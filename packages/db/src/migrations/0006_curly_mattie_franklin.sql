@@ -1,1 +1,0 @@
-ALTER TABLE "post" ADD COLUMN "subtitle" varchar(256);

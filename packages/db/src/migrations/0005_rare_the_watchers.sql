@@ -1,1 +1,0 @@
-ALTER TABLE "post" DROP COLUMN "subtitle";
