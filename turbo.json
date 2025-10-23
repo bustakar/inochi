@@ -42,11 +42,11 @@
     },
     "migrate": {
       "cache": false,
-      "interactive": true
+      "interactive": false
     },
     "generate": {
       "cache": false,
-      "interactive": true
+      "interactive": false
     },
     "ui-add": {
       "cache": false,

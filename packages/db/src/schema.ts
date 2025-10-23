@@ -6,6 +6,7 @@ import { z } from "zod/v4";
 export const Post = pgTable("post", (t) => ({
   id: t.uuid().notNull().primaryKey().defaultRandom(),
   title: t.varchar({ length: 256 }).notNull(),
+  subtitle: t.varchar({ length: 256 }),
   content: t.text().notNull(),
   createdAt: t.timestamp().defaultNow().notNull(),
   updatedAt: t
