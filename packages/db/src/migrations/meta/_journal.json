@@ -43,6 +43,13 @@
       "when": 1761238320255,
       "tag": "0005_rare_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1761238839534,
+      "tag": "0006_curly_mattie_franklin",
+      "breakpoints": true
     }
   ]
 }
