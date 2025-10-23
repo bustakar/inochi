@@ -11,4 +11,5 @@ export default {
   dialect: "postgresql",
   dbCredentials: { url: nonPoolingUrl },
   casing: "snake_case",
+  out: "./src/migrations",
 } satisfies Config;
