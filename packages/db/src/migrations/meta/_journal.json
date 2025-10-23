@@ -22,6 +22,13 @@
       "when": 1761236207394,
       "tag": "0002_true_steve_rogers",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1761237396765,
+      "tag": "0003_steady_hydra",
+      "breakpoints": true
     }
   ]
 }
