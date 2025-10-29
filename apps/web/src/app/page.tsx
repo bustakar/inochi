@@ -1,11 +1,11 @@
 "use client";
 
+import Benefits from "@/app/_components/Benefits";
+import Footer from "@/app/_components/Footer";
+import FooterHero from "@/app/_components/FooterHero";
+import Hero from "@/app/_components/Hero";
+import Testimonials from "@/app/_components/Testimonials";
 import Header from "@/components/Header";
-import Benefits from "@/components/home/Benefits";
-import Footer from "@/components/home/Footer";
-import FooterHero from "@/components/home/FooterHero";
-import Hero from "@/components/home/Hero";
-import Testimonials from "@/components/home/Testimonials";
 
 export default function Home() {
   return (

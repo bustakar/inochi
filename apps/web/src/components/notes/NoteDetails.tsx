@@ -3,8 +3,8 @@
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import ComplexToggle from "../home/ComplexToggle";
 import { useState } from "react";
+import ComplexToggle from "../../app/_components/ComplexToggle";
 
 interface NoteDetailsProps {
   noteId: Id<"notes">;
