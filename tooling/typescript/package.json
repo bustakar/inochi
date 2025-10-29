@@ -1,0 +1,7 @@
+{
+  "name": "@inochi/tsconfig",
+  "private": true,
+  "files": [
+    "*.json"
+  ]
+}

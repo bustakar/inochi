@@ -5,11 +5,15 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "clean": "turbo run clean && rm -rf node_modules",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore"
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
+    "ui-add": "turbo run ui-add"
   },
   "devDependencies": {
+    "@inochi/prettier-config": "workspace:*",
+    "@turbo/gen": "^2.5.8",
     "prettier": "3.6.2",
-    "turbo": "2.5.8"
+    "turbo": "2.5.8",
+    "typescript": "catalog:"
   },
   "engines": {
     "node": "^22.21.0",
