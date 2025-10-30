@@ -1,9 +1,9 @@
 "use client";
 
+import { Badge } from "@inochi/ui";
 import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { Dumbbell, Target } from "lucide-react";
 import React, { useMemo } from "react";
-import { Badge } from "@inochi/ui";
 
 interface SkillCardProps {
   skill: Doc<"skills"> & {
@@ -22,16 +22,18 @@ const levelColors: Record<string, string> = {
 
 function SkillCardComponent({ skill }: SkillCardProps) {
   const displayDescription = useMemo(() => {
-    const truncatedDescription =
-      skill.description.length > 100
-        ? skill.description.substring(0, 100) + "..."
-        : skill.description;
+    // Truncate at word boundary to avoid breaking words
+    const maxLength = 150; // Allow more characters since line-clamp-2 will handle display
+    if (skill.description.length <= maxLength) {
+      return skill.description;
+    }
 
-    // Show description in 2 lines (approximately 80 chars per line)
-    const lines = truncatedDescription.match(/.{1,80}(\s|$)/g) || [
-      truncatedDescription,
-    ];
-    return lines.slice(0, 2).join(" ");
+    // Find the last space before maxLength to avoid breaking words
+    const truncated = skill.description.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(" ");
+    const cutoff = lastSpace > 0 ? lastSpace : maxLength;
+
+    return skill.description.substring(0, cutoff) + "...";
   }, [skill.description]);
   return (
     <div className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
