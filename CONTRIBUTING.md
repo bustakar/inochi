@@ -117,4 +117,3 @@ See the [README.md](README.md) for detailed setup instructions. The main steps a
 By contributing, you agree that your contributions will be licensed under the MIT License (see [LICENSE](LICENSE)).
 
 Thank you for helping make Inochi better!
-

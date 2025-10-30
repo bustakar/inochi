@@ -7,7 +7,7 @@ const MUSCLES = [
   { name: "Front Deltoids", category: "upper_body_push" },
   { name: "Triceps", category: "upper_body_push" },
   { name: "Side Deltoids", category: "upper_body_push" },
-  
+
   // Upper Body - Pull
   { name: "Back", category: "upper_body_pull" },
   { name: "Lats", category: "upper_body_pull" },
@@ -15,13 +15,13 @@ const MUSCLES = [
   { name: "Rear Deltoids", category: "upper_body_pull" },
   { name: "Biceps", category: "upper_body_pull" },
   { name: "Forearms", category: "upper_body_pull" },
-  
+
   // Core
   { name: "Abs", category: "core" },
   { name: "Obliques", category: "core" },
   { name: "Lower Back", category: "core" },
   { name: "Transverse Abdominis", category: "core" },
-  
+
   // Lower Body
   { name: "Quadriceps", category: "lower_body" },
   { name: "Hamstrings", category: "lower_body" },
@@ -40,7 +40,7 @@ const EQUIPMENT = [
   { name: "Weighted Vest", category: "calisthenics" },
   { name: "Resistance Bands", category: "calisthenics" },
   { name: "Hanging Leg Raise Station", category: "calisthenics" },
-  
+
   // Gymnastics Equipment
   { name: "Gymnastic Rings", category: "gymnastics" },
   { name: "Rings", category: "gymnastics" },
@@ -48,14 +48,14 @@ const EQUIPMENT = [
   { name: "Wall Bars", category: "gymnastics" },
   { name: "Parallel Bars", category: "gymnastics" },
   { name: "Pommel Horse", category: "gymnastics" },
-  
+
   // Gym Equipment
   { name: "Barbell", category: "gym" },
   { name: "Dumbbells", category: "gym" },
   { name: "Kettlebells", category: "gym" },
   { name: "Cable Machine", category: "gym" },
   { name: "Smith Machine", category: "gym" },
-  
+
   // Other Sports/Fitness
   { name: "TRX Straps", category: "functional" },
   { name: "Box/Platform", category: "functional" },
@@ -69,7 +69,7 @@ export const seedMusclesAndEquipment = mutation({
     // Check if already seeded
     const existingMuscles = await ctx.db.query("muscles").first();
     const existingEquipment = await ctx.db.query("equipment").first();
-    
+
     if (existingMuscles || existingEquipment) {
       return { message: "Data already seeded", skipped: true };
     }
@@ -95,4 +95,3 @@ export const seedMusclesAndEquipment = mutation({
     };
   },
 });
-

@@ -38,7 +38,9 @@ export function SkillCard({ skill }: SkillCardProps) {
         <h3 className="text-lg font-semibold text-card-foreground">
           {skill.title}
         </h3>
-        <Badge className={levelColors[skill.level] || "bg-gray-100 text-gray-800"}>
+        <Badge
+          className={levelColors[skill.level] || "bg-gray-100 text-gray-800"}
+        >
           {skill.level}
         </Badge>
       </div>
@@ -56,9 +58,7 @@ export function SkillCard({ skill }: SkillCardProps) {
             <div
               key={i}
               className={`w-2 h-2 rounded-full ${
-                i < skill.difficulty
-                  ? "bg-primary"
-                  : "bg-muted"
+                i < skill.difficulty ? "bg-primary" : "bg-muted"
               }`}
             />
           ))}
@@ -96,4 +96,3 @@ export function SkillCard({ skill }: SkillCardProps) {
     </div>
   );
 }
-

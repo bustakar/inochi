@@ -187,30 +187,35 @@ export function CreateSkillDialog() {
                     <FormLabel>Muscles</FormLabel>
                     <FormControl>
                       <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                        {muscles.map((muscle: { _id: Id<"muscles">; name: string }) => (
-                          <label
-                            key={muscle._id}
-                            className="flex items-center gap-2 text-sm cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={field.value.includes(muscle._id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  field.onChange([...field.value, muscle._id]);
-                                } else {
-                                  field.onChange(
-                                    field.value.filter(
-                                      (id) => id !== muscle._id,
-                                    ),
-                                  );
-                                }
-                              }}
-                              className="rounded border-input"
-                            />
-                            <span>{muscle.name}</span>
-                          </label>
-                        ))}
+                        {muscles.map(
+                          (muscle: { _id: Id<"muscles">; name: string }) => (
+                            <label
+                              key={muscle._id}
+                              className="flex items-center gap-2 text-sm cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={field.value.includes(muscle._id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    field.onChange([
+                                      ...field.value,
+                                      muscle._id,
+                                    ]);
+                                  } else {
+                                    field.onChange(
+                                      field.value.filter(
+                                        (id) => id !== muscle._id,
+                                      ),
+                                    );
+                                  }
+                                }}
+                                className="rounded border-input"
+                              />
+                              <span>{muscle.name}</span>
+                            </label>
+                          ),
+                        )}
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -228,30 +233,32 @@ export function CreateSkillDialog() {
                     <FormLabel>Equipment</FormLabel>
                     <FormControl>
                       <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                        {equipment.map((equip: { _id: Id<"equipment">; name: string }) => (
-                          <label
-                            key={equip._id}
-                            className="flex items-center gap-2 text-sm cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={field.value.includes(equip._id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  field.onChange([...field.value, equip._id]);
-                                } else {
-                                  field.onChange(
-                                    field.value.filter(
-                                      (id) => id !== equip._id,
-                                    ),
-                                  );
-                                }
-                              }}
-                              className="rounded border-input"
-                            />
-                            <span>{equip.name}</span>
-                          </label>
-                        ))}
+                        {equipment.map(
+                          (equip: { _id: Id<"equipment">; name: string }) => (
+                            <label
+                              key={equip._id}
+                              className="flex items-center gap-2 text-sm cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={field.value.includes(equip._id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    field.onChange([...field.value, equip._id]);
+                                  } else {
+                                    field.onChange(
+                                      field.value.filter(
+                                        (id) => id !== equip._id,
+                                      ),
+                                    );
+                                  }
+                                }}
+                                className="rounded border-input"
+                              />
+                              <span>{equip.name}</span>
+                            </label>
+                          ),
+                        )}
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -322,34 +329,39 @@ export function CreateSkillDialog() {
                       <FormControl>
                         <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
                           {skills
-                            .filter((s: { _id: Id<"skills"> }) => !form.watch("variants").includes(s._id))
-                            .map((skill: { _id: Id<"skills">; title: string }) => (
-                              <label
-                                key={skill._id}
-                                className="flex items-center gap-2 text-sm cursor-pointer"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={field.value.includes(skill._id)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      field.onChange([
-                                        ...field.value,
-                                        skill._id,
-                                      ]);
-                                    } else {
-                                      field.onChange(
-                                        field.value.filter(
-                                          (id) => id !== skill._id,
-                                        ),
-                                      );
-                                    }
-                                  }}
-                                  className="rounded border-input"
-                                />
-                                <span>{skill.title}</span>
-                              </label>
-                            ))}
+                            .filter(
+                              (s: { _id: Id<"skills"> }) =>
+                                !form.watch("variants").includes(s._id),
+                            )
+                            .map(
+                              (skill: { _id: Id<"skills">; title: string }) => (
+                                <label
+                                  key={skill._id}
+                                  className="flex items-center gap-2 text-sm cursor-pointer"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={field.value.includes(skill._id)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        field.onChange([
+                                          ...field.value,
+                                          skill._id,
+                                        ]);
+                                      } else {
+                                        field.onChange(
+                                          field.value.filter(
+                                            (id) => id !== skill._id,
+                                          ),
+                                        );
+                                      }
+                                    }}
+                                    className="rounded border-input"
+                                  />
+                                  <span>{skill.title}</span>
+                                </label>
+                              ),
+                            )}
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -366,34 +378,39 @@ export function CreateSkillDialog() {
                       <FormControl>
                         <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
                           {skills
-                            .filter((s: { _id: Id<"skills"> }) => !form.watch("prerequisites").includes(s._id))
-                            .map((skill: { _id: Id<"skills">; title: string }) => (
-                              <label
-                                key={skill._id}
-                                className="flex items-center gap-2 text-sm cursor-pointer"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={field.value.includes(skill._id)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      field.onChange([
-                                        ...field.value,
-                                        skill._id,
-                                      ]);
-                                    } else {
-                                      field.onChange(
-                                        field.value.filter(
-                                          (id) => id !== skill._id,
-                                        ),
-                                      );
-                                    }
-                                  }}
-                                  className="rounded border-input"
-                                />
-                                <span>{skill.title}</span>
-                              </label>
-                            ))}
+                            .filter(
+                              (s: { _id: Id<"skills"> }) =>
+                                !form.watch("prerequisites").includes(s._id),
+                            )
+                            .map(
+                              (skill: { _id: Id<"skills">; title: string }) => (
+                                <label
+                                  key={skill._id}
+                                  className="flex items-center gap-2 text-sm cursor-pointer"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={field.value.includes(skill._id)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        field.onChange([
+                                          ...field.value,
+                                          skill._id,
+                                        ]);
+                                      } else {
+                                        field.onChange(
+                                          field.value.filter(
+                                            (id) => id !== skill._id,
+                                          ),
+                                        );
+                                      }
+                                    }}
+                                    className="rounded border-input"
+                                  />
+                                  <span>{skill.title}</span>
+                                </label>
+                              ),
+                            )}
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -470,4 +487,3 @@ export function CreateSkillDialog() {
     </Dialog>
   );
 }
-
