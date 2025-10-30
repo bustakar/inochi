@@ -18,6 +18,8 @@ export const getSkills = query({
     level: v.optional(levelValidator),
     minDifficulty: v.optional(v.number()),
     maxDifficulty: v.optional(v.number()),
+    muscleIds: v.optional(v.array(v.id("muscles"))),
+    equipmentIds: v.optional(v.array(v.id("equipment"))),
   },
   returns: v.array(
     v.object({
@@ -36,6 +38,22 @@ export const getSkills = query({
       createdAt: v.number(),
       updatedAt: v.number(),
       createdBy: v.string(),
+      musclesData: v.array(
+        v.object({
+          _id: v.id("muscles"),
+          _creationTime: v.number(),
+          name: v.string(),
+          category: v.string(),
+        }),
+      ),
+      equipmentData: v.array(
+        v.object({
+          _id: v.id("equipment"),
+          _creationTime: v.number(),
+          name: v.string(),
+          category: v.string(),
+        }),
+      ),
     }),
   ),
   handler: async (ctx, args) => {
@@ -83,7 +101,33 @@ export const getSkills = query({
       });
     }
 
-    return skills;
+    // Filter by muscles if provided
+    if (args.muscleIds && args.muscleIds.length > 0) {
+      skills = skills.filter((skill) =>
+        skill.muscles.some((id) => args.muscleIds!.includes(id)),
+      );
+    }
+
+    // Filter by equipment if provided
+    if (args.equipmentIds && args.equipmentIds.length > 0) {
+      skills = skills.filter((skill) =>
+        skill.equipment.some((id) => args.equipmentIds!.includes(id)),
+      );
+    }
+
+    // Enrich with muscle and equipment data
+    const muscles = await ctx.db.query("muscles").collect();
+    const equipment = await ctx.db.query("equipment").collect();
+
+    return skills.map((skill) => ({
+      ...skill,
+      musclesData: skill.muscles
+        .map((id) => muscles.find((m) => m._id === id))
+        .filter((m): m is Doc<"muscles"> => m !== undefined),
+      equipmentData: skill.equipment
+        .map((id) => equipment.find((e) => e._id === id))
+        .filter((e): e is Doc<"equipment"> => e !== undefined),
+    }));
   },
 });
 
@@ -125,6 +169,8 @@ export const searchSkills = query({
     level: v.optional(levelValidator),
     minDifficulty: v.optional(v.number()),
     maxDifficulty: v.optional(v.number()),
+    muscleIds: v.optional(v.array(v.id("muscles"))),
+    equipmentIds: v.optional(v.array(v.id("equipment"))),
   },
   returns: v.array(
     v.object({
@@ -143,6 +189,22 @@ export const searchSkills = query({
       createdAt: v.number(),
       updatedAt: v.number(),
       createdBy: v.string(),
+      musclesData: v.array(
+        v.object({
+          _id: v.id("muscles"),
+          _creationTime: v.number(),
+          name: v.string(),
+          category: v.string(),
+        }),
+      ),
+      equipmentData: v.array(
+        v.object({
+          _id: v.id("equipment"),
+          _creationTime: v.number(),
+          name: v.string(),
+          category: v.string(),
+        }),
+      ),
     }),
   ),
   handler: async (ctx, args) => {
@@ -202,7 +264,33 @@ export const searchSkills = query({
       });
     }
 
-    return results;
+    // Filter by muscles if provided
+    if (args.muscleIds && args.muscleIds.length > 0) {
+      results = results.filter((skill) =>
+        skill.muscles.some((id) => args.muscleIds!.includes(id)),
+      );
+    }
+
+    // Filter by equipment if provided
+    if (args.equipmentIds && args.equipmentIds.length > 0) {
+      results = results.filter((skill) =>
+        skill.equipment.some((id) => args.equipmentIds!.includes(id)),
+      );
+    }
+
+    // Enrich with muscle and equipment data
+    const muscles = await ctx.db.query("muscles").collect();
+    const equipment = await ctx.db.query("equipment").collect();
+
+    return results.map((skill) => ({
+      ...skill,
+      musclesData: skill.muscles
+        .map((id) => muscles.find((m) => m._id === id))
+        .filter((m): m is Doc<"muscles"> => m !== undefined),
+      equipmentData: skill.equipment
+        .map((id) => equipment.find((e) => e._id === id))
+        .filter((e): e is Doc<"equipment"> => e !== undefined),
+    }));
   },
 });
 

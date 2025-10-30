@@ -1,8 +1,8 @@
 "use client";
 
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { Dumbbell, Target } from "lucide-react";
+import React, { useMemo } from "react";
 import { Badge } from "@inochi/ui";
 
 interface SkillCardProps {
@@ -20,18 +20,19 @@ const levelColors: Record<string, string> = {
   elite: "bg-red-100 text-red-800",
 };
 
-export function SkillCard({ skill }: SkillCardProps) {
-  const truncatedDescription =
-    skill.description.length > 100
-      ? skill.description.substring(0, 100) + "..."
-      : skill.description;
+function SkillCardComponent({ skill }: SkillCardProps) {
+  const displayDescription = useMemo(() => {
+    const truncatedDescription =
+      skill.description.length > 100
+        ? skill.description.substring(0, 100) + "..."
+        : skill.description;
 
-  // Show description in 2 lines (approximately 80 chars per line)
-  const lines = truncatedDescription.match(/.{1,80}(\s|$)/g) || [
-    truncatedDescription,
-  ];
-  const displayDescription = lines.slice(0, 2).join(" ");
-
+    // Show description in 2 lines (approximately 80 chars per line)
+    const lines = truncatedDescription.match(/.{1,80}(\s|$)/g) || [
+      truncatedDescription,
+    ];
+    return lines.slice(0, 2).join(" ");
+  }, [skill.description]);
   return (
     <div className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-2">
@@ -96,3 +97,5 @@ export function SkillCard({ skill }: SkillCardProps) {
     </div>
   );
 }
+
+export const SkillCard = React.memo(SkillCardComponent);

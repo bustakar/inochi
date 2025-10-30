@@ -1,3 +1,4 @@
+import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 
 // Seed muscles - main muscle groups for calisthenics
@@ -43,7 +44,6 @@ const EQUIPMENT = [
 
   // Gymnastics Equipment
   { name: "Gymnastic Rings", category: "gymnastics" },
-  { name: "Rings", category: "gymnastics" },
   { name: "Handstand Blocks", category: "gymnastics" },
   { name: "Wall Bars", category: "gymnastics" },
   { name: "Parallel Bars", category: "gymnastics" },
@@ -65,13 +65,24 @@ const EQUIPMENT = [
 
 export const seedMusclesAndEquipment = mutation({
   args: {},
+  returns: v.union(
+    v.object({
+      message: v.string(),
+      skipped: v.literal(true),
+    }),
+    v.object({
+      message: v.string(),
+      musclesCount: v.number(),
+      equipmentCount: v.number(),
+    }),
+  ),
   handler: async (ctx) => {
     // Check if already seeded
     const existingMuscles = await ctx.db.query("muscles").first();
     const existingEquipment = await ctx.db.query("equipment").first();
 
     if (existingMuscles || existingEquipment) {
-      return { message: "Data already seeded", skipped: true };
+      return { message: "Data already seeded", skipped: true as const };
     }
 
     // Insert muscles

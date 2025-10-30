@@ -59,12 +59,12 @@
     "../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.regexp.d.ts",
     "../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.decorators.d.ts",
     "../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.decorators.legacy.d.ts",
-    "../../../node_modules/.pnpm/@types+react@19.2.2/node_modules/@types/react/global.d.ts",
-    "../../../node_modules/.pnpm/csstype@3.1.3/node_modules/csstype/index.d.ts",
-    "../../../node_modules/.pnpm/@types+react@19.2.2/node_modules/@types/react/index.d.ts",
     "../../../node_modules/.pnpm/clsx@2.1.1/node_modules/clsx/clsx.d.mts",
     "../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/types.d.ts",
     "../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.d.ts",
+    "../../../node_modules/.pnpm/@types+react@19.2.2/node_modules/@types/react/global.d.ts",
+    "../../../node_modules/.pnpm/csstype@3.1.3/node_modules/csstype/index.d.ts",
+    "../../../node_modules/.pnpm/@types+react@19.2.2/node_modules/@types/react/index.d.ts",
     "../../../node_modules/.pnpm/tailwind-merge@3.3.1/node_modules/tailwind-merge/dist/types.d.ts",
     "../src/lib/utils.ts",
     "../src/badge.tsx",
@@ -136,24 +136,24 @@
     "../src/index.ts"
   ],
   "fileIdsList": [
-    [62, 73],
-    [62, 72, 73],
-    [62],
-    [62, 72, 73, 76, 77, 78],
-    [62, 72, 73, 127, 128],
-    [62, 72, 73, 76, 78, 129],
-    [60, 61],
+    [65, 73],
+    [65, 72, 73],
+    [65],
+    [65, 72, 73, 76, 77, 78],
+    [65, 72, 73, 127, 128],
+    [65, 72, 73, 76, 78, 129],
     [63, 64],
-    [63],
-    [62, 101],
+    [60, 61],
+    [60],
+    [65, 101],
     [101, 102, 103, 106, 107, 108, 109, 110, 111, 112, 115, 116],
     [101],
     [104, 105],
-    [62, 99, 101],
+    [65, 99, 101],
     [96, 97, 99],
     [92, 95, 97, 99],
     [96, 99],
-    [62, 87, 88, 89, 92, 93, 94, 96, 97, 98, 99],
+    [65, 87, 88, 89, 92, 93, 94, 96, 97, 98, 99],
     [89, 92, 93, 94, 95, 96, 97, 98, 99, 100],
     [96],
     [90, 96, 97],
@@ -164,23 +164,23 @@
     [113, 114],
     [62, 65, 67],
     [62, 65, 67, 69],
-    [62, 67],
+    [65, 67],
     [74],
-    [62, 67, 79, 80],
+    [65, 67, 79, 80],
     [62, 65, 67, 83, 85],
-    [62, 67, 69, 82, 83, 117],
+    [65, 67, 69, 82, 83, 117],
     [
-      65, 66, 67, 68, 70, 71, 75, 81, 83, 85, 86, 118, 119, 120, 121, 124, 125,
+      62, 66, 67, 68, 70, 71, 75, 81, 83, 85, 86, 118, 119, 120, 121, 124, 125,
       126, 131, 132, 133
     ],
-    [62, 67, 82],
-    [63, 66],
-    [62, 67, 84],
+    [65, 67, 82],
+    [60, 66],
+    [65, 67, 84],
     [62, 65, 67, 69, 70, 80, 85, 119, 120, 121, 131, 132],
     [67],
     [80, 122, 123],
     [67, 80],
-    [62, 67, 130]
+    [65, 67, 130]
   ],
   "fileInfos": [
     {
@@ -471,6 +471,18 @@
       "impliedFormat": 1
     },
     {
+      "version": "c57b441e0c0a9cbdfa7d850dae1f8a387d6f81cbffbc3cd0465d530084c2417d",
+      "impliedFormat": 99
+    },
+    {
+      "version": "2fbe402f0ee5aa8ab55367f88030f79d46211c0a0f342becaa9f648bf8534e9d",
+      "impliedFormat": 1
+    },
+    {
+      "version": "b94258ef37e67474ac5522e9c519489a55dcb3d4a8f645e335fc68ea2215fe88",
+      "impliedFormat": 1
+    },
+    {
       "version": "170d4db14678c68178ee8a3d5a990d5afb759ecb6ec44dbd885c50f6da6204f6",
       "affectsGlobalScope": true,
       "impliedFormat": 1
@@ -484,18 +496,6 @@
       "impliedFormat": 1
     },
     {
-      "version": "c57b441e0c0a9cbdfa7d850dae1f8a387d6f81cbffbc3cd0465d530084c2417d",
-      "impliedFormat": 99
-    },
-    {
-      "version": "2fbe402f0ee5aa8ab55367f88030f79d46211c0a0f342becaa9f648bf8534e9d",
-      "impliedFormat": 1
-    },
-    {
-      "version": "b94258ef37e67474ac5522e9c519489a55dcb3d4a8f645e335fc68ea2215fe88",
-      "impliedFormat": 1
-    },
-    {
       "version": "8b15d05f236e8537d3ecbe4422ce46bf0de4e4cd40b2f909c91c5818af4ff17a",
       "impliedFormat": 1
     },
@@ -504,8 +504,8 @@
       "signature": "f79c5de64f05b055d9ebcf22aa8380ebedb45636f0b9345d1dbb1b01a4f09b25"
     },
     {
-      "version": "99d563d66539d258115f5b493d452187db7233d57066dbaa2a7927ab59962f6b",
-      "signature": "3c32adb36b85365e167342676cd65dd7e98240885e9efd449fea31745a728d0d"
+      "version": "6ab964291d0785c5198d7bae2c9edd0cfcd468a04a200fc6acb78b487050c341",
+      "signature": "52d23c04869c5122fb5287af4642a18c167214f8659de49af485410749a6907c"
     },
     {
       "version": "a80ec72f5e178862476deaeed532c305bdfcd3627014ae7ac2901356d794fc93",
@@ -767,10 +767,7 @@
       "version": "6c1656c7d6a3d8138e53644bd8a1179f0cfb64457c8ae299f2c4cb18d29baa8b",
       "signature": "255f413b36b019505a2f1b6a57bea33ccd2e57e86952827b78a4162140193dc2"
     },
-    {
-      "version": "b38104a5e8d8ea188be3a0d797b2760c0f0b1e5760c3c3fd23c4dfcdca5e0888",
-      "signature": "d8a12e2971a354a4827604021b085669376a93ee36374cfadb4409f33f818ffb"
-    }
+    "b38104a5e8d8ea188be3a0d797b2760c0f0b1e5760c3c3fd23c4dfcdca5e0888"
   ],
   "root": [
     67,
@@ -814,9 +811,9 @@
     [84, 1],
     [69, 3],
     [130, 6],
-    [62, 7],
-    [65, 8],
-    [64, 9],
+    [65, 7],
+    [62, 8],
+    [61, 9],
     [80, 3],
     [123, 3],
     [102, 10],

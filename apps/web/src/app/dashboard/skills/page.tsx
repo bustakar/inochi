@@ -3,34 +3,88 @@
 import { Input } from "@inochi/ui/Input";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useReducer } from "react";
 import { CreateSkillDialog } from "./_components/create-skill-dialog";
 import { SkillsFilters } from "./_components/skills-filters";
 import { SkillsList } from "./_components/skills-list";
+import { useDebounce } from "./_hooks/use-debounce";
+
+type SkillLevel = "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+
+interface SkillsFiltersState {
+  searchInput: string;
+  level: SkillLevel | undefined;
+  minDifficulty: number | undefined;
+  maxDifficulty: number | undefined;
+  muscleIds: Id<"muscles">[];
+  equipmentIds: Id<"equipment">[];
+}
+
+type SkillsFiltersAction =
+  | { type: "SET_SEARCH_INPUT"; payload: string }
+  | { type: "SET_LEVEL"; payload: SkillLevel | undefined }
+  | { type: "SET_DIFFICULTY"; payload: { min?: number; max?: number } }
+  | { type: "SET_MUSCLES"; payload: Id<"muscles">[] }
+  | { type: "SET_EQUIPMENT"; payload: Id<"equipment">[] };
+
+const initialFiltersState: SkillsFiltersState = {
+  searchInput: "",
+  level: undefined,
+  minDifficulty: undefined,
+  maxDifficulty: undefined,
+  muscleIds: [],
+  equipmentIds: [],
+};
+
+function filtersReducer(
+  state: SkillsFiltersState,
+  action: SkillsFiltersAction,
+): SkillsFiltersState {
+  switch (action.type) {
+    case "SET_SEARCH_INPUT":
+      return { ...state, searchInput: action.payload };
+    case "SET_LEVEL":
+      return { ...state, level: action.payload };
+    case "SET_DIFFICULTY":
+      return {
+        ...state,
+        minDifficulty: action.payload.min,
+        maxDifficulty: action.payload.max,
+      };
+    case "SET_MUSCLES":
+      return { ...state, muscleIds: action.payload };
+    case "SET_EQUIPMENT":
+      return { ...state, equipmentIds: action.payload };
+    default:
+      return state;
+  }
+}
+
+const VALID_LEVELS: readonly SkillLevel[] = [
+  "beginner",
+  "intermediate",
+  "advanced",
+  "expert",
+  "elite",
+] as const;
+
+function isValidLevel(level: string): level is SkillLevel {
+  return VALID_LEVELS.includes(level as SkillLevel);
+}
 
 export default function SkillsPage() {
-  const [searchInput, setSearchInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, dispatch] = useReducer(filtersReducer, initialFiltersState);
+  const debouncedSearchQuery = useDebounce(filters.searchInput, 300);
 
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchQuery(searchInput);
-    }, 300); // 300ms delay
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-  const [level, setLevel] = useState<
-    "beginner" | "intermediate" | "advanced" | "expert" | "elite" | undefined
-  >(undefined);
-  const [minDifficulty, setMinDifficulty] = useState<number | undefined>(
-    undefined,
-  );
-  const [maxDifficulty, setMaxDifficulty] = useState<number | undefined>(
-    undefined,
-  );
-  const [muscleIds, setMuscleIds] = useState<Id<"muscles">[]>([]);
-  const [equipmentIds, setEquipmentIds] = useState<Id<"equipment">[]>([]);
+  const handleLevelChange = (newLevel: string | undefined) => {
+    if (!newLevel) {
+      dispatch({ type: "SET_LEVEL", payload: undefined });
+      return;
+    }
+    if (isValidLevel(newLevel)) {
+      dispatch({ type: "SET_LEVEL", payload: newLevel });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -45,8 +99,10 @@ export default function SkillsPage() {
         <Input
           type="text"
           placeholder="Search skills..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          value={filters.searchInput}
+          onChange={(e) =>
+            dispatch({ type: "SET_SEARCH_INPUT", payload: e.target.value })
+          }
           className="pl-10"
         />
       </div>
@@ -55,40 +111,37 @@ export default function SkillsPage() {
         {/* Filters Sidebar */}
         <div className="lg:col-span-1">
           <SkillsFilters
-            level={level}
-            minDifficulty={minDifficulty}
-            maxDifficulty={maxDifficulty}
-            muscleIds={muscleIds}
-            equipmentIds={equipmentIds}
-            onLevelChange={(newLevel) =>
-              setLevel(
-                newLevel as
-                  | "beginner"
-                  | "intermediate"
-                  | "advanced"
-                  | "expert"
-                  | "elite"
-                  | undefined,
-              )
+            level={filters.level}
+            minDifficulty={filters.minDifficulty}
+            maxDifficulty={filters.maxDifficulty}
+            muscleIds={filters.muscleIds}
+            equipmentIds={filters.equipmentIds}
+            onLevelChange={handleLevelChange}
+            onDifficultyChange={(min, max) =>
+              dispatch({ type: "SET_DIFFICULTY", payload: { min, max } })
             }
-            onDifficultyChange={(min, max) => {
-              setMinDifficulty(min);
-              setMaxDifficulty(max);
-            }}
-            onMusclesChange={setMuscleIds}
-            onEquipmentChange={setEquipmentIds}
+            onMusclesChange={(ids) =>
+              dispatch({ type: "SET_MUSCLES", payload: ids })
+            }
+            onEquipmentChange={(ids) =>
+              dispatch({ type: "SET_EQUIPMENT", payload: ids })
+            }
           />
         </div>
 
         {/* Skills List */}
         <div className="lg:col-span-3">
           <SkillsList
-            level={level}
-            minDifficulty={minDifficulty}
-            maxDifficulty={maxDifficulty}
-            searchQuery={searchQuery || undefined}
-            muscleIds={muscleIds.length > 0 ? muscleIds : undefined}
-            equipmentIds={equipmentIds.length > 0 ? equipmentIds : undefined}
+            level={filters.level}
+            minDifficulty={filters.minDifficulty}
+            maxDifficulty={filters.maxDifficulty}
+            searchQuery={debouncedSearchQuery.trim() || undefined}
+            muscleIds={
+              filters.muscleIds.length > 0 ? filters.muscleIds : undefined
+            }
+            equipmentIds={
+              filters.equipmentIds.length > 0 ? filters.equipmentIds : undefined
+            }
           />
         </div>
       </div>

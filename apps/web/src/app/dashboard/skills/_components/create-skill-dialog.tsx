@@ -5,6 +5,7 @@ import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
 import {
   Dialog,
@@ -78,8 +79,14 @@ export function CreateSkillDialog() {
       });
       form.reset();
       setOpen(false);
+      toast.success("Skill created successfully!");
     } catch (error) {
       console.error("Error creating skill:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to create skill. Please try again.",
+      );
     }
   };
 

@@ -1,11 +1,11 @@
 "use client";
 
+import { Input } from "@inochi/ui/Input";
+import { Label } from "@inochi/ui/Label";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useState } from "react";
-import { Input } from "@inochi/ui/Input";
-import { Label } from "@inochi/ui/Label";
 
 interface SkillsFiltersProps {
   level?: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
@@ -30,8 +30,8 @@ export function SkillsFilters({
   onMusclesChange,
   onEquipmentChange,
 }: SkillsFiltersProps) {
-  const muscles = useQuery(api.skills.getMuscles);
-  const equipment = useQuery(api.skills.getEquipment);
+  const muscles = useQuery(api.skills.getMuscles, {});
+  const equipment = useQuery(api.skills.getEquipment, {});
   const [localMinDifficulty, setLocalMinDifficulty] = useState(
     minDifficulty?.toString() || "",
   );
