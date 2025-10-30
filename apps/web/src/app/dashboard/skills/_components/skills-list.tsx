@@ -78,13 +78,16 @@ export function SkillsList({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {enrichedSkills.map((skill: Doc<"skills"> & {
-        musclesData?: Array<Doc<"muscles">>;
-        equipmentData?: Array<Doc<"equipment">>;
-      }) => (
-        <SkillCard key={skill._id} skill={skill} />
-      ))}
+      {enrichedSkills.map(
+        (
+          skill: Doc<"skills"> & {
+            musclesData?: Array<Doc<"muscles">>;
+            equipmentData?: Array<Doc<"equipment">>;
+          },
+        ) => (
+          <SkillCard key={skill._id} skill={skill} />
+        ),
+      )}
     </div>
   );
 }
-

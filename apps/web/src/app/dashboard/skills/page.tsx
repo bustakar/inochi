@@ -3,13 +3,23 @@
 import { Input } from "@inochi/ui/Input";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateSkillDialog } from "./_components/create-skill-dialog";
 import { SkillsFilters } from "./_components/skills-filters";
 import { SkillsList } from "./_components/skills-list";
 
 export default function SkillsPage() {
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
   const [level, setLevel] = useState<
     "beginner" | "intermediate" | "advanced" | "expert" | "elite" | undefined
   >(undefined);
@@ -35,8 +45,8 @@ export default function SkillsPage() {
         <Input
           type="text"
           placeholder="Search skills..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           className="pl-10"
         />
       </div>
