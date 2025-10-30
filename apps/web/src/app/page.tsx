@@ -1,21 +1,21 @@
 "use client";
 
-import Benefits from "@/app/_components/Benefits";
-import Footer from "@/app/_components/Footer";
-import FooterHero from "@/app/_components/FooterHero";
-import Hero from "@/app/_components/Hero";
-import Testimonials from "@/app/_components/Testimonials";
-import Header from "@/components/Header";
+import CallToAction from "@/components/call-to-action";
+import FAQs from "@/components/faqs";
+import Features from "@/components/features-1";
+import FooterSection from "@/components/footer";
+import HeroSection from "@/components/hero-section";
+import StatsSection from "@/components/stats";
 
 export default function Home() {
   return (
     <main>
-      <Header />
-      <Hero />
-      <Benefits />
-      <Testimonials />
-      <FooterHero />
-      <Footer />
+      <HeroSection />
+      <Features />
+      {/* <StatsSection /> */}
+      {/* <FAQs /> */}
+      <CallToAction />
+      <FooterSection />
     </main>
   );
 }
