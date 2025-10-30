@@ -12,13 +12,7 @@ import { Button } from "@inochi/ui/Button";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import {
-  ChevronDown,
-  Dumbbell,
-  Gauge,
-  Target,
-  TrendingUp,
-} from "lucide-react";
+import { ChevronDown, Dumbbell, Gauge, Target, TrendingUp } from "lucide-react";
 import { useState } from "react";
 
 interface SkillsFiltersHorizontalProps {
@@ -52,7 +46,7 @@ export function SkillsFiltersHorizontal({
   const levelLabel = level
     ? level.charAt(0).toUpperCase() + level.slice(1)
     : "All Levels";
-  
+
   const difficultyLabel = (() => {
     if (minDifficulty !== undefined && maxDifficulty !== undefined) {
       return `${minDifficulty}-${maxDifficulty}`;
@@ -65,7 +59,7 @@ export function SkillsFiltersHorizontal({
     }
     return "All";
   })();
-  
+
   const musclesLabel = "Muscles";
   const equipmentLabel = "Equipment";
 
