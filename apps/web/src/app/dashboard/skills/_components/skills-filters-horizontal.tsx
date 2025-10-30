@@ -8,12 +8,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/common/dropdown-menu";
-import { Badge } from "@inochi/ui";
 import { Button } from "@inochi/ui/Button";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { ChevronDown, Dumbbell, Gauge, Target, TrendingUp } from "lucide-react";
+import {
+  ChevronDown,
+  Dumbbell,
+  Gauge,
+  Target,
+  TrendingUp,
+} from "lucide-react";
+import { useState } from "react";
 
 interface SkillsFiltersHorizontalProps {
   level?: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
@@ -40,32 +46,41 @@ export function SkillsFiltersHorizontal({
 }: SkillsFiltersHorizontalProps) {
   const muscles = useQuery(api.skills.getMuscles, {});
   const equipment = useQuery(api.skills.getEquipment, {});
+  const [musclesOpen, setMusclesOpen] = useState(false);
+  const [equipmentOpen, setEquipmentOpen] = useState(false);
 
   const levelLabel = level
     ? level.charAt(0).toUpperCase() + level.slice(1)
     : "All Levels";
-  const difficultyLabel =
-    minDifficulty || maxDifficulty
-      ? `${minDifficulty || 1}-${maxDifficulty || 10}`
-      : "All";
-  const musclesLabel =
-    muscleIds.length > 0 ? `${muscleIds.length} selected` : "All";
-  const equipmentLabel =
-    equipmentIds.length > 0 ? `${equipmentIds.length} selected` : "All";
+  
+  const difficultyLabel = (() => {
+    if (minDifficulty !== undefined && maxDifficulty !== undefined) {
+      return `${minDifficulty}-${maxDifficulty}`;
+    }
+    if (minDifficulty !== undefined) {
+      return `${minDifficulty}+`;
+    }
+    if (maxDifficulty !== undefined) {
+      return `≤${maxDifficulty}`;
+    }
+    return "All";
+  })();
+  
+  const musclesLabel = "Muscles";
+  const equipmentLabel = "Equipment";
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Level Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9">
+          <Button
+            variant={level ? "default" : "outline"}
+            size="sm"
+            className="h-9"
+          >
             <TrendingUp className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline">{levelLabel}</span>
-            {level && (
-              <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                1
-              </Badge>
-            )}
             <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
@@ -99,14 +114,17 @@ export function SkillsFiltersHorizontal({
       {/* Difficulty Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9">
+          <Button
+            variant={
+              minDifficulty !== undefined || maxDifficulty !== undefined
+                ? "default"
+                : "outline"
+            }
+            size="sm"
+            className="h-9"
+          >
             <Gauge className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline">{difficultyLabel}</span>
-            {(minDifficulty || maxDifficulty) && (
-              <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                1
-              </Badge>
-            )}
             <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
@@ -122,12 +140,22 @@ export function SkillsFiltersHorizontal({
                 placeholder="Min"
                 value={minDifficulty || ""}
                 onChange={(e) => {
-                  const val = e.target.value
-                    ? parseInt(e.target.value)
-                    : undefined;
-                  if (!val || (val >= 1 && val <= 10)) {
-                    onDifficultyChange(val, maxDifficulty);
+                  if (!e.target.value) {
+                    // Allow clearing the value
+                    onDifficultyChange(undefined, maxDifficulty);
+                    return;
                   }
+                  const val = parseInt(e.target.value);
+                  if (isNaN(val) || val < 1 || val > 10) {
+                    return;
+                  }
+                  // Ensure min doesn't exceed max if max is set
+                  const currentMax = maxDifficulty;
+                  if (currentMax !== undefined && val > currentMax) {
+                    // Don't update if min would be greater than max
+                    return;
+                  }
+                  onDifficultyChange(val, currentMax);
                 }}
                 className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm"
               />
@@ -138,12 +166,22 @@ export function SkillsFiltersHorizontal({
                 placeholder="Max"
                 value={maxDifficulty || ""}
                 onChange={(e) => {
-                  const val = e.target.value
-                    ? parseInt(e.target.value)
-                    : undefined;
-                  if (!val || (val >= 1 && val <= 10)) {
-                    onDifficultyChange(minDifficulty, val);
+                  if (!e.target.value) {
+                    // Allow clearing the value
+                    onDifficultyChange(minDifficulty, undefined);
+                    return;
                   }
+                  const val = parseInt(e.target.value);
+                  if (isNaN(val) || val < 1 || val > 10) {
+                    return;
+                  }
+                  // Ensure max isn't less than min if min is set
+                  const currentMin = minDifficulty;
+                  if (currentMin !== undefined && val < currentMin) {
+                    // Don't update if max would be less than min
+                    return;
+                  }
+                  onDifficultyChange(currentMin, val);
                 }}
                 className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm"
               />
@@ -162,22 +200,26 @@ export function SkillsFiltersHorizontal({
 
       {/* Muscles Filter */}
       {muscles && (
-        <DropdownMenu>
+        <DropdownMenu
+          open={musclesOpen}
+          onOpenChange={setMusclesOpen}
+          modal={false}
+        >
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-9">
+            <Button
+              variant={muscleIds.length > 0 ? "default" : "outline"}
+              size="sm"
+              className="h-9"
+            >
               <Target className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">{musclesLabel}</span>
-              {muscleIds.length > 0 && (
-                <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                  {muscleIds.length}
-                </Badge>
-              )}
               <ChevronDown className="h-4 w-4 ml-2" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
             className="w-64 max-h-96 overflow-y-auto"
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <DropdownMenuLabel>Muscles</DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -194,32 +236,56 @@ export function SkillsFiltersHorizontal({
                     );
                   }
                 }}
+                onSelect={(e) => {
+                  e.preventDefault();
+                }}
               >
                 {muscle.name}
               </DropdownMenuCheckboxItem>
             ))}
+            {muscleIds.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="p-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      onMusclesChange([]);
+                    }}
+                  >
+                    Clear Selection
+                  </Button>
+                </div>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )}
 
       {/* Equipment Filter */}
       {equipment && (
-        <DropdownMenu>
+        <DropdownMenu
+          open={equipmentOpen}
+          onOpenChange={setEquipmentOpen}
+          modal={false}
+        >
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-9">
+            <Button
+              variant={equipmentIds.length > 0 ? "default" : "outline"}
+              size="sm"
+              className="h-9"
+            >
               <Dumbbell className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">{equipmentLabel}</span>
-              {equipmentIds.length > 0 && (
-                <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                  {equipmentIds.length}
-                </Badge>
-              )}
               <ChevronDown className="h-4 w-4 ml-2" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
             className="w-64 max-h-96 overflow-y-auto"
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <DropdownMenuLabel>Equipment</DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -236,10 +302,30 @@ export function SkillsFiltersHorizontal({
                     );
                   }
                 }}
+                onSelect={(e) => {
+                  e.preventDefault();
+                }}
               >
                 {equip.name}
               </DropdownMenuCheckboxItem>
             ))}
+            {equipmentIds.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="p-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      onEquipmentChange([]);
+                    }}
+                  >
+                    Clear Selection
+                  </Button>
+                </div>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )}

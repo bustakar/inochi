@@ -1,8 +1,9 @@
 "use client";
 
+import { Button } from "@inochi/ui/Button";
 import { Input } from "@inochi/ui/Input";
 import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useReducer, useState } from "react";
 import { CreateSkillDialog } from "./_components/create-skill-dialog";
 import { SkillsFiltersHorizontal } from "./_components/skills-filters-horizontal";
@@ -104,6 +105,24 @@ export default function SkillsPage() {
     setEditDialogOpen(true);
   };
 
+  const hasActiveFilters =
+    filters.level !== undefined ||
+    filters.minDifficulty !== undefined ||
+    filters.maxDifficulty !== undefined ||
+    filters.muscleIds.length > 0 ||
+    filters.equipmentIds.length > 0;
+
+  const clearAllFilters = () => {
+    dispatch({ type: "SET_SEARCH_INPUT", payload: "" });
+    dispatch({ type: "SET_LEVEL", payload: undefined });
+    dispatch({
+      type: "SET_DIFFICULTY",
+      payload: { min: undefined, max: undefined },
+    });
+    dispatch({ type: "SET_MUSCLES", payload: [] });
+    dispatch({ type: "SET_EQUIPMENT", payload: [] });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -141,6 +160,17 @@ export default function SkillsPage() {
             className="pl-10"
           />
         </div>
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9"
+            onClick={clearAllFilters}
+          >
+            <X className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Clear All</span>
+          </Button>
+        )}
         <SkillsFiltersHorizontal
           level={filters.level}
           minDifficulty={filters.minDifficulty}
