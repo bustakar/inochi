@@ -30,27 +30,37 @@ const MUSCLES = [
   { name: "Hip Flexors", category: "lower_body" },
 ];
 
-// Seed equipment - calisthenics equipment
+// Seed equipment - categorized by sport/activity type
 const EQUIPMENT = [
-  // Basic Equipment
-  { name: "None (Bodyweight)", category: "basic" },
-  { name: "Pull-up Bar", category: "basic" },
-  { name: "Parallettes", category: "basic" },
-  { name: "Rings", category: "basic" },
-  { name: "Dip Bars", category: "basic" },
+  // Calisthenics Equipment
+  { name: "None (Bodyweight)", category: "calisthenics" },
+  { name: "Pull-up Bar", category: "calisthenics" },
+  { name: "Dip Bars", category: "calisthenics" },
+  { name: "Parallettes", category: "calisthenics" },
+  { name: "Weighted Vest", category: "calisthenics" },
+  { name: "Resistance Bands", category: "calisthenics" },
+  { name: "Hanging Leg Raise Station", category: "calisthenics" },
   
-  // Advanced Equipment
-  { name: "Weighted Vest", category: "advanced" },
-  { name: "Resistance Bands", category: "advanced" },
-  { name: "Gymnastic Rings", category: "advanced" },
-  { name: "Wall Bars", category: "advanced" },
-  { name: "TRX Straps", category: "advanced" },
+  // Gymnastics Equipment
+  { name: "Gymnastic Rings", category: "gymnastics" },
+  { name: "Rings", category: "gymnastics" },
+  { name: "Handstand Blocks", category: "gymnastics" },
+  { name: "Wall Bars", category: "gymnastics" },
+  { name: "Parallel Bars", category: "gymnastics" },
+  { name: "Pommel Horse", category: "gymnastics" },
   
-  // Specialty Equipment
-  { name: "Box/Platform", category: "specialty" },
-  { name: "Handstand Blocks", category: "specialty" },
-  { name: "Climbing Rope", category: "specialty" },
-  { name: "Hanging Leg Raise Station", category: "specialty" },
+  // Gym Equipment
+  { name: "Barbell", category: "gym" },
+  { name: "Dumbbells", category: "gym" },
+  { name: "Kettlebells", category: "gym" },
+  { name: "Cable Machine", category: "gym" },
+  { name: "Smith Machine", category: "gym" },
+  
+  // Other Sports/Fitness
+  { name: "TRX Straps", category: "functional" },
+  { name: "Box/Platform", category: "functional" },
+  { name: "Climbing Rope", category: "functional" },
+  { name: "Sandbag", category: "functional" },
 ];
 
 export const seedMusclesAndEquipment = mutation({
