@@ -43,9 +43,9 @@ interface CreateSkillFormData {
 export function CreateSkillDialog() {
   const [open, setOpen] = useState(false);
   const createSkill = useMutation(api.skills.createSkill);
-  const muscles = useQuery(api.skills.getMuscles);
-  const equipment = useQuery(api.skills.getEquipment);
-  const skills = useQuery(api.skills.getSkills);
+  const muscles = useQuery(api.skills.getMuscles, {});
+  const equipment = useQuery(api.skills.getEquipment, {});
+  const skills = useQuery(api.skills.getSkills, {});
 
   const form = useForm<CreateSkillFormData>({
     defaultValues: {

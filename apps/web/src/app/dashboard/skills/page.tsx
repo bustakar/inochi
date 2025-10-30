@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { SkillsList } from "./_components/skills-list";
-import { SkillsFilters } from "./_components/skills-filters";
-import { CreateSkillDialog } from "./_components/create-skill-dialog";
 import { Input } from "@inochi/ui/Input";
-import { Search } from "lucide-react";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
+import { Search } from "lucide-react";
+import { useState } from "react";
+import { CreateSkillDialog } from "./_components/create-skill-dialog";
+import { SkillsFilters } from "./_components/skills-filters";
+import { SkillsList } from "./_components/skills-list";
 
 export default function SkillsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -85,4 +85,3 @@ export default function SkillsPage() {
     </div>
   );
 }
-

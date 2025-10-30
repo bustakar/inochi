@@ -23,26 +23,18 @@ export function SkillsList({
   equipmentIds,
 }: SkillsListProps) {
   // Use search if query provided, otherwise use regular getSkills
-  const skills = useQuery(
-    searchQuery
-      ? api.skills.searchSkills
-      : api.skills.getSkills,
-    searchQuery
-      ? {
-          searchQuery,
-          level,
-          minDifficulty,
-          maxDifficulty,
-        }
-      : {
-          level,
-          minDifficulty,
-          maxDifficulty,
-        },
+  const searchSkillsResult = useQuery(
+    api.skills.searchSkills,
+    searchQuery ? { searchQuery, level, minDifficulty, maxDifficulty } : "skip",
   );
+  const allSkillsResult = useQuery(
+    api.skills.getSkills,
+    !searchQuery ? { level, minDifficulty, maxDifficulty } : "skip",
+  );
+  const skills = searchQuery ? searchSkillsResult : allSkillsResult;
 
-  const muscles = useQuery(api.skills.getMuscles);
-  const equipment = useQuery(api.skills.getEquipment);
+  const muscles = useQuery(api.skills.getMuscles, {});
+  const equipment = useQuery(api.skills.getEquipment, {});
 
   if (!skills || !muscles || !equipment) {
     return (
