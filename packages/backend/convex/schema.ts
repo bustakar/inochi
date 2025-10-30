@@ -5,13 +5,6 @@ import { levelValidator } from "./validators";
 const urlValidator = v.string();
 
 export default defineSchema({
-  notes: defineTable({
-    userId: v.string(),
-    title: v.string(),
-    content: v.string(),
-    summary: v.optional(v.string()),
-  }),
-
   muscles: defineTable({
     name: v.string(),
     category: v.string(),

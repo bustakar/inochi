@@ -187,7 +187,7 @@ export function CreateSkillDialog() {
                     <FormLabel>Muscles</FormLabel>
                     <FormControl>
                       <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                        {muscles.map((muscle) => (
+                        {muscles.map((muscle: { _id: Id<"muscles">; name: string }) => (
                           <label
                             key={muscle._id}
                             className="flex items-center gap-2 text-sm cursor-pointer"
@@ -228,7 +228,7 @@ export function CreateSkillDialog() {
                     <FormLabel>Equipment</FormLabel>
                     <FormControl>
                       <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                        {equipment.map((equip) => (
+                        {equipment.map((equip: { _id: Id<"equipment">; name: string }) => (
                           <label
                             key={equip._id}
                             className="flex items-center gap-2 text-sm cursor-pointer"
@@ -322,8 +322,8 @@ export function CreateSkillDialog() {
                       <FormControl>
                         <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
                           {skills
-                            .filter((s) => s._id !== form.watch("variants"))
-                            .map((skill) => (
+                            .filter((s: { _id: Id<"skills"> }) => !form.watch("variants").includes(s._id))
+                            .map((skill: { _id: Id<"skills">; title: string }) => (
                               <label
                                 key={skill._id}
                                 className="flex items-center gap-2 text-sm cursor-pointer"
@@ -366,8 +366,8 @@ export function CreateSkillDialog() {
                       <FormControl>
                         <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
                           {skills
-                            .filter((s) => s._id !== form.watch("prerequisites"))
-                            .map((skill) => (
+                            .filter((s: { _id: Id<"skills"> }) => !form.watch("prerequisites").includes(s._id))
+                            .map((skill: { _id: Id<"skills">; title: string }) => (
                               <label
                                 key={skill._id}
                                 className="flex items-center gap-2 text-sm cursor-pointer"

@@ -10,6 +10,7 @@
     "./Button": "./src/button.tsx",
     "./Card": "./src/card.tsx",
     "./Dialog": "./src/dialog.tsx",
+    "./Form": "./src/form.tsx",
     "./Input": "./src/input.tsx",
     "./Label": "./src/label.tsx",
     "./Separator": "./src/separator.tsx",

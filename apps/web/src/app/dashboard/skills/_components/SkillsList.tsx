@@ -55,24 +55,24 @@ export function SkillsList({
   // Filter by muscles and equipment if provided
   let filteredSkills = skills;
   if (muscleIds && muscleIds.length > 0) {
-    filteredSkills = filteredSkills.filter((skill) =>
+    filteredSkills = filteredSkills.filter((skill: Doc<"skills">) =>
       skill.muscles.some((id) => muscleIds.includes(id)),
     );
   }
   if (equipmentIds && equipmentIds.length > 0) {
-    filteredSkills = filteredSkills.filter((skill) =>
+    filteredSkills = filteredSkills.filter((skill: Doc<"skills">) =>
       skill.equipment.some((id) => equipmentIds.includes(id)),
     );
   }
 
   // Enrich skills with muscle and equipment data
-  const enrichedSkills = filteredSkills.map((skill) => ({
+  const enrichedSkills = filteredSkills.map((skill: Doc<"skills">) => ({
     ...skill,
     musclesData: skill.muscles
-      .map((id) => muscles.find((m) => m._id === id))
+      .map((id) => muscles.find((m: Doc<"muscles">) => m._id === id))
       .filter((m): m is Doc<"muscles"> => m !== undefined),
     equipmentData: skill.equipment
-      .map((id) => equipment.find((e) => e._id === id))
+      .map((id) => equipment.find((e: Doc<"equipment">) => e._id === id))
       .filter((e): e is Doc<"equipment"> => e !== undefined),
   }));
 
@@ -86,7 +86,10 @@ export function SkillsList({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {enrichedSkills.map((skill) => (
+      {enrichedSkills.map((skill: Doc<"skills"> & {
+        musclesData?: Array<Doc<"muscles">>;
+        equipmentData?: Array<Doc<"equipment">>;
+      }) => (
         <SkillCard key={skill._id} skill={skill} />
       ))}
     </div>

@@ -112,7 +112,7 @@ export function SkillsFilters({
         <div>
           <Label>Muscles</Label>
           <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
-            {muscles.map((muscle) => (
+            {muscles.map((muscle: { _id: Id<"muscles">; name: string }) => (
               <label
                 key={muscle._id}
                 className="flex items-center gap-2 text-sm cursor-pointer"
@@ -143,7 +143,7 @@ export function SkillsFilters({
         <div>
           <Label>Equipment</Label>
           <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
-            {equipment.map((equip) => (
+            {equipment.map((equip: { _id: Id<"equipment">; name: string }) => (
               <label
                 key={equip._id}
                 className="flex items-center gap-2 text-sm cursor-pointer"
