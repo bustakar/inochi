@@ -1,9 +1,9 @@
 "use client";
 
 import { Input } from "@inochi/ui/Input";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
+import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { Search } from "lucide-react";
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import { CreateSkillDialog } from "./_components/create-skill-dialog";
 import { SkillsFilters } from "./_components/skills-filters";
 import { SkillsList } from "./_components/skills-list";
@@ -75,6 +75,14 @@ function isValidLevel(level: string): level is SkillLevel {
 export default function SkillsPage() {
   const [filters, dispatch] = useReducer(filtersReducer, initialFiltersState);
   const debouncedSearchQuery = useDebounce(filters.searchInput, 300);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [skillToEdit, setSkillToEdit] = useState<
+    | (Doc<"skills"> & {
+        musclesData?: Array<Doc<"muscles">>;
+        equipmentData?: Array<Doc<"equipment">>;
+      })
+    | null
+  >(null);
 
   const handleLevelChange = (newLevel: string | undefined) => {
     if (!newLevel) {
@@ -86,12 +94,37 @@ export default function SkillsPage() {
     }
   };
 
+  const handleSuggestEdit = (
+    skill: Doc<"skills"> & {
+      musclesData?: Array<Doc<"muscles">>;
+      equipmentData?: Array<Doc<"equipment">>;
+    },
+  ) => {
+    setSkillToEdit(skill);
+    setEditDialogOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Skills</h1>
         <CreateSkillDialog />
       </div>
+
+      {/* Edit Dialog */}
+      {skillToEdit && (
+        <CreateSkillDialog
+          mode="edit"
+          existingSkill={skillToEdit}
+          open={editDialogOpen}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open) {
+              setSkillToEdit(null);
+            }
+          }}
+        />
+      )}
 
       {/* Search */}
       <div className="relative">
@@ -142,6 +175,7 @@ export default function SkillsPage() {
             equipmentIds={
               filters.equipmentIds.length > 0 ? filters.equipmentIds : undefined
             }
+            onSuggestEdit={handleSuggestEdit}
           />
         </div>
       </div>

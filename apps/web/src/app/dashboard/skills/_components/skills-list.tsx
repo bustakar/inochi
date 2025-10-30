@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
+import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useMemo } from "react";
 import { SkillCard } from "./skill-card";
@@ -13,6 +13,12 @@ interface SkillsListProps {
   searchQuery?: string;
   muscleIds?: Id<"muscles">[];
   equipmentIds?: Id<"equipment">[];
+  onSuggestEdit?: (
+    skill: Doc<"skills"> & {
+      musclesData?: Array<Doc<"muscles">>;
+      equipmentData?: Array<Doc<"equipment">>;
+    },
+  ) => void;
 }
 
 export function SkillsList({
@@ -22,6 +28,7 @@ export function SkillsList({
   searchQuery,
   muscleIds,
   equipmentIds,
+  onSuggestEdit,
 }: SkillsListProps) {
   // Build query args with all filters
   const queryArgs = useMemo(
@@ -66,7 +73,11 @@ export function SkillsList({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {skills.map((skill) => (
-        <SkillCard key={skill._id} skill={skill} />
+        <SkillCard
+          key={skill._id}
+          skill={skill}
+          onSuggestEdit={onSuggestEdit}
+        />
       ))}
     </div>
   );
