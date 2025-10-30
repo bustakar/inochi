@@ -151,7 +151,7 @@ export function SkillsFiltersHorizontal({
                   }
                   onDifficultyChange(val, currentMax);
                 }}
-                className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm"
+                className="w-full rounded-md border border-input bg-background text-foreground px-2 py-1 text-sm placeholder:text-muted-foreground"
               />
               <input
                 type="number"
@@ -177,7 +177,7 @@ export function SkillsFiltersHorizontal({
                   }
                   onDifficultyChange(currentMin, val);
                 }}
-                className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm"
+                className="w-full rounded-md border border-input bg-background text-foreground px-2 py-1 text-sm placeholder:text-muted-foreground"
               />
             </div>
             <Button

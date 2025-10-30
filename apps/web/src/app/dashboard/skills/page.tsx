@@ -126,7 +126,7 @@ export default function SkillsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Skills</h1>
+        <h1 className="text-3xl font-bold text-foreground">Skills</h1>
         <CreateSkillDialog />
       </div>
 
