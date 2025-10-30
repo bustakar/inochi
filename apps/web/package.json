@@ -28,15 +28,16 @@
   "devDependencies": {
     "@packages/backend": "workspace:*",
     "@tailwindcss/forms": "0.5.10",
-    "@tailwindcss/postcss": "4.1.16",
+    "@tailwindcss/postcss": "catalog:",
     "@types/node": "24.9.2",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
+    "autoprefixer": "^10.4.21",
     "eslint": "9.38.0",
     "eslint-config-next": "16.0.1",
     "postcss": "8.5.6",
     "swr": "^2.3.6",
-    "tailwindcss": "4.1.16",
+    "tailwindcss": "catalog:",
     "typescript": "5.9.3"
   }
 }
