@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "@inochi/tailwind-config/theme";
+
+@source "../../../../packages/ui/src/*.{ts,tsx}";
+@source "../../**/*.{ts,tsx}";
 
 @theme {
   --breakpoint-*: initial;
