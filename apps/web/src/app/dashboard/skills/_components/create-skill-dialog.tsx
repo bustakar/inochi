@@ -1,9 +1,9 @@
 "use client";
 
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
+import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
@@ -41,12 +41,42 @@ interface CreateSkillFormData {
   tips: string[];
 }
 
-export function CreateSkillDialog() {
-  const [open, setOpen] = useState(false);
-  const createSkill = useMutation(api.skills.createSkill);
+interface CreateSkillDialogProps {
+  mode?: "create" | "edit";
+  existingSkill?: Doc<"skills"> & {
+    musclesData?: Array<Doc<"muscles">>;
+    equipmentData?: Array<Doc<"equipment">>;
+  };
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function CreateSkillDialog({
+  mode = "create",
+  existingSkill,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: CreateSkillDialogProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const createSubmission = useMutation(api.submissions.createSubmission);
   const muscles = useQuery(api.skills.getMuscles, {});
   const equipment = useQuery(api.skills.getEquipment, {});
   const skills = useQuery(api.skills.getSkills, {});
+
+  // Use controlled or internal state
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (controlledOnOpenChange) {
+        controlledOnOpenChange(newOpen);
+      } else {
+        setInternalOpen(newOpen);
+      }
+    },
+    [controlledOnOpenChange],
+  );
+
+  const isEditMode = mode === "edit" && existingSkill;
 
   const form = useForm<CreateSkillFormData>({
     defaultValues: {
@@ -63,9 +93,42 @@ export function CreateSkillDialog() {
     },
   });
 
+  // Prefill form when editing or when dialog opens
+  useEffect(() => {
+    if (open) {
+      if (isEditMode && existingSkill) {
+        form.reset({
+          title: existingSkill.title,
+          description: existingSkill.description,
+          level: existingSkill.level,
+          difficulty: existingSkill.difficulty,
+          muscles: existingSkill.muscles,
+          equipment: existingSkill.equipment,
+          embedded_videos: existingSkill.embedded_videos,
+          prerequisites: existingSkill.prerequisites,
+          variants: existingSkill.variants,
+          tips: existingSkill.tips,
+        });
+      } else {
+        form.reset({
+          title: "",
+          description: "",
+          level: "beginner",
+          difficulty: 1,
+          muscles: [],
+          equipment: [],
+          embedded_videos: [],
+          prerequisites: [],
+          variants: [],
+          tips: [],
+        });
+      }
+    }
+  }, [open, isEditMode, existingSkill, form]);
+
   const onSubmit = async (data: CreateSkillFormData) => {
     try {
-      await createSkill({
+      await createSubmission({
         title: data.title,
         description: data.description,
         level: data.level,
@@ -76,16 +139,21 @@ export function CreateSkillDialog() {
         prerequisites: data.prerequisites,
         variants: data.variants,
         tips: data.tips.filter((t) => t.trim() !== ""),
+        submissionType: isEditMode ? "edit" : "create",
+        originalSkillId: isEditMode ? existingSkill?._id : undefined,
       });
-      form.reset();
-      setOpen(false);
-      toast.success("Skill created successfully!");
+      toast.success(
+        isEditMode
+          ? "Edit suggestion submitted!"
+          : "Skill suggestion submitted!",
+      );
+      handleOpenChange(false);
     } catch (error) {
-      console.error("Error creating skill:", error);
+      console.error("Error submitting suggestion:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to create skill. Please try again.",
+          : "Failed to submit suggestion. Please try again.",
       );
     }
   };
@@ -94,13 +162,17 @@ export function CreateSkillDialog() {
   const tips = form.watch("tips");
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Create Skill</Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {!isEditMode && (
+        <DialogTrigger asChild>
+          <Button>Suggest Skill</Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Skill</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? "Suggest Skill Edit" : "Suggest New Skill"}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -482,11 +554,13 @@ export function CreateSkillDialog() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
+                onClick={() => handleOpenChange(false)}
               >
                 Cancel
               </Button>
-              <Button type="submit">Create Skill</Button>
+              <Button type="submit">
+                {isEditMode ? "Suggest Edit" : "Suggest Skill"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

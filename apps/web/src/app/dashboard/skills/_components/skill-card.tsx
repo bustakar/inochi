@@ -1,8 +1,15 @@
 "use client";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/common/dropdown-menu";
 import { Badge } from "@inochi/ui";
+import { Button } from "@inochi/ui/Button";
 import { Doc } from "@packages/backend/convex/_generated/dataModel";
-import { Dumbbell, Target } from "lucide-react";
+import { Dumbbell, MoreVertical, Target } from "lucide-react";
 import React, { useMemo } from "react";
 
 interface SkillCardProps {
@@ -10,6 +17,7 @@ interface SkillCardProps {
     musclesData?: Array<Doc<"muscles">>;
     equipmentData?: Array<Doc<"equipment">>;
   };
+  onSuggestEdit?: (skill: Doc<"skills">) => void;
 }
 
 const levelColors: Record<string, string> = {
@@ -20,7 +28,7 @@ const levelColors: Record<string, string> = {
   elite: "bg-red-100 text-red-800",
 };
 
-function SkillCardComponent({ skill }: SkillCardProps) {
+function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
   const displayDescription = useMemo(() => {
     // Truncate at word boundary to avoid breaking words
     const maxLength = 150; // Allow more characters since line-clamp-2 will handle display
@@ -36,16 +44,37 @@ function SkillCardComponent({ skill }: SkillCardProps) {
     return skill.description.substring(0, cutoff) + "...";
   }, [skill.description]);
   return (
-    <div className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
+    <div className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow relative">
       <div className="flex items-start justify-between mb-2">
-        <h3 className="text-lg font-semibold text-card-foreground">
+        <h3 className="text-lg font-semibold text-card-foreground pr-8">
           {skill.title}
         </h3>
-        <Badge
-          className={levelColors[skill.level] || "bg-gray-100 text-gray-800"}
-        >
-          {skill.level}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge
+            className={levelColors[skill.level] || "bg-gray-100 text-gray-800"}
+          >
+            {skill.level}
+          </Badge>
+          {onSuggestEdit && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 absolute top-2 right-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onSuggestEdit(skill)}>
+                  Suggest Edit
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
 
       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
