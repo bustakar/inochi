@@ -21,6 +21,7 @@ import {
 
 export function NavMain({
   items,
+  groupLabel = "Platform",
 }: {
   items: {
     title: string;
@@ -32,10 +33,11 @@ export function NavMain({
       url: string;
     }[];
   }[];
+  groupLabel?: string;
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>{groupLabel}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           // Simple clickable item without sub-items

@@ -72,6 +72,21 @@ export function CreateSkillDialog({
       } else {
         setInternalOpen(newOpen);
       }
+      // Ensure overlay is removed when dialog closes
+      if (!newOpen) {
+        // Small delay to allow animations to complete
+        setTimeout(() => {
+          // Force cleanup of any lingering overlay elements
+          const overlays = document.querySelectorAll(
+            '[data-slot="dialog-overlay"]',
+          );
+          overlays.forEach((overlay) => {
+            if (!overlay.closest('[data-state="open"]')) {
+              overlay.remove();
+            }
+          });
+        }, 200);
+      }
     },
     [controlledOnOpenChange],
   );
@@ -95,21 +110,9 @@ export function CreateSkillDialog({
 
   // Prefill form when editing or when dialog opens
   useEffect(() => {
-    if (open) {
-      if (isEditMode && existingSkill) {
-        form.reset({
-          title: existingSkill.title,
-          description: existingSkill.description,
-          level: existingSkill.level,
-          difficulty: existingSkill.difficulty,
-          muscles: existingSkill.muscles,
-          equipment: existingSkill.equipment,
-          embedded_videos: existingSkill.embedded_videos,
-          prerequisites: existingSkill.prerequisites,
-          variants: existingSkill.variants,
-          tips: existingSkill.tips,
-        });
-      } else {
+    if (!open) {
+      // Reset form when dialog closes to ensure clean state
+      if (!isEditMode) {
         form.reset({
           title: "",
           description: "",
@@ -123,8 +126,38 @@ export function CreateSkillDialog({
           tips: [],
         });
       }
+      return;
     }
-  }, [open, isEditMode, existingSkill, form]);
+
+    if (isEditMode && existingSkill) {
+      form.reset({
+        title: existingSkill.title,
+        description: existingSkill.description,
+        level: existingSkill.level,
+        difficulty: existingSkill.difficulty,
+        muscles: existingSkill.muscles,
+        equipment: existingSkill.equipment,
+        embedded_videos: existingSkill.embedded_videos,
+        prerequisites: existingSkill.prerequisites,
+        variants: existingSkill.variants,
+        tips: existingSkill.tips,
+      });
+    } else if (!isEditMode) {
+      form.reset({
+        title: "",
+        description: "",
+        level: "beginner",
+        difficulty: 1,
+        muscles: [],
+        equipment: [],
+        embedded_videos: [],
+        prerequisites: [],
+        variants: [],
+        tips: [],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isEditMode, existingSkill?._id]);
 
   const onSubmit = async (data: CreateSkillFormData) => {
     try {
