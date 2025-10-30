@@ -8,9 +8,11 @@
  * @module
  */
 
-import type * as notes from "../notes.js";
 import type * as openai from "../openai.js";
+import type * as seed from "../seed.js";
+import type * as skills from "../skills.js";
 import type * as utils from "../utils.js";
+import type * as validators from "../validators.js";
 
 import type {
   ApiFromModules,
@@ -27,9 +29,11 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  notes: typeof notes;
   openai: typeof openai;
+  seed: typeof seed;
+  skills: typeof skills;
   utils: typeof utils;
+  validators: typeof validators;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

@@ -11,6 +11,9 @@ export const openaiKeySet = query({
   },
 });
 
+// Commented out - these functions reference the notes table which has been removed
+// Uncomment and update if needed for future features
+/*
 export const summary = internalAction({
   args: {
     id: v.id("notes"),
@@ -73,3 +76,4 @@ export const saveSummary = internalMutation({
     });
   },
 });
+*/

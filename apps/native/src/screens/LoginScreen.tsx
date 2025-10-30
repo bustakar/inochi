@@ -18,13 +18,15 @@ const LoginScreen = ({ navigation }) => {
         const { createdSessionId, setActive } = await startGoogleAuthFlow();
         if (createdSessionId) {
           setActive({ session: createdSessionId });
-          navigation.navigate("NotesDashboardScreen");
+          // TODO: Navigate to skills dashboard when implemented
+          // navigation.navigate("SkillsDashboardScreen");
         }
       } else if (authType === "apple") {
         const { createdSessionId, setActive } = await startAppleAuthFlow();
         if (createdSessionId) {
           setActive({ session: createdSessionId });
-          navigation.navigate("NotesDashboardScreen");
+          // TODO: Navigate to skills dashboard when implemented
+          // navigation.navigate("SkillsDashboardScreen");
         }
       }
     } catch (err) {
