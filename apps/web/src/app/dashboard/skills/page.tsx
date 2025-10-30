@@ -1,11 +1,12 @@
 "use client";
 
+import { Button } from "@inochi/ui/Button";
 import { Input } from "@inochi/ui/Input";
 import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useReducer, useState } from "react";
 import { CreateSkillDialog } from "./_components/create-skill-dialog";
-import { SkillsFilters } from "./_components/skills-filters";
+import { SkillsFiltersHorizontal } from "./_components/skills-filters-horizontal";
 import { SkillsList } from "./_components/skills-list";
 import { useDebounce } from "./_hooks/use-debounce";
 
@@ -104,6 +105,24 @@ export default function SkillsPage() {
     setEditDialogOpen(true);
   };
 
+  const hasActiveFilters =
+    filters.level !== undefined ||
+    filters.minDifficulty !== undefined ||
+    filters.maxDifficulty !== undefined ||
+    filters.muscleIds.length > 0 ||
+    filters.equipmentIds.length > 0;
+
+  const clearAllFilters = () => {
+    dispatch({ type: "SET_SEARCH_INPUT", payload: "" });
+    dispatch({ type: "SET_LEVEL", payload: undefined });
+    dispatch({
+      type: "SET_DIFFICULTY",
+      payload: { min: undefined, max: undefined },
+    });
+    dispatch({ type: "SET_MUSCLES", payload: [] });
+    dispatch({ type: "SET_EQUIPMENT", payload: [] });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -114,6 +133,7 @@ export default function SkillsPage() {
       {/* Edit Dialog */}
       {skillToEdit && (
         <CreateSkillDialog
+          key={skillToEdit._id}
           mode="edit"
           existingSkill={skillToEdit}
           open={editDialogOpen}
@@ -126,59 +146,62 @@ export default function SkillsPage() {
         />
       )}
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input
-          type="text"
-          placeholder="Search skills..."
-          value={filters.searchInput}
-          onChange={(e) =>
-            dispatch({ type: "SET_SEARCH_INPUT", payload: e.target.value })
+      {/* Search and Filters Row */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div className="relative flex-1 w-full sm:w-auto sm:min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            type="text"
+            placeholder="Search skills..."
+            value={filters.searchInput}
+            onChange={(e) =>
+              dispatch({ type: "SET_SEARCH_INPUT", payload: e.target.value })
+            }
+            className="pl-10"
+          />
+        </div>
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9"
+            onClick={clearAllFilters}
+          >
+            <X className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Clear All</span>
+          </Button>
+        )}
+        <SkillsFiltersHorizontal
+          level={filters.level}
+          minDifficulty={filters.minDifficulty}
+          maxDifficulty={filters.maxDifficulty}
+          muscleIds={filters.muscleIds}
+          equipmentIds={filters.equipmentIds}
+          onLevelChange={handleLevelChange}
+          onDifficultyChange={(min, max) =>
+            dispatch({ type: "SET_DIFFICULTY", payload: { min, max } })
           }
-          className="pl-10"
+          onMusclesChange={(ids) =>
+            dispatch({ type: "SET_MUSCLES", payload: ids })
+          }
+          onEquipmentChange={(ids) =>
+            dispatch({ type: "SET_EQUIPMENT", payload: ids })
+          }
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Filters Sidebar */}
-        <div className="lg:col-span-1">
-          <SkillsFilters
-            level={filters.level}
-            minDifficulty={filters.minDifficulty}
-            maxDifficulty={filters.maxDifficulty}
-            muscleIds={filters.muscleIds}
-            equipmentIds={filters.equipmentIds}
-            onLevelChange={handleLevelChange}
-            onDifficultyChange={(min, max) =>
-              dispatch({ type: "SET_DIFFICULTY", payload: { min, max } })
-            }
-            onMusclesChange={(ids) =>
-              dispatch({ type: "SET_MUSCLES", payload: ids })
-            }
-            onEquipmentChange={(ids) =>
-              dispatch({ type: "SET_EQUIPMENT", payload: ids })
-            }
-          />
-        </div>
-
-        {/* Skills List */}
-        <div className="lg:col-span-3">
-          <SkillsList
-            level={filters.level}
-            minDifficulty={filters.minDifficulty}
-            maxDifficulty={filters.maxDifficulty}
-            searchQuery={debouncedSearchQuery.trim() || undefined}
-            muscleIds={
-              filters.muscleIds.length > 0 ? filters.muscleIds : undefined
-            }
-            equipmentIds={
-              filters.equipmentIds.length > 0 ? filters.equipmentIds : undefined
-            }
-            onSuggestEdit={handleSuggestEdit}
-          />
-        </div>
-      </div>
+      {/* Skills List */}
+      <SkillsList
+        level={filters.level}
+        minDifficulty={filters.minDifficulty}
+        maxDifficulty={filters.maxDifficulty}
+        searchQuery={debouncedSearchQuery.trim() || undefined}
+        muscleIds={filters.muscleIds.length > 0 ? filters.muscleIds : undefined}
+        equipmentIds={
+          filters.equipmentIds.length > 0 ? filters.equipmentIds : undefined
+        }
+        onSuggestEdit={handleSuggestEdit}
+      />
     </div>
   );
 }

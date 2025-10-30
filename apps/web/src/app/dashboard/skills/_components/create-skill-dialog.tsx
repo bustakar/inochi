@@ -1,32 +1,32 @@
 "use client";
 
-import { api } from "@packages/backend/convex/_generated/api";
-import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { Plus, X } from "lucide-react";
+import { Button } from "@inochi/ui/Button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
 } from "@inochi/ui/Dialog";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@inochi/ui/Form";
 import { Input } from "@inochi/ui/Input";
-import { Textarea } from "@inochi/ui/Textarea";
-import { Button } from "@inochi/ui/Button";
 import { Label } from "@inochi/ui/Label";
+import { Textarea } from "@inochi/ui/Textarea";
+import { api } from "@packages/backend/convex/_generated/api";
+import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { Plus, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 interface CreateSkillFormData {
   title: string;
@@ -76,6 +76,38 @@ export function CreateSkillDialog({
     [controlledOnOpenChange],
   );
 
+  // Ensure body pointer-events is restored when dialog closes
+  useEffect(() => {
+    if (!open) {
+      // Small delay to allow Radix Dialog cleanup to complete
+      const timeoutId = setTimeout(() => {
+        // Remove any lingering overlay elements
+        const overlays = document.querySelectorAll(
+          '[data-slot="dialog-overlay"]',
+        );
+        overlays.forEach((overlay) => {
+          const dialogRoot = overlay.closest("[data-state]");
+          if (!dialogRoot || dialogRoot.getAttribute("data-state") !== "open") {
+            overlay.remove();
+          }
+        });
+
+        // Ensure body pointer-events is restored
+        const body = document.body;
+        if (body.style.pointerEvents === "none") {
+          body.style.pointerEvents = "";
+        }
+
+        // Also check for any data attributes that Radix might set
+        if (body.hasAttribute("data-radix-dialog-prevent-scroll")) {
+          body.removeAttribute("data-radix-dialog-prevent-scroll");
+        }
+      }, 300); // Increased delay to ensure animations complete
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open]);
+
   const isEditMode = mode === "edit" && existingSkill;
 
   const form = useForm<CreateSkillFormData>({
@@ -95,21 +127,9 @@ export function CreateSkillDialog({
 
   // Prefill form when editing or when dialog opens
   useEffect(() => {
-    if (open) {
-      if (isEditMode && existingSkill) {
-        form.reset({
-          title: existingSkill.title,
-          description: existingSkill.description,
-          level: existingSkill.level,
-          difficulty: existingSkill.difficulty,
-          muscles: existingSkill.muscles,
-          equipment: existingSkill.equipment,
-          embedded_videos: existingSkill.embedded_videos,
-          prerequisites: existingSkill.prerequisites,
-          variants: existingSkill.variants,
-          tips: existingSkill.tips,
-        });
-      } else {
+    if (!open) {
+      // Reset form when dialog closes to ensure clean state
+      if (!isEditMode) {
         form.reset({
           title: "",
           description: "",
@@ -123,8 +143,38 @@ export function CreateSkillDialog({
           tips: [],
         });
       }
+      return;
     }
-  }, [open, isEditMode, existingSkill, form]);
+
+    if (isEditMode && existingSkill) {
+      form.reset({
+        title: existingSkill.title,
+        description: existingSkill.description,
+        level: existingSkill.level,
+        difficulty: existingSkill.difficulty,
+        muscles: existingSkill.muscles,
+        equipment: existingSkill.equipment,
+        embedded_videos: existingSkill.embedded_videos,
+        prerequisites: existingSkill.prerequisites,
+        variants: existingSkill.variants,
+        tips: existingSkill.tips,
+      });
+    } else if (!isEditMode) {
+      form.reset({
+        title: "",
+        description: "",
+        level: "beginner",
+        difficulty: 1,
+        muscles: [],
+        equipment: [],
+        embedded_videos: [],
+        prerequisites: [],
+        variants: [],
+        tips: [],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isEditMode, existingSkill?._id]);
 
   const onSubmit = async (data: CreateSkillFormData) => {
     try {

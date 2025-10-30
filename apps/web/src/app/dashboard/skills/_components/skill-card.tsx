@@ -45,36 +45,39 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
   }, [skill.description]);
   return (
     <div className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow relative">
+      {/* Header with title and more button */}
       <div className="flex items-start justify-between mb-2">
-        <h3 className="text-lg font-semibold text-card-foreground pr-8">
+        <h3 className="text-lg font-semibold text-card-foreground pr-8 flex-1">
           {skill.title}
         </h3>
-        <div className="flex items-center gap-2">
-          <Badge
-            className={levelColors[skill.level] || "bg-gray-100 text-gray-800"}
-          >
-            {skill.level}
-          </Badge>
-          {onSuggestEdit && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 absolute top-2 right-2"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onSuggestEdit(skill)}>
-                  Suggest Edit
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
+        {onSuggestEdit && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 flex-shrink-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onSuggestEdit(skill)}>
+                Suggest Edit
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+
+      {/* Level badge on its own row */}
+      <div className="mb-2">
+        <Badge
+          className={levelColors[skill.level] || "bg-gray-100 text-gray-800"}
+        >
+          {skill.level}
+        </Badge>
       </div>
 
       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
