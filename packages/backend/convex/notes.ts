@@ -68,3 +68,4 @@ export const deleteNote = mutation({
     await ctx.db.delete(args.noteId);
   },
 });
+
