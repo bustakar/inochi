@@ -1,5 +1,5 @@
 import Image from "next/image";
-import TestTimonialCard from "../common/TestTimonialCard";
+import TestTimonialCard from "../../components/common/TestTimonialCard";
 
 const TestimonialsData = [
   {

@@ -1,6 +1,6 @@
 import React from "react";
-import Logo from "../common/Logo";
-import Menu from "../common/Menu";
+import Logo from "../../components/common/Logo";
+import Menu from "../../components/common/Menu";
 
 const menuItems = [
   {
