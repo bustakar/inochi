@@ -21,11 +21,15 @@ interface SkillCardProps {
 }
 
 const levelColors: Record<string, string> = {
-  beginner: "bg-green-100 text-green-800",
-  intermediate: "bg-blue-100 text-blue-800",
-  advanced: "bg-purple-100 text-purple-800",
-  expert: "bg-orange-100 text-orange-800",
-  elite: "bg-red-100 text-red-800",
+  beginner:
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  intermediate:
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  advanced:
+    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  expert:
+    "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
+  elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
 };
 
 function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
@@ -74,7 +78,10 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
       {/* Level badge on its own row */}
       <div className="mb-2">
         <Badge
-          className={levelColors[skill.level] || "bg-gray-100 text-gray-800"}
+          className={
+            levelColors[skill.level] ||
+            "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+          }
         >
           {skill.level}
         </Badge>
