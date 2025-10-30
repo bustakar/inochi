@@ -25,7 +25,7 @@ export * from "./tooltip";
 export * from "./sidebar";
 
 // Hooks
-export * from "./hooks/use-mobile.js";
+export * from "./hooks/use-mobile";
 
 // Utils
-export * from "./lib/utils.js";
+export * from "./lib/utils";

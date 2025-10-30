@@ -3,7 +3,7 @@
 import { api } from "@packages/backend/convex/_generated/api";
 import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { SkillCard } from "./SkillCard";
+import { SkillCard } from "./skill-card";
 
 interface SkillsListProps {
   level?: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
