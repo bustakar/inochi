@@ -17,7 +17,7 @@ const data = {
   navMain: [
     {
       title: "Skills",
-      url: "#",
+      url: "/dashboard/skills",
       icon: GraduationCap,
     },
   ],

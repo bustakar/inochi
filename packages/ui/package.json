@@ -6,6 +6,7 @@
     ".": "./src/index.ts",
     "./Spinner": "./src/spinner.tsx",
     "./Sidebar": "./src/sidebar.tsx",
+    "./Badge": "./src/badge.tsx",
     "./Button": "./src/button.tsx",
     "./Card": "./src/card.tsx",
     "./Dialog": "./src/dialog.tsx",
