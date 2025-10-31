@@ -1,55 +1,79 @@
-import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
-import { useOAuth } from "@clerk/clerk-expo";
+import { useSSO, useUser } from "@clerk/clerk-expo";
 import { AntDesign } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { RFValue } from "react-native-responsive-fontsize";
 
-const LoginScreen = ({ navigation }) => {
-  const { startOAuthFlow: startGoogleAuthFlow } = useOAuth({
-    strategy: "oauth_google",
-  });
-  const { startOAuthFlow: startAppleAuthFlow } = useOAuth({
-    strategy: "oauth_apple",
-  });
+const getOAuthStrategy = (authType: string) => {
+  switch (authType) {
+    case "google":
+      return "oauth_google";
+    case "apple":
+      return "oauth_apple";
+    case "github":
+      return "oauth_github";
+  }
+};
+
+export default function LoginScreen() {
+  const { startSSOFlow } = useSSO();
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.replace("/skills");
+    }
+  }, [isLoaded, isSignedIn, router]);
 
   const onPress = async (authType: string) => {
     try {
-      if (authType === "google") {
-        const { createdSessionId, setActive } = await startGoogleAuthFlow();
-        if (createdSessionId) {
-          setActive({ session: createdSessionId });
-          // TODO: Navigate to skills dashboard when implemented
-          // navigation.navigate("SkillsDashboardScreen");
-        }
-      } else if (authType === "apple") {
-        const { createdSessionId, setActive } = await startAppleAuthFlow();
-        if (createdSessionId) {
-          setActive({ session: createdSessionId });
-          // TODO: Navigate to skills dashboard when implemented
-          // navigation.navigate("SkillsDashboardScreen");
-        }
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: getOAuthStrategy(authType),
+      });
+      if (createdSessionId) {
+        setActive({ session: createdSessionId });
+        router.replace("/skills");
       }
     } catch (err) {
       console.error("OAuth error", err);
     }
   };
 
+  if (!isLoaded) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
         <Image
-          source={require("../assets/icons/logo.png")} // Ensure the correct path to your logo image file
+          source={require("../src/assets/icons/logo.png")}
           style={styles.logo}
         />
         <Text style={styles.title}>Log in to your account</Text>
         <Text style={styles.subtitle}>Welcome! Please login below.</Text>
         <TouchableOpacity
           style={styles.buttonGoogle}
+          onPress={() => onPress("github")}
+        >
+          {/* <Image
+            style={styles.githubIcon}
+            source={require("../src/assets/icons/github.png")}
+          /> */}
+          <Text style={{ ...styles.buttonText, color: "#344054" }}>
+            Continue with GitHub
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.buttonGoogle}
           onPress={() => onPress("google")}
         >
           <Image
             style={styles.googleIcon}
-            source={require("../assets/icons/google.png")}
+            source={require("../src/assets/icons/google.png")}
           />
           <Text style={{ ...styles.buttonText, color: "#344054" }}>
             Continue with Google
@@ -60,7 +84,7 @@ const LoginScreen = ({ navigation }) => {
           style={styles.buttonApple}
           onPress={() => onPress("apple")}
         >
-          <AntDesign name="apple1" size={24} color="black" />
+          <AntDesign name="apple" size={24} color="black" />
           <Text
             style={{ ...styles.buttonText, color: "#344054", marginLeft: 12 }}
           >
@@ -69,13 +93,13 @@ const LoginScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <View style={styles.signupContainer}>
-          <Text style={{ fontFamily: "Regular" }}>Don’t have an account? </Text>
+          <Text style={{ fontFamily: "Regular" }}>Don't have an account? </Text>
           <Text>Sign up above.</Text>
         </View>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -106,48 +130,11 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: "center",
   },
-  input: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#D0D5DD",
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 16,
-    fontFamily: "Regular",
-    fontSize: RFValue(14),
-  },
-  buttonEmail: {
-    backgroundColor: "#0D87E1",
-    padding: 15,
-    borderRadius: 10,
-    width: "100%",
-    marginBottom: 24,
-    minHeight: 44,
-  },
   buttonText: {
     textAlign: "center",
     color: "#FFF",
     fontFamily: "SemiBold",
     fontSize: RFValue(14),
-  },
-  buttonTextWithIcon: {
-    marginLeft: 10,
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 24,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#000",
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    color: "#000",
-    fontFamily: "Medium",
   },
   buttonGoogle: {
     flexDirection: "row",
@@ -176,23 +163,9 @@ const styles = StyleSheet.create({
   signupContainer: {
     flexDirection: "row",
   },
-  signupText: {
-    color: "#4D9DE0",
-    fontFamily: "SemiBold",
-  },
   googleIcon: {
     width: 24,
     height: 24,
     marginRight: 12,
   },
-  errorText: {
-    fontSize: RFValue(14),
-    color: "tomato",
-    fontFamily: "Medium",
-    alignSelf: "flex-start",
-    marginBottom: 8,
-    marginLeft: 4,
-  },
 });
-
-export default LoginScreen;
