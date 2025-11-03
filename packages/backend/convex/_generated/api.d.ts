@@ -11,8 +11,8 @@
 import type * as functions_openai from "../functions/openai.js";
 import type * as functions_skills from "../functions/skills.js";
 import type * as functions_submissions from "../functions/submissions.js";
-import type * as schema_validators from "../schema/validators.js";
 import type * as utils from "../utils.js";
+import type * as validators_validators from "../validators/validators.js";
 
 import type {
   ApiFromModules,
@@ -32,8 +32,8 @@ declare const fullApi: ApiFromModules<{
   "functions/openai": typeof functions_openai;
   "functions/skills": typeof functions_skills;
   "functions/submissions": typeof functions_submissions;
-  "schema/validators": typeof schema_validators;
   utils: typeof utils;
+  "validators/validators": typeof validators_validators;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
