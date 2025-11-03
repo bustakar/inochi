@@ -1,43 +1,32 @@
 "use client";
 
-import { api } from "@packages/backend/convex/_generated/api";
-import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { Plus, X } from "lucide-react";
+import {
+  ArrayInputField,
+  BasicFormFields,
+  CheckboxGroupField,
+  skillFormSchema,
+  type SkillFormData,
+} from "@/components/forms";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@inochi/ui/Button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@inochi/ui/Dialog";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@inochi/ui/Form";
-import { Input } from "@inochi/ui/Input";
-import { Textarea } from "@inochi/ui/Textarea";
-import { Button } from "@inochi/ui/Button";
+import { Form } from "@inochi/ui/Form";
+import { api } from "@packages/backend/convex/_generated/api";
+import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-interface EditSubmissionFormData {
-  title: string;
-  description: string;
-  level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
-  difficulty: number;
-  muscles: Id<"muscles">[];
-  equipment: Id<"equipment">[];
-  embedded_videos: string[];
-  prerequisites: Id<"skills">[];
-  variants: Id<"skills">[];
-  tips: string[];
-}
+// ============================================================================
+// Types
+// ============================================================================
 
 interface EditSubmissionDialogProps {
   submission: Doc<"user_submissions"> & {
@@ -48,17 +37,18 @@ interface EditSubmissionDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function EditSubmissionDialog({
-  submission,
-  open,
-  onOpenChange,
-}: EditSubmissionDialogProps) {
-  const updateSubmission = useMutation(api.submissions.updateSubmission);
-  const muscles = useQuery(api.skills.getMuscles, {});
-  const equipment = useQuery(api.skills.getEquipment, {});
-  const skills = useQuery(api.skills.getSkills, {});
+// ============================================================================
+// Custom Hook: Form Management
+// ============================================================================
 
-  const form = useForm<EditSubmissionFormData>({
+function useEditSubmissionForm(
+  submission: Doc<"user_submissions">,
+  open: boolean,
+) {
+  const updateSubmission = useMutation(api.submissions.updateSubmission);
+
+  const form = useForm<SkillFormData>({
+    resolver: zodResolver(skillFormSchema),
     defaultValues: {
       title: submission.title,
       description: submission.description,
@@ -73,23 +63,25 @@ export function EditSubmissionDialog({
     },
   });
 
-  // Reset form when submission changes
+  // Reset form when submission changes or dialog opens
   useEffect(() => {
-    form.reset({
-      title: submission.title,
-      description: submission.description,
-      level: submission.level,
-      difficulty: submission.difficulty,
-      muscles: submission.muscles,
-      equipment: submission.equipment,
-      embedded_videos: submission.embedded_videos,
-      prerequisites: submission.prerequisites,
-      variants: submission.variants,
-      tips: submission.tips,
-    });
-  }, [submission, form]);
+    if (open) {
+      form.reset({
+        title: submission.title,
+        description: submission.description,
+        level: submission.level,
+        difficulty: submission.difficulty,
+        muscles: submission.muscles,
+        equipment: submission.equipment,
+        embedded_videos: submission.embedded_videos,
+        prerequisites: submission.prerequisites,
+        variants: submission.variants,
+        tips: submission.tips,
+      });
+    }
+  }, [submission._id, open, form, submission]);
 
-  const onSubmit = async (data: EditSubmissionFormData) => {
+  const onSubmit = async (data: SkillFormData) => {
     try {
       await updateSubmission({
         id: submission._id,
@@ -105,7 +97,7 @@ export function EditSubmissionDialog({
         tips: data.tips.filter((t) => t.trim() !== ""),
       });
       toast.success("Submission updated successfully!");
-      onOpenChange(false);
+      return true;
     } catch (error) {
       console.error("Error updating submission:", error);
       toast.error(
@@ -113,11 +105,37 @@ export function EditSubmissionDialog({
           ? error.message
           : "Failed to update submission. Please try again.",
       );
+      return false;
     }
   };
 
-  const videos = form.watch("embedded_videos");
-  const tips = form.watch("tips");
+  return { form, onSubmit };
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export function EditSubmissionDialog({
+  submission,
+  open,
+  onOpenChange,
+}: EditSubmissionDialogProps) {
+  const muscles = useQuery(api.skills.getMuscles, {});
+  const equipment = useQuery(api.skills.getEquipment, {});
+  const skills = useQuery(api.skills.getSkills, {});
+
+  const { form, onSubmit } = useEditSubmissionForm(submission, open);
+
+  const handleSubmit = async (data: SkillFormData) => {
+    const success = await onSubmit(data);
+    if (success) {
+      onOpenChange(false);
+    }
+  };
+
+  const prerequisites = form.watch("prerequisites");
+  const variants = form.watch("variants");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -125,380 +143,71 @@ export function EditSubmissionDialog({
         <DialogHeader>
           <DialogTitle>Edit Submission</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
+        <Form {...(form as any)}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
+            <BasicFormFields
               control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Skill title" required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              titleFieldName="title"
+              descriptionFieldName="description"
+              levelFieldName="level"
+              difficultyFieldName="difficulty"
             />
 
-            <FormField
+            <CheckboxGroupField
               control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Skill description"
-                      rows={4}
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              name="muscles"
+              options={muscles}
+              label="Muscles"
+              description="Select the muscles targeted by this skill"
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="level"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Level</FormLabel>
-                    <FormControl>
-                      <select
-                        {...field}
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      >
-                        <option value="beginner">Beginner</option>
-                        <option value="intermediate">Intermediate</option>
-                        <option value="advanced">Advanced</option>
-                        <option value="expert">Expert</option>
-                        <option value="elite">Elite</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <CheckboxGroupField
+              control={form.control}
+              name="equipment"
+              options={equipment}
+              label="Equipment"
+              description="Select the equipment needed for this skill"
+            />
 
-              <FormField
-                control={form.control}
-                name="difficulty"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Difficulty (1-10)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        max="10"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value) || 1)
-                        }
-                        required
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {muscles && (
-              <FormField
-                control={form.control}
-                name="muscles"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Muscles</FormLabel>
-                    <FormControl>
-                      <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                        {muscles.map(
-                          (muscle: { _id: Id<"muscles">; name: string }) => (
-                            <label
-                              key={muscle._id}
-                              className="flex items-center gap-2 text-sm cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={field.value.includes(muscle._id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    field.onChange([
-                                      ...field.value,
-                                      muscle._id,
-                                    ]);
-                                  } else {
-                                    field.onChange(
-                                      field.value.filter(
-                                        (id) => id !== muscle._id,
-                                      ),
-                                    );
-                                  }
-                                }}
-                                className="rounded border-input"
-                              />
-                              <span>{muscle.name}</span>
-                            </label>
-                          ),
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {equipment && (
-              <FormField
-                control={form.control}
-                name="equipment"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Equipment</FormLabel>
-                    <FormControl>
-                      <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                        {equipment.map(
-                          (equip: { _id: Id<"equipment">; name: string }) => (
-                            <label
-                              key={equip._id}
-                              className="flex items-center gap-2 text-sm cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={field.value.includes(equip._id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    field.onChange([...field.value, equip._id]);
-                                  } else {
-                                    field.onChange(
-                                      field.value.filter(
-                                        (id) => id !== equip._id,
-                                      ),
-                                    );
-                                  }
-                                }}
-                                className="rounded border-input"
-                              />
-                              <span>{equip.name}</span>
-                            </label>
-                          ),
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            <FormField
+            <ArrayInputField
               control={form.control}
               name="embedded_videos"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Embedded Videos (URLs)</FormLabel>
-                  <FormControl>
-                    <div className="space-y-2">
-                      {videos.map((video, index) => (
-                        <div key={index} className="flex gap-2">
-                          <Input
-                            value={video}
-                            onChange={(e) => {
-                              const newVideos = [...videos];
-                              newVideos[index] = e.target.value;
-                              field.onChange(newVideos);
-                            }}
-                            placeholder="https://..."
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              const newVideos = videos.filter(
-                                (_, i) => i !== index,
-                              );
-                              field.onChange(newVideos);
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          field.onChange([...videos, ""]);
-                        }}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Video URL
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Embedded Videos (URLs)"
+              placeholder="https://..."
+              addButtonText="Add Video URL"
             />
 
             {skills && (
               <>
-                <FormField
+                <CheckboxGroupField
                   control={form.control}
                   name="prerequisites"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prerequisites</FormLabel>
-                      <FormControl>
-                        <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                          {skills
-                            .filter(
-                              (s: { _id: Id<"skills"> }) =>
-                                !form.watch("variants").includes(s._id),
-                            )
-                            .map(
-                              (skill: { _id: Id<"skills">; title: string }) => (
-                                <label
-                                  key={skill._id}
-                                  className="flex items-center gap-2 text-sm cursor-pointer"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={field.value.includes(skill._id)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        field.onChange([
-                                          ...field.value,
-                                          skill._id,
-                                        ]);
-                                      } else {
-                                        field.onChange(
-                                          field.value.filter(
-                                            (id) => id !== skill._id,
-                                          ),
-                                        );
-                                      }
-                                    }}
-                                    className="rounded border-input"
-                                  />
-                                  <span>{skill.title}</span>
-                                </label>
-                              ),
-                            )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  options={skills.map((s) => ({ _id: s._id, title: s.title }))}
+                  label="Prerequisites"
+                  description="Select skills that should be mastered before this one"
+                  excludeIds={variants.map((id) => String(id))}
                 />
 
-                <FormField
+                <CheckboxGroupField
                   control={form.control}
                   name="variants"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Variants</FormLabel>
-                      <FormControl>
-                        <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                          {skills
-                            .filter(
-                              (s: { _id: Id<"skills"> }) =>
-                                !form.watch("prerequisites").includes(s._id),
-                            )
-                            .map(
-                              (skill: { _id: Id<"skills">; title: string }) => (
-                                <label
-                                  key={skill._id}
-                                  className="flex items-center gap-2 text-sm cursor-pointer"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={field.value.includes(skill._id)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        field.onChange([
-                                          ...field.value,
-                                          skill._id,
-                                        ]);
-                                      } else {
-                                        field.onChange(
-                                          field.value.filter(
-                                            (id) => id !== skill._id,
-                                          ),
-                                        );
-                                      }
-                                    }}
-                                    className="rounded border-input"
-                                  />
-                                  <span>{skill.title}</span>
-                                </label>
-                              ),
-                            )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  options={skills.map((s) => ({ _id: s._id, title: s.title }))}
+                  label="Variants"
+                  description="Select alternative versions of this skill"
+                  excludeIds={prerequisites.map((id) => String(id))}
                 />
               </>
             )}
 
-            <FormField
+            <ArrayInputField
               control={form.control}
               name="tips"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tips</FormLabel>
-                  <FormControl>
-                    <div className="space-y-2">
-                      {tips.map((tip, index) => (
-                        <div key={index} className="flex gap-2">
-                          <Input
-                            value={tip}
-                            onChange={(e) => {
-                              const newTips = [...tips];
-                              newTips[index] = e.target.value;
-                              field.onChange(newTips);
-                            }}
-                            placeholder="Tip..."
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              const newTips = tips.filter(
-                                (_, i) => i !== index,
-                              );
-                              field.onChange(newTips);
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          field.onChange([...tips, ""]);
-                        }}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Tip
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Tips"
+              placeholder="Tip..."
+              addButtonText="Add Tip"
             />
 
             <DialogFooter>

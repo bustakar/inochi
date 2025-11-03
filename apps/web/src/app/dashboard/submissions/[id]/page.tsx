@@ -1,23 +1,22 @@
 "use client";
 
+import { Badge } from "@inochi/ui";
+import { Button } from "@inochi/ui/Button";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
+import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Edit,
+  Trash2,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@inochi/ui/Button";
-import { Badge } from "@inochi/ui";
-import {
-  Clock,
-  CheckCircle,
-  XCircle,
-  Edit,
-  Trash2,
-  ArrowLeft,
-} from "lucide-react";
-import Link from "next/link";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { EditSubmissionDialog } from "../_components/edit-submission-dialog";
 
 function formatTimeAgo(timestamp: number): string {
@@ -108,7 +107,8 @@ export default function SubmissionDetailPage() {
     );
   }
 
-  const statusInfo = statusConfig[submission.status];
+  const statusInfo =
+    statusConfig[submission.status as "pending" | "approved" | "rejected"];
   const StatusIcon = statusInfo.icon;
   const canEdit = submission.status === "pending";
 
@@ -226,7 +226,7 @@ export default function SubmissionDetailPage() {
           <div>
             <h3 className="text-sm font-medium mb-2">Muscles</h3>
             <div className="flex flex-wrap gap-2">
-              {submission.musclesData.map((muscle) => (
+              {submission.musclesData.map((muscle: Doc<"muscles">) => (
                 <Badge key={muscle._id} variant="outline">
                   {muscle.name}
                 </Badge>
@@ -239,7 +239,7 @@ export default function SubmissionDetailPage() {
           <div>
             <h3 className="text-sm font-medium mb-2">Equipment</h3>
             <div className="flex flex-wrap gap-2">
-              {submission.equipmentData.map((equip) => (
+              {submission.equipmentData.map((equip: Doc<"equipment">) => (
                 <Badge key={equip._id} variant="outline">
                   {equip.name}
                 </Badge>
@@ -253,18 +253,20 @@ export default function SubmissionDetailPage() {
             <div>
               <h3 className="text-sm font-medium mb-2">Video URLs</h3>
               <ul className="list-disc list-inside space-y-1">
-                {submission.embedded_videos.map((url, index) => (
-                  <li key={index}>
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline text-sm"
-                    >
-                      {url}
-                    </a>
-                  </li>
-                ))}
+                {submission.embedded_videos.map(
+                  (url: string, index: number) => (
+                    <li key={index}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline text-sm"
+                      >
+                        {url}
+                      </a>
+                    </li>
+                  ),
+                )}
               </ul>
             </div>
           )}
@@ -273,7 +275,7 @@ export default function SubmissionDetailPage() {
           <div>
             <h3 className="text-sm font-medium mb-2">Tips</h3>
             <ul className="list-disc list-inside space-y-1">
-              {submission.tips.map((tip, index) => (
+              {submission.tips.map((tip: string, index: number) => (
                 <li key={index} className="text-sm text-muted-foreground">
                   {tip}
                 </li>
