@@ -5,14 +5,20 @@ import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import Link from "next/link";
 import { SubmissionCard } from "./submission-card";
+import { Roles } from "@/types/globals";
 
 interface SubmissionsListProps {
   status?: "pending" | "approved" | "rejected";
+  userRole: Roles;
 }
 
-export function SubmissionsList({ status }: SubmissionsListProps) {
+export function SubmissionsList({
+  status,
+  userRole,
+}: SubmissionsListProps) {
   const submissions = useQuery(api.functions.submissions.getUserSubmissions, {
     status,
+    userRole,
   });
 
   if (submissions === undefined) {
@@ -36,6 +42,9 @@ export function SubmissionsList({ status }: SubmissionsListProps) {
     );
   }
 
+  const isAdminOrModerator =
+    userRole === "admin" || userRole === "moderator";
+
   return (
     <div className="space-y-4">
       {submissions.map((submission: Doc<"user_submissions">) => (
@@ -44,7 +53,10 @@ export function SubmissionsList({ status }: SubmissionsListProps) {
           href={`/dashboard/submissions/${submission._id}`}
           className="block"
         >
-          <SubmissionCard submission={submission} />
+          <SubmissionCard
+            submission={submission}
+            showSubmitter={isAdminOrModerator}
+          />
         </Link>
       ))}
     </div>

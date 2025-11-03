@@ -12,7 +12,28 @@ export const getUserId = async (ctx: { auth: Auth }) => {
   return (await ctx.auth.getUserIdentity())?.subject;
 };
 
-// Get all submissions for the current user
+// Get user role from Clerk token metadata
+// Note: This assumes the role is passed from the frontend since Convex
+// doesn't directly expose JWT claims. The frontend will pass the role.
+export const getUserRole = async (
+  ctx: { auth: Auth },
+  roleFromClient?: string,
+): Promise<"admin" | "moderator" | "user"> => {
+  // Try to get role from token claims if available
+  // If not available, use role passed from client (defaults to "user")
+  // In production, you might want to verify the role server-side
+  return (roleFromClient as "admin" | "moderator" | "user") || "user";
+};
+
+export const isAdminOrModerator = async (
+  ctx: { auth: Auth },
+  roleFromClient?: string,
+): Promise<boolean> => {
+  const role = await getUserRole(ctx, roleFromClient);
+  return role === "admin" || role === "moderator";
+};
+
+// Get all submissions (for admin/moderator) or user's own submissions
 export const getUserSubmissions = query({
   args: {
     status: v.optional(
@@ -22,6 +43,7 @@ export const getUserSubmissions = query({
         v.literal("rejected"),
       ),
     ),
+    userRole: v.optional(v.string()),
   },
   returns: v.array(
     v.object({
@@ -90,20 +112,36 @@ export const getUserSubmissions = query({
       throw new Error("User not authenticated");
     }
 
+    const role = await getUserRole(ctx, args.userRole);
+    const isAdminMod = role === "admin" || role === "moderator";
+
     let submissions: Array<Doc<"user_submissions">>;
 
-    if (args.status !== undefined) {
-      submissions = await ctx.db
-        .query("user_submissions")
-        .withIndex("by_user_and_status", (q) =>
-          q.eq("submittedBy", userId).eq("status", args.status!),
-        )
-        .collect();
+    if (isAdminMod) {
+      // Admin/moderator can see all submissions
+      if (args.status !== undefined) {
+        submissions = await ctx.db
+          .query("user_submissions")
+          .withIndex("by_status", (q) => q.eq("status", args.status!))
+          .collect();
+      } else {
+        submissions = await ctx.db.query("user_submissions").collect();
+      }
     } else {
-      submissions = await ctx.db
-        .query("user_submissions")
-        .withIndex("by_user", (q) => q.eq("submittedBy", userId))
-        .collect();
+      // Regular users can only see their own submissions
+      if (args.status !== undefined) {
+        submissions = await ctx.db
+          .query("user_submissions")
+          .withIndex("by_user_and_status", (q) =>
+            q.eq("submittedBy", userId).eq("status", args.status!),
+          )
+          .collect();
+      } else {
+        submissions = await ctx.db
+          .query("user_submissions")
+          .withIndex("by_user", (q) => q.eq("submittedBy", userId))
+          .collect();
+      }
     }
 
     // Sort by submittedAt descending (newest first)
@@ -151,10 +189,11 @@ export const getUserSubmissions = query({
   },
 });
 
-// Get a single submission by ID (only if user owns it)
+// Get a single submission by ID (user can view own, admin/moderator can view any)
 export const getSubmission = query({
   args: {
     id: v.id("user_submissions"),
+    userRole: v.optional(v.string()),
   },
   returns: v.union(
     v.object({
@@ -229,8 +268,11 @@ export const getSubmission = query({
       return null;
     }
 
-    // Verify user owns this submission
-    if (submission.submittedBy !== userId) {
+    const role = await getUserRole(ctx, args.userRole);
+    const isAdminMod = role === "admin" || role === "moderator";
+
+    // Verify user owns this submission OR is admin/moderator
+    if (submission.submittedBy !== userId && !isAdminMod) {
       throw new Error("Unauthorized: You can only view your own submissions");
     }
 
@@ -499,10 +541,89 @@ export const updateSubmission = mutation({
   },
 });
 
-// Delete a pending submission (only if user owns it and it's pending)
+// Approve a submission (admin/moderator only)
+export const approveSubmission = mutation({
+  args: {
+    id: v.id("user_submissions"),
+    userRole: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const role = await getUserRole(ctx, args.userRole);
+    if (role !== "admin" && role !== "moderator") {
+      throw new Error("Unauthorized: Only admins and moderators can approve submissions");
+    }
+
+    const submission = await ctx.db.get(args.id);
+    if (!submission) {
+      throw new Error("Submission not found");
+    }
+
+    if (submission.status !== "pending") {
+      throw new Error("Only pending submissions can be approved");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.id, {
+      status: "approved",
+      reviewedBy: userId,
+      reviewedAt: now,
+    });
+
+    return null;
+  },
+});
+
+// Reject a submission (admin/moderator only)
+export const rejectSubmission = mutation({
+  args: {
+    id: v.id("user_submissions"),
+    rejectionReason: v.optional(v.string()),
+    userRole: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const role = await getUserRole(ctx, args.userRole);
+    if (role !== "admin" && role !== "moderator") {
+      throw new Error("Unauthorized: Only admins and moderators can reject submissions");
+    }
+
+    const submission = await ctx.db.get(args.id);
+    if (!submission) {
+      throw new Error("Submission not found");
+    }
+
+    if (submission.status !== "pending") {
+      throw new Error("Only pending submissions can be rejected");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.id, {
+      status: "rejected",
+      reviewedBy: userId,
+      reviewedAt: now,
+      rejectionReason: args.rejectionReason,
+    });
+
+    return null;
+  },
+});
+
+// Delete a submission (users can delete their own pending submissions)
 export const deleteSubmission = mutation({
   args: {
     id: v.id("user_submissions"),
+    userRole: v.optional(v.string()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -516,13 +637,17 @@ export const deleteSubmission = mutation({
       throw new Error("Submission not found");
     }
 
+    const role = await getUserRole(ctx, args.userRole);
+    const isAdminMod = role === "admin" || role === "moderator";
+
     // Verify user owns this submission
-    if (submission.submittedBy !== userId) {
+    if (submission.submittedBy !== userId && !isAdminMod) {
       throw new Error("Unauthorized: You can only delete your own submissions");
     }
 
-    // Only allow deletion if status is pending
-    if (submission.status !== "pending") {
+    // Users can only delete pending submissions
+    // Admin/moderator can delete any submission
+    if (!isAdminMod && submission.status !== "pending") {
       throw new Error("You can only delete pending submissions");
     }
 

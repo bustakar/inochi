@@ -27,6 +27,7 @@ interface SubmissionCardProps {
       title: string;
     };
   };
+  showSubmitter?: boolean;
 }
 
 const statusConfig: Record<
@@ -64,7 +65,10 @@ const typeConfig: Record<
   },
 };
 
-export function SubmissionCard({ submission }: SubmissionCardProps) {
+export function SubmissionCard({
+  submission,
+  showSubmitter = false,
+}: SubmissionCardProps) {
   const statusInfo = statusConfig[submission.status];
   const StatusIcon = statusInfo.icon;
   const typeInfo = typeConfig[submission.submissionType];
@@ -85,6 +89,11 @@ export function SubmissionCard({ submission }: SubmissionCardProps) {
               {statusInfo.label}
             </Badge>
           </div>
+          {showSubmitter && (
+            <p className="text-xs text-muted-foreground mb-2">
+              Submitted by: {submission.submittedBy}
+            </p>
+          )}
           {submission.submissionType === "edit" &&
             submission.originalSkillData && (
               <p className="text-sm text-muted-foreground mb-2">
