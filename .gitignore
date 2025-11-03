@@ -16,6 +16,8 @@ build
 
 # expo
 .expo
+ios/
+android/
 
 # misc
 .DS_Store
