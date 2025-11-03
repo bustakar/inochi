@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@packages/backend/convex/_generated/api";
+import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import Link from "next/link";
 import { SubmissionCard } from "./submission-card";
@@ -37,7 +38,7 @@ export function SubmissionsList({ status }: SubmissionsListProps) {
 
   return (
     <div className="space-y-4">
-      {submissions.map((submission) => (
+      {submissions.map((submission: Doc<"user_submissions">) => (
         <Link
           key={submission._id}
           href={`/dashboard/submissions/${submission._id}`}

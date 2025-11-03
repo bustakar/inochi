@@ -8,11 +8,10 @@
  * @module
  */
 
-import type * as skills from "../functions/skills.js";
-import type * as submissions from "../functions/submissions.js";
-import type * as openai from "../openai.js";
-import type * as validators from "../schema/validators.js";
-import type * as seed from "../seed/seed.js";
+import type * as functions_openai from "../functions/openai.js";
+import type * as functions_skills from "../functions/skills.js";
+import type * as functions_submissions from "../functions/submissions.js";
+import type * as schema_validators from "../schema/validators.js";
 import type * as utils from "../utils.js";
 
 import type {
@@ -30,12 +29,11 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  openai: typeof openai;
-  seed: typeof seed;
-  skills: typeof skills;
-  submissions: typeof submissions;
+  "functions/openai": typeof functions_openai;
+  "functions/skills": typeof functions_skills;
+  "functions/submissions": typeof functions_submissions;
+  "schema/validators": typeof schema_validators;
   utils: typeof utils;
-  validators: typeof validators;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

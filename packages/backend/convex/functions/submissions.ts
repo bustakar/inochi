@@ -54,7 +54,14 @@ export const getUserSubmissions = query({
           _id: v.id("muscles"),
           _creationTime: v.number(),
           name: v.string(),
-          category: v.string(),
+          slug: v.string(),
+          recommendedRestHours: v.number(),
+          parts: v.array(
+            v.object({
+              name: v.string(),
+              slug: v.string(),
+            }),
+          ),
         }),
       ),
       equipmentData: v.array(
@@ -180,7 +187,14 @@ export const getSubmission = query({
           _id: v.id("muscles"),
           _creationTime: v.number(),
           name: v.string(),
-          category: v.string(),
+          slug: v.string(),
+          recommendedRestHours: v.number(),
+          parts: v.array(
+            v.object({
+              name: v.string(),
+              slug: v.string(),
+            }),
+          ),
         }),
       ),
       equipmentData: v.array(

@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  ArrayInputField,
+  BasicFormFields,
+  CheckboxGroupField,
+  skillFormSchema,
+  type SkillFormData,
+} from "@/components/forms";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@inochi/ui/Button";
 import {
   Dialog,
@@ -9,37 +17,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@inochi/ui/Dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@inochi/ui/Form";
-import { Input } from "@inochi/ui/Input";
-import { Label } from "@inochi/ui/Label";
-import { Textarea } from "@inochi/ui/Textarea";
+import { Form } from "@inochi/ui/Form";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
+import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { Plus, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-interface CreateSkillFormData {
-  title: string;
-  description: string;
-  level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
-  difficulty: number;
-  muscles: Id<"muscles">[];
-  equipment: Id<"equipment">[];
-  embedded_videos: string[];
-  prerequisites: Id<"skills">[];
-  variants: Id<"skills">[];
-  tips: string[];
-}
+// ============================================================================
+// Types
+// ============================================================================
 
 interface CreateSkillDialogProps {
   mode?: "create" | "edit";
@@ -51,66 +39,19 @@ interface CreateSkillDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateSkillDialog({
-  mode = "create",
-  existingSkill,
-  open: controlledOpen,
-  onOpenChange: controlledOnOpenChange,
-}: CreateSkillDialogProps = {}) {
-  const [internalOpen, setInternalOpen] = useState(false);
+// ============================================================================
+// Custom Hook: Form Management
+// ============================================================================
+
+function useCreateSkillForm(
+  isEditMode: boolean,
+  existingSkill: Doc<"skills"> | undefined,
+  open: boolean,
+) {
   const createSubmission = useMutation(api.submissions.createSubmission);
-  const muscles = useQuery(api.skills.getMuscles, {});
-  const equipment = useQuery(api.skills.getEquipment, {});
-  const skills = useQuery(api.skills.getSkills, {});
 
-  // Use controlled or internal state
-  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const handleOpenChange = useCallback(
-    (newOpen: boolean) => {
-      if (controlledOnOpenChange) {
-        controlledOnOpenChange(newOpen);
-      } else {
-        setInternalOpen(newOpen);
-      }
-    },
-    [controlledOnOpenChange],
-  );
-
-  // Ensure body pointer-events is restored when dialog closes
-  useEffect(() => {
-    if (!open) {
-      // Small delay to allow Radix Dialog cleanup to complete
-      const timeoutId = setTimeout(() => {
-        // Remove any lingering overlay elements
-        const overlays = document.querySelectorAll(
-          '[data-slot="dialog-overlay"]',
-        );
-        overlays.forEach((overlay) => {
-          const dialogRoot = overlay.closest("[data-state]");
-          if (!dialogRoot || dialogRoot.getAttribute("data-state") !== "open") {
-            overlay.remove();
-          }
-        });
-
-        // Ensure body pointer-events is restored
-        const body = document.body;
-        if (body.style.pointerEvents === "none") {
-          body.style.pointerEvents = "";
-        }
-
-        // Also check for any data attributes that Radix might set
-        if (body.hasAttribute("data-radix-dialog-prevent-scroll")) {
-          body.removeAttribute("data-radix-dialog-prevent-scroll");
-        }
-      }, 300); // Increased delay to ensure animations complete
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [open]);
-
-  const isEditMode = mode === "edit" && existingSkill;
-
-  const form = useForm<CreateSkillFormData>({
+  const form = useForm<SkillFormData>({
+    resolver: zodResolver(skillFormSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -125,27 +66,26 @@ export function CreateSkillDialog({
     },
   });
 
-  // Prefill form when editing or when dialog opens
+  // Reset form when dialog opens/closes or edit mode changes
   useEffect(() => {
     if (!open) {
-      // Reset form when dialog closes to ensure clean state
-      if (!isEditMode) {
-        form.reset({
-          title: "",
-          description: "",
-          level: "beginner",
-          difficulty: 1,
-          muscles: [],
-          equipment: [],
-          embedded_videos: [],
-          prerequisites: [],
-          variants: [],
-          tips: [],
-        });
-      }
+      // Reset to defaults when dialog closes
+      form.reset({
+        title: "",
+        description: "",
+        level: "beginner",
+        difficulty: 1,
+        muscles: [],
+        equipment: [],
+        embedded_videos: [],
+        prerequisites: [],
+        variants: [],
+        tips: [],
+      });
       return;
     }
 
+    // Prefill form when editing
     if (isEditMode && existingSkill) {
       form.reset({
         title: existingSkill.title,
@@ -159,24 +99,10 @@ export function CreateSkillDialog({
         variants: existingSkill.variants,
         tips: existingSkill.tips,
       });
-    } else if (!isEditMode) {
-      form.reset({
-        title: "",
-        description: "",
-        level: "beginner",
-        difficulty: 1,
-        muscles: [],
-        equipment: [],
-        embedded_videos: [],
-        prerequisites: [],
-        variants: [],
-        tips: [],
-      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, isEditMode, existingSkill?._id]);
+  }, [open, isEditMode, existingSkill?._id, form]);
 
-  const onSubmit = async (data: CreateSkillFormData) => {
+  const onSubmit = async (data: SkillFormData) => {
     try {
       await createSubmission({
         title: data.title,
@@ -197,7 +123,7 @@ export function CreateSkillDialog({
           ? "Edit suggestion submitted!"
           : "Skill suggestion submitted!",
       );
-      handleOpenChange(false);
+      return true;
     } catch (error) {
       console.error("Error submitting suggestion:", error);
       toast.error(
@@ -205,11 +131,57 @@ export function CreateSkillDialog({
           ? error.message
           : "Failed to submit suggestion. Please try again.",
       );
+      return false;
     }
   };
 
-  const videos = form.watch("embedded_videos");
-  const tips = form.watch("tips");
+  return { form, onSubmit };
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export function CreateSkillDialog({
+  mode = "create",
+  existingSkill,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: CreateSkillDialogProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const muscles = useQuery(api.skills.getMuscles, {});
+  const equipment = useQuery(api.skills.getEquipment, {});
+  const skills = useQuery(api.skills.getSkills, {});
+
+  // Use controlled or internal state
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (controlledOnOpenChange) {
+        controlledOnOpenChange(newOpen);
+      } else {
+        setInternalOpen(newOpen);
+      }
+    },
+    [controlledOnOpenChange],
+  );
+
+  const isEditMode = Boolean(mode === "edit" && existingSkill);
+  const { form, onSubmit } = useCreateSkillForm(
+    isEditMode,
+    existingSkill,
+    open,
+  );
+
+  const handleSubmit = async (data: SkillFormData) => {
+    const success = await onSubmit(data);
+    if (success) {
+      handleOpenChange(false);
+    }
+  };
+
+  const prerequisites = form.watch("prerequisites");
+  const variants = form.watch("variants");
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -224,380 +196,71 @@ export function CreateSkillDialog({
             {isEditMode ? "Suggest Skill Edit" : "Suggest New Skill"}
           </DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
+        <Form {...(form as any)}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
+            <BasicFormFields
               control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Skill title" required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              titleFieldName="title"
+              descriptionFieldName="description"
+              levelFieldName="level"
+              difficultyFieldName="difficulty"
             />
 
-            <FormField
+            <CheckboxGroupField
               control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Skill description"
-                      rows={4}
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              name="muscles"
+              options={muscles}
+              label="Muscles"
+              description="Select the muscles targeted by this skill"
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="level"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Level</FormLabel>
-                    <FormControl>
-                      <select
-                        {...field}
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      >
-                        <option value="beginner">Beginner</option>
-                        <option value="intermediate">Intermediate</option>
-                        <option value="advanced">Advanced</option>
-                        <option value="expert">Expert</option>
-                        <option value="elite">Elite</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <CheckboxGroupField
+              control={form.control}
+              name="equipment"
+              options={equipment}
+              label="Equipment"
+              description="Select the equipment needed for this skill"
+            />
 
-              <FormField
-                control={form.control}
-                name="difficulty"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Difficulty (1-10)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        max="10"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value) || 1)
-                        }
-                        required
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {muscles && (
-              <FormField
-                control={form.control}
-                name="muscles"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Muscles</FormLabel>
-                    <FormControl>
-                      <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                        {muscles.map(
-                          (muscle: { _id: Id<"muscles">; name: string }) => (
-                            <label
-                              key={muscle._id}
-                              className="flex items-center gap-2 text-sm cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={field.value.includes(muscle._id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    field.onChange([
-                                      ...field.value,
-                                      muscle._id,
-                                    ]);
-                                  } else {
-                                    field.onChange(
-                                      field.value.filter(
-                                        (id) => id !== muscle._id,
-                                      ),
-                                    );
-                                  }
-                                }}
-                                className="rounded border-input"
-                              />
-                              <span>{muscle.name}</span>
-                            </label>
-                          ),
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {equipment && (
-              <FormField
-                control={form.control}
-                name="equipment"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Equipment</FormLabel>
-                    <FormControl>
-                      <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                        {equipment.map(
-                          (equip: { _id: Id<"equipment">; name: string }) => (
-                            <label
-                              key={equip._id}
-                              className="flex items-center gap-2 text-sm cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={field.value.includes(equip._id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    field.onChange([...field.value, equip._id]);
-                                  } else {
-                                    field.onChange(
-                                      field.value.filter(
-                                        (id) => id !== equip._id,
-                                      ),
-                                    );
-                                  }
-                                }}
-                                className="rounded border-input"
-                              />
-                              <span>{equip.name}</span>
-                            </label>
-                          ),
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            <FormField
+            <ArrayInputField
               control={form.control}
               name="embedded_videos"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Embedded Videos (URLs)</FormLabel>
-                  <FormControl>
-                    <div className="space-y-2">
-                      {videos.map((video, index) => (
-                        <div key={index} className="flex gap-2">
-                          <Input
-                            value={video}
-                            onChange={(e) => {
-                              const newVideos = [...videos];
-                              newVideos[index] = e.target.value;
-                              field.onChange(newVideos);
-                            }}
-                            placeholder="https://..."
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              const newVideos = videos.filter(
-                                (_, i) => i !== index,
-                              );
-                              field.onChange(newVideos);
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          field.onChange([...videos, ""]);
-                        }}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Video URL
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Embedded Videos (URLs)"
+              placeholder="https://..."
+              addButtonText="Add Video URL"
             />
 
             {skills && (
               <>
-                <FormField
+                <CheckboxGroupField
                   control={form.control}
                   name="prerequisites"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prerequisites</FormLabel>
-                      <FormControl>
-                        <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                          {skills
-                            .filter(
-                              (s: { _id: Id<"skills"> }) =>
-                                !form.watch("variants").includes(s._id),
-                            )
-                            .map(
-                              (skill: { _id: Id<"skills">; title: string }) => (
-                                <label
-                                  key={skill._id}
-                                  className="flex items-center gap-2 text-sm cursor-pointer"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={field.value.includes(skill._id)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        field.onChange([
-                                          ...field.value,
-                                          skill._id,
-                                        ]);
-                                      } else {
-                                        field.onChange(
-                                          field.value.filter(
-                                            (id) => id !== skill._id,
-                                          ),
-                                        );
-                                      }
-                                    }}
-                                    className="rounded border-input"
-                                  />
-                                  <span>{skill.title}</span>
-                                </label>
-                              ),
-                            )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  options={skills.map((s) => ({ _id: s._id, title: s.title }))}
+                  label="Prerequisites"
+                  description="Select skills that should be mastered before this one"
+                  excludeIds={variants.map((id) => String(id))}
                 />
 
-                <FormField
+                <CheckboxGroupField
                   control={form.control}
                   name="variants"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Variants</FormLabel>
-                      <FormControl>
-                        <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                          {skills
-                            .filter(
-                              (s: { _id: Id<"skills"> }) =>
-                                !form.watch("prerequisites").includes(s._id),
-                            )
-                            .map(
-                              (skill: { _id: Id<"skills">; title: string }) => (
-                                <label
-                                  key={skill._id}
-                                  className="flex items-center gap-2 text-sm cursor-pointer"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={field.value.includes(skill._id)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        field.onChange([
-                                          ...field.value,
-                                          skill._id,
-                                        ]);
-                                      } else {
-                                        field.onChange(
-                                          field.value.filter(
-                                            (id) => id !== skill._id,
-                                          ),
-                                        );
-                                      }
-                                    }}
-                                    className="rounded border-input"
-                                  />
-                                  <span>{skill.title}</span>
-                                </label>
-                              ),
-                            )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  options={skills.map((s) => ({ _id: s._id, title: s.title }))}
+                  label="Variants"
+                  description="Select alternative versions of this skill"
+                  excludeIds={prerequisites.map((id) => String(id))}
                 />
               </>
             )}
 
-            <FormField
+            <ArrayInputField
               control={form.control}
               name="tips"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tips</FormLabel>
-                  <FormControl>
-                    <div className="space-y-2">
-                      {tips.map((tip, index) => (
-                        <div key={index} className="flex gap-2">
-                          <Input
-                            value={tip}
-                            onChange={(e) => {
-                              const newTips = [...tips];
-                              newTips[index] = e.target.value;
-                              field.onChange(newTips);
-                            }}
-                            placeholder="Tip..."
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              const newTips = tips.filter(
-                                (_, i) => i !== index,
-                              );
-                              field.onChange(newTips);
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          field.onChange([...tips, ""]);
-                        }}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Tip
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Tips"
+              placeholder="Tip..."
+              addButtonText="Add Tip"
             />
 
             <DialogFooter>
