@@ -60,10 +60,12 @@ export default function SubmissionDetailPage() {
   const submissionId = params.id as Id<"user_submissions">;
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const submission = useQuery(api.submissions.getSubmission, {
+  const submission = useQuery(api.functions.submissions.getSubmission, {
     id: submissionId,
   });
-  const deleteSubmission = useMutation(api.submissions.deleteSubmission);
+  const deleteSubmission = useMutation(
+    api.functions.submissions.deleteSubmission,
+  );
 
   const handleDelete = async () => {
     if (

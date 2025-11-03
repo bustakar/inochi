@@ -38,8 +38,8 @@ export function SkillsFiltersHorizontal({
   onMusclesChange,
   onEquipmentChange,
 }: SkillsFiltersHorizontalProps) {
-  const muscles = useQuery(api.skills.getMuscles, {});
-  const equipment = useQuery(api.skills.getEquipment, {});
+  const muscles = useQuery(api.functions.skills.getMuscles, {});
+  const equipment = useQuery(api.functions.skills.getEquipment, {});
   const [musclesOpen, setMusclesOpen] = useState(false);
   const [equipmentOpen, setEquipmentOpen] = useState(false);
 

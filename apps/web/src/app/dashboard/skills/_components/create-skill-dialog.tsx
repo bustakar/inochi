@@ -48,7 +48,9 @@ function useCreateSkillForm(
   existingSkill: Doc<"skills"> | undefined,
   open: boolean,
 ) {
-  const createSubmission = useMutation(api.submissions.createSubmission);
+  const createSubmission = useMutation(
+    api.functions.submissions.createSubmission,
+  );
 
   const form = useForm<SkillFormData>({
     resolver: zodResolver(skillFormSchema),
@@ -149,9 +151,9 @@ export function CreateSkillDialog({
   onOpenChange: controlledOnOpenChange,
 }: CreateSkillDialogProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const muscles = useQuery(api.skills.getMuscles, {});
-  const equipment = useQuery(api.skills.getEquipment, {});
-  const skills = useQuery(api.skills.getSkills, {});
+  const muscles = useQuery(api.functions.skills.getMuscles, {});
+  const equipment = useQuery(api.functions.skills.getEquipment, {});
+  const skills = useQuery(api.functions.skills.getSkills, {});
 
   // Use controlled or internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;

@@ -30,8 +30,8 @@ export function SkillsFilters({
   onMusclesChange,
   onEquipmentChange,
 }: SkillsFiltersProps) {
-  const muscles = useQuery(api.skills.getMuscles, {});
-  const equipment = useQuery(api.skills.getEquipment, {});
+  const muscles = useQuery(api.functions.skills.getMuscles, {});
+  const equipment = useQuery(api.functions.skills.getEquipment, {});
   const [localMinDifficulty, setLocalMinDifficulty] = useState(
     minDifficulty?.toString() || "",
   );

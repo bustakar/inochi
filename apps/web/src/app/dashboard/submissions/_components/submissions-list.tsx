@@ -11,7 +11,7 @@ interface SubmissionsListProps {
 }
 
 export function SubmissionsList({ status }: SubmissionsListProps) {
-  const submissions = useQuery(api.submissions.getUserSubmissions, {
+  const submissions = useQuery(api.functions.submissions.getUserSubmissions, {
     status,
   });
 

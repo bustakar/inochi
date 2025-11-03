@@ -45,7 +45,9 @@ function useEditSubmissionForm(
   submission: Doc<"user_submissions">,
   open: boolean,
 ) {
-  const updateSubmission = useMutation(api.submissions.updateSubmission);
+  const updateSubmission = useMutation(
+    api.functions.submissions.updateSubmission,
+  );
 
   const form = useForm<SkillFormData>({
     resolver: zodResolver(skillFormSchema),
@@ -121,9 +123,9 @@ export function EditSubmissionDialog({
   open,
   onOpenChange,
 }: EditSubmissionDialogProps) {
-  const muscles = useQuery(api.skills.getMuscles, {});
-  const equipment = useQuery(api.skills.getEquipment, {});
-  const skills = useQuery(api.skills.getSkills, {});
+  const muscles = useQuery(api.functions.skills.getMuscles, {});
+  const equipment = useQuery(api.functions.skills.getEquipment, {});
+  const skills = useQuery(api.functions.skills.getSkills, {});
 
   const { form, onSubmit } = useEditSubmissionForm(submission, open);
 
