@@ -16,14 +16,10 @@ export const skillFormSchema = z.object({
   equipment: z.array(z.custom<Id<"equipment">>()),
   embedded_videos: z
     .array(z.string().url("Each video must be a valid URL"))
-    .optional()
     .default([]),
   prerequisites: z.array(z.custom<Id<"skills">>()),
   variants: z.array(z.custom<Id<"skills">>()),
-  tips: z
-    .array(z.string().min(1, "Tip cannot be empty"))
-    .optional()
-    .default([]),
+  tips: z.array(z.string().min(1, "Tip cannot be empty")).default([]),
 });
 
 export type SkillFormData = z.infer<typeof skillFormSchema>;
