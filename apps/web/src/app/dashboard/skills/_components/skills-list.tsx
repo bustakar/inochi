@@ -45,11 +45,11 @@ export function SkillsList({
 
   // Use search if query provided, otherwise use regular getSkills
   const searchSkillsResult = useQuery(
-    api.skills.searchSkills,
+    api.functions.skills.searchSkills,
     searchQuery ? { searchQuery, ...queryArgs } : "skip",
   );
   const allSkillsResult = useQuery(
-    api.skills.getSkills,
+    api.functions.skills.getSkills,
     !searchQuery ? queryArgs : "skip",
   );
   const skills = searchQuery ? searchSkillsResult : allSkillsResult;
