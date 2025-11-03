@@ -6,7 +6,7 @@ import {
   levelValidator,
   validateDifficulty,
   validateUrlArray,
-} from "../schema/validators";
+} from "../validators/validators";
 
 export const getUserId = async (ctx: { auth: Auth }) => {
   return (await ctx.auth.getUserIdentity())?.subject;

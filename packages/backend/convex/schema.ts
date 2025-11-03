@@ -1,6 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { levelValidator } from "./validators.js";
+import { levelValidator } from "./validators/validators.js";
 
 const urlValidator = v.string();
 
