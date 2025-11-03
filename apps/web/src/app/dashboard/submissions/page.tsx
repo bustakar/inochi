@@ -1,5 +1,7 @@
 "use client";
 
+import { getClientRole, isClientAdminOrModerator } from "@/utils/roles";
+import { useAuth } from "@clerk/clerk-react";
 import { useState } from "react";
 import { SubmissionsList } from "./_components/submissions-list";
 
@@ -7,11 +9,16 @@ type SubmissionStatus = "pending" | "approved" | "rejected" | undefined;
 
 export default function SubmissionsPage() {
   const [statusFilter, setStatusFilter] = useState<SubmissionStatus>(undefined);
+  const { sessionClaims } = useAuth();
+  const userRole = getClientRole(sessionClaims);
+  const isAdminOrModeratorResult = isClientAdminOrModerator(sessionClaims);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">My Submissions</h1>
+        <h1 className="text-3xl font-bold">
+          {isAdminOrModeratorResult ? "All Submissions" : "My Submissions"}
+        </h1>
       </div>
 
       {/* Status Filter Tabs */}
@@ -59,7 +66,7 @@ export default function SubmissionsPage() {
       </div>
 
       {/* Submissions List */}
-      <SubmissionsList status={statusFilter} />
+      <SubmissionsList status={statusFilter} userRole={userRole} />
     </div>
   );
 }

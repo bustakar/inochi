@@ -1,5 +1,8 @@
 "use client";
 
+import { Roles } from "@/types/globals";
+import { getClientRole, isClientAdminOrModerator } from "@/utils/roles";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { Badge } from "@inochi/ui";
 import { Button } from "@inochi/ui/Button";
 import { api } from "@packages/backend/convex/_generated/api";
@@ -17,6 +20,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ApproveRejectButtons } from "../_components/approve-reject-buttons";
 import { EditSubmissionDialog } from "../_components/edit-submission-dialog";
 
 function formatTimeAgo(timestamp: number): string {
@@ -59,9 +63,14 @@ export default function SubmissionDetailPage() {
   const router = useRouter();
   const submissionId = params.id as Id<"user_submissions">;
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const { sessionClaims } = useAuth();
+  const { user } = useUser();
+  const userRole = getClientRole(sessionClaims);
+  const isAdminOrModeratorResult = isClientAdminOrModerator(sessionClaims);
 
   const submission = useQuery(api.functions.submissions.getSubmission, {
     id: submissionId,
+    userRole,
   });
   const deleteSubmission = useMutation(
     api.functions.submissions.deleteSubmission,
@@ -77,7 +86,7 @@ export default function SubmissionDetailPage() {
     }
 
     try {
-      await deleteSubmission({ id: submissionId });
+      await deleteSubmission({ id: submissionId, userRole });
       toast.success("Submission deleted successfully");
       router.push("/dashboard/submissions");
     } catch (error) {
@@ -113,6 +122,9 @@ export default function SubmissionDetailPage() {
     statusConfig[submission.status as "pending" | "approved" | "rejected"];
   const StatusIcon = statusInfo.icon;
   const canEdit = submission.status === "pending";
+  const canDelete =
+    isAdminOrModeratorResult ||
+    (submission.status === "pending" && submission.submittedBy === user?.id);
 
   return (
     <div className="space-y-6">
@@ -138,20 +150,38 @@ export default function SubmissionDetailPage() {
                 Submitted {formatTimeAgo(submission.submittedAt)}
               </span>
             </div>
+            {isAdminOrModeratorResult && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Submitted by: {submission.submittedBy}
+              </p>
+            )}
           </div>
         </div>
-        {canEdit && (
-          <div className="flex gap-2">
+        <div className="flex gap-2">
+          {isAdminOrModeratorResult && submission.status === "pending" && (
+            <ApproveRejectButtons
+              submissionId={submissionId}
+              userRole={userRole}
+              currentStatus={submission.status}
+              onSuccess={() => {
+                // Refetch submission data
+                router.refresh();
+              }}
+            />
+          )}
+          {canEdit && (
             <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
               <Edit className="w-4 h-4 mr-2" />
               Edit
             </Button>
+          )}
+          {canDelete && (
             <Button variant="destructive" onClick={handleDelete}>
               <Trash2 className="w-4 h-4 mr-2" />
               Delete
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Original Skill Link (for edits) */}
