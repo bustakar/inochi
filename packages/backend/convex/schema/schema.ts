@@ -1,19 +1,29 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { levelValidator } from "./validators";
+import { levelValidator } from "./validators.js";
 
 const urlValidator = v.string();
 
 export default defineSchema({
   muscles: defineTable({
     name: v.string(),
-    category: v.string(),
-  }).index("by_category", ["category"]),
+    slug: v.string(),
+    recommendedRestHours: v.number(),
+    parts: v.array(
+      v.object({
+        name: v.string(),
+        slug: v.string(),
+      }),
+    ),
+  }).index("by_slug", ["slug"]),
 
   equipment: defineTable({
     name: v.string(),
+    slug: v.string(),
     category: v.string(),
-  }).index("by_category", ["category"]),
+  })
+    .index("by_category", ["category"])
+    .index("by_slug", ["slug"]),
 
   skills: defineTable({
     title: v.string(),

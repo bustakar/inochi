@@ -1,12 +1,12 @@
 import { Auth } from "convex/server";
 import { v } from "convex/values";
-import { Doc, Id } from "./_generated/dataModel";
-import { mutation, query } from "./_generated/server";
+import { Doc, Id } from "../_generated/dataModel";
+import { mutation, query } from "../_generated/server";
 import {
   levelValidator,
   validateDifficulty,
   validateUrlArray,
-} from "./validators";
+} from "../schema/validators";
 
 export const getUserId = async (ctx: { auth: Auth }) => {
   return (await ctx.auth.getUserIdentity())?.subject;

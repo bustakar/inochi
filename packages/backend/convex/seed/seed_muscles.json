@@ -1,0 +1,114 @@
+[
+  {
+    "name": "Chest",
+    "slug": "chest",
+    "recommendedRestHours": 48,
+    "parts": [
+      { "name": "Upper Chest", "slug": "upper_chest" },
+      { "name": "Middle Chest", "slug": "middle_chest" },
+      { "name": "Lower Chest", "slug": "lower_chest" }
+    ]
+  },
+  {
+    "name": "Back",
+    "slug": "back",
+    "recommendedRestHours": 72,
+    "parts": [
+      { "name": "Lats", "slug": "lats" },
+      { "name": "Rhomboids", "slug": "rhomboids" },
+      { "name": "Trapezius", "slug": "trapezius" },
+      { "name": "Erector Spinae", "slug": "erector_spinae" }
+    ]
+  },
+  {
+    "name": "Shoulders",
+    "slug": "shoulders",
+    "recommendedRestHours": 48,
+    "parts": [
+      { "name": "Front Deltoid", "slug": "front_deltoid" },
+      { "name": "Side Deltoid", "slug": "side_deltoid" },
+      { "name": "Rear Deltoid", "slug": "rear_deltoid" }
+    ]
+  },
+  {
+    "name": "Biceps",
+    "slug": "biceps",
+    "recommendedRestHours": 48,
+    "parts": [
+      { "name": "Long Head", "slug": "biceps_long_head" },
+      { "name": "Short Head", "slug": "biceps_short_head" }
+    ]
+  },
+  {
+    "name": "Triceps",
+    "slug": "triceps",
+    "recommendedRestHours": 48,
+    "parts": [
+      { "name": "Long Head", "slug": "triceps_long_head" },
+      { "name": "Lateral Head", "slug": "triceps_lateral_head" },
+      { "name": "Medial Head", "slug": "triceps_medial_head" }
+    ]
+  },
+  {
+    "name": "Forearms",
+    "slug": "forearms",
+    "recommendedRestHours": 48,
+    "parts": [
+      { "name": "Brachioradialis", "slug": "brachioradialis" },
+      { "name": "Flexor Group", "slug": "forearm_flexors" },
+      { "name": "Extensor Group", "slug": "forearm_extensors" }
+    ]
+  },
+  {
+    "name": "Core",
+    "slug": "core",
+    "recommendedRestHours": 48,
+    "parts": [
+      { "name": "Rectus Abdominis", "slug": "rectus_abdominis" },
+      { "name": "Obliques", "slug": "obliques" },
+      { "name": "Transverse Abdominis", "slug": "transverse_abdominis" },
+      { "name": "Lower Back", "slug": "lower_back" }
+    ]
+  },
+  {
+    "name": "Glutes",
+    "slug": "glutes",
+    "recommendedRestHours": 72,
+    "parts": [
+      { "name": "Gluteus Maximus", "slug": "gluteus_maximus" },
+      { "name": "Gluteus Medius", "slug": "gluteus_medius" },
+      { "name": "Gluteus Minimus", "slug": "gluteus_minimus" }
+    ]
+  },
+  {
+    "name": "Quadriceps",
+    "slug": "quadriceps",
+    "recommendedRestHours": 72,
+    "parts": [
+      { "name": "Rectus Femoris", "slug": "rectus_femoris" },
+      { "name": "Vastus Lateralis", "slug": "vastus_lateralis" },
+      { "name": "Vastus Medialis", "slug": "vastus_medialis" },
+      { "name": "Vastus Intermedius", "slug": "vastus_intermedius" }
+    ]
+  },
+  {
+    "name": "Hamstrings",
+    "slug": "hamstrings",
+    "recommendedRestHours": 72,
+    "parts": [
+      { "name": "Biceps Femoris", "slug": "biceps_femoris" },
+      { "name": "Semitendinosus", "slug": "semitendinosus" },
+      { "name": "Semimembranosus", "slug": "semimembranosus" }
+    ]
+  },
+  {
+    "name": "Calves",
+    "slug": "calves",
+    "recommendedRestHours": 48,
+    "parts": [
+      { "name": "Gastrocnemius", "slug": "gastrocnemius" },
+      { "name": "Soleus", "slug": "soleus" },
+      { "name": "Tibialis Anterior", "slug": "tibialis_anterior" }
+    ]
+  }
+]

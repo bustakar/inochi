@@ -1,0 +1,67 @@
+[
+  {
+    "name": "None (Bodyweight)",
+    "slug": "bodyweight_only",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Pull-Up Bar",
+    "slug": "pull_up_bar",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Dip Bars",
+    "slug": "dip_bars",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Parallettes",
+    "slug": "parallettes",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Gymnastic Rings",
+    "slug": "gymnastic_rings",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Resistance Bands",
+    "slug": "resistance_bands",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Weighted Vest",
+    "slug": "weighted_vest",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Ab Wheel",
+    "slug": "ab_wheel",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Push-Up Handles",
+    "slug": "push_up_handles",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Wall Bars",
+    "slug": "wall_bars",
+    "category": "calisthenics"
+  },
+  {
+    "name": "TRX Straps",
+    "slug": "trx_straps",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Parallel Bars",
+    "slug": "parallel_bars",
+    "category": "calisthenics"
+  },
+  {
+    "name": "Plyo Box or Platform",
+    "slug": "plyo_box",
+    "category": "calisthenics"
+  }
+]

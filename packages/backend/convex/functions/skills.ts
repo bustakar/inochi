@@ -1,12 +1,12 @@
 import { Auth } from "convex/server";
 import { v } from "convex/values";
-import { Doc, Id } from "./_generated/dataModel";
-import { mutation, query } from "./_generated/server";
+import { Doc, Id } from "../_generated/dataModel";
+import { mutation, query } from "../_generated/server";
 import {
   levelValidator,
   validateDifficulty,
   validateUrlArray,
-} from "./validators";
+} from "../schema/validators";
 
 export const getUserId = async (ctx: { auth: Auth }) => {
   return (await ctx.auth.getUserIdentity())?.subject;
@@ -43,7 +43,14 @@ export const getSkills = query({
           _id: v.id("muscles"),
           _creationTime: v.number(),
           name: v.string(),
-          category: v.string(),
+          slug: v.string(),
+          recommendedRestHours: v.number(),
+          parts: v.array(
+            v.object({
+              name: v.string(),
+              slug: v.string(),
+            }),
+          ),
         }),
       ),
       equipmentData: v.array(
@@ -51,6 +58,7 @@ export const getSkills = query({
           _id: v.id("equipment"),
           _creationTime: v.number(),
           name: v.string(),
+          slug: v.string(),
           category: v.string(),
         }),
       ),
@@ -194,7 +202,14 @@ export const searchSkills = query({
           _id: v.id("muscles"),
           _creationTime: v.number(),
           name: v.string(),
-          category: v.string(),
+          slug: v.string(),
+          recommendedRestHours: v.number(),
+          parts: v.array(
+            v.object({
+              name: v.string(),
+              slug: v.string(),
+            }),
+          ),
         }),
       ),
       equipmentData: v.array(
@@ -202,6 +217,7 @@ export const searchSkills = query({
           _id: v.id("equipment"),
           _creationTime: v.number(),
           name: v.string(),
+          slug: v.string(),
           category: v.string(),
         }),
       ),
@@ -501,7 +517,14 @@ export const getMuscles = query({
       _id: v.id("muscles"),
       _creationTime: v.number(),
       name: v.string(),
-      category: v.string(),
+      slug: v.string(),
+      recommendedRestHours: v.number(),
+      parts: v.array(
+        v.object({
+          name: v.string(),
+          slug: v.string(),
+        }),
+      ),
     }),
   ),
   handler: async (ctx) => {
@@ -517,6 +540,7 @@ export const getEquipment = query({
       _id: v.id("equipment"),
       _creationTime: v.number(),
       name: v.string(),
+      slug: v.string(),
       category: v.string(),
     }),
   ),
