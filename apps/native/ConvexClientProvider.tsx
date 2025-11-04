@@ -1,7 +1,7 @@
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;

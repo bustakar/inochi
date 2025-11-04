@@ -30,10 +30,13 @@ export default function LoginScreen() {
   const onPress = async (authType: string) => {
     try {
       const { createdSessionId, setActive } = await startSSOFlow({
-        strategy: getOAuthStrategy(authType),
+        strategy: getOAuthStrategy(authType) as
+          | "oauth_google"
+          | "oauth_apple"
+          | "oauth_github",
       });
-      if (createdSessionId) {
-        setActive({ session: createdSessionId });
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
         router.replace("/skills");
       }
     } catch (err) {

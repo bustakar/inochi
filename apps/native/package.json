@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore",
-    "lint": "eslint --flag unstable_native_nodejs_ts_config",
+    "lint": "eslint . --cache --cache-location .cache/.eslintcache",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
