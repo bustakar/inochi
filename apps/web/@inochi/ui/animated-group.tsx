@@ -1,6 +1,7 @@
 "use client";
-import { ReactNode } from "react";
-import { motion, Variants } from "motion/react";
+import type { ReactNode } from "react";
+import { motion } from "motion/react";
+import type { Variants } from "motion/react";
 import React from "react";
 
 export type PresetType =
@@ -15,7 +16,7 @@ export type PresetType =
   | "rotate"
   | "swing";
 
-export type AnimatedGroupProps = {
+export interface AnimatedGroupProps {
   children: ReactNode;
   className?: string;
   variants?: {
@@ -112,17 +113,25 @@ function AnimatedGroup({
     item: addDefaultVariants(preset ? presetVariants[preset] : {}),
     container: addDefaultVariants(defaultContainerVariants),
   };
-  const containerVariants = variants?.container || selectedVariants.container;
-  const itemVariants = variants?.item || selectedVariants.item;
+  const containerVariants = variants?.container ?? selectedVariants.container;
+  const itemVariants = variants?.item ?? selectedVariants.item;
 
-  const MotionComponent = React.useMemo(
-    () => motion.create(typeof as === "string" ? as : "div"),
-    [as],
-  );
-  const MotionChild = React.useMemo(
-    () => motion.create(typeof asChild === "string" ? asChild : "div"),
-    [asChild],
-  );
+  // Create motion components outside of render to avoid creating components during render
+  const MotionComponent = React.useMemo(() => {
+    const elementType = typeof as === "string" ? as : "div";
+    if (elementType in motion && typeof motion[elementType as keyof typeof motion] === "function") {
+      return motion[elementType as keyof typeof motion] as typeof motion.div;
+    }
+    return motion.div;
+  }, [as]);
+  
+  const MotionChild = React.useMemo(() => {
+    const elementType = typeof asChild === "string" ? asChild : "div";
+    if (elementType in motion && typeof motion[elementType as keyof typeof motion] === "function") {
+      return motion[elementType as keyof typeof motion] as typeof motion.div;
+    }
+    return motion.div;
+  }, [asChild]);
 
   return (
     <MotionComponent

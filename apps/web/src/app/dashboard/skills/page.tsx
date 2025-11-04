@@ -2,7 +2,7 @@
 
 import { Button } from "@inochi/ui/Button";
 import { Input } from "@inochi/ui/Input";
-import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
+import type { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { Search, X } from "lucide-react";
 import { useReducer, useState } from "react";
 import { CreateSkillDialog } from "./_components/create-skill-dialog";
@@ -79,8 +79,8 @@ export default function SkillsPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [skillToEdit, setSkillToEdit] = useState<
     | (Doc<"skills"> & {
-        musclesData?: Array<Doc<"muscles">>;
-        equipmentData?: Array<Doc<"equipment">>;
+        musclesData?: Doc<"muscles">[];
+        equipmentData?: Doc<"equipment">[];
       })
     | null
   >(null);
@@ -97,8 +97,8 @@ export default function SkillsPage() {
 
   const handleSuggestEdit = (
     skill: Doc<"skills"> & {
-      musclesData?: Array<Doc<"muscles">>;
-      equipmentData?: Array<Doc<"equipment">>;
+      musclesData?: Doc<"muscles">[];
+      equipmentData?: Doc<"equipment">[];
     },
   ) => {
     setSkillToEdit(skill);

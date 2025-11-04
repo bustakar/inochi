@@ -1,11 +1,11 @@
 "use client";
 
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import type { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import Link from "next/link";
 import { SubmissionCard } from "./submission-card";
-import { Roles } from "@/types/globals";
+import type { Roles } from "@/types/globals";
 
 interface SubmissionsListProps {
   status?: "pending" | "approved" | "rejected";

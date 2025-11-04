@@ -3,7 +3,7 @@
 import { Input } from "@inochi/ui/Input";
 import { Label } from "@inochi/ui/Label";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useState } from "react";
 
@@ -33,10 +33,10 @@ export function SkillsFilters({
   const muscles = useQuery(api.functions.skills.getMuscles, {});
   const equipment = useQuery(api.functions.skills.getEquipment, {});
   const [localMinDifficulty, setLocalMinDifficulty] = useState(
-    minDifficulty?.toString() || "",
+    minDifficulty?.toString() ?? "",
   );
   const [localMaxDifficulty, setLocalMaxDifficulty] = useState(
-    maxDifficulty?.toString() || "",
+    maxDifficulty?.toString() ?? "",
   );
 
   const handleDifficultyBlur = () => {
@@ -57,7 +57,7 @@ export function SkillsFilters({
         <Label htmlFor="level">Level</Label>
         <select
           id="level"
-          value={level || ""}
+          value={level ?? ""}
           onChange={(e) => onLevelChange(e.target.value || undefined)}
           className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
         >

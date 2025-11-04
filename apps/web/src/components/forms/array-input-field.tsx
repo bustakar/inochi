@@ -2,14 +2,10 @@
 
 import { Button } from "@inochi/ui/Button";
 import { Field, FieldContent, FieldError, FieldLabel } from "@inochi/ui";
-import { FormControl, FormField, FormItem } from "@inochi/ui/Form";
+import { FormField, FormItem } from "@inochi/ui/Form";
 import { Input } from "@inochi/ui/Input";
 import { Plus, X } from "lucide-react";
-import {
-  type Control,
-  type FieldPath,
-  type FieldValues,
-} from "react-hook-form";
+import type {Control, FieldPath, FieldValues} from "react-hook-form";
 
 interface ArrayInputFieldProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -28,10 +24,10 @@ export function ArrayInputField<TFieldValues extends FieldValues>({
 }: ArrayInputFieldProps<TFieldValues>) {
   return (
     <FormField
-      control={control as any}
-      name={name as any}
+      control={control}
+      name={name}
       render={({ field, fieldState }) => {
-        const items = field.value || [];
+        const items: string[] = Array.isArray(field.value) ? field.value : [];
 
         return (
           <FormItem>

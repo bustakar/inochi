@@ -10,7 +10,7 @@ import {
 } from "@/components/common/dropdown-menu";
 import { Button } from "@inochi/ui/Button";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { ChevronDown, Dumbbell, Gauge, Target, TrendingUp } from "lucide-react";
 import { useState } from "react";
@@ -132,7 +132,7 @@ export function SkillsFiltersHorizontal({
                 min="1"
                 max="10"
                 placeholder="Min"
-                value={minDifficulty || ""}
+                value={minDifficulty ?? ""}
                 onChange={(e) => {
                   if (!e.target.value) {
                     // Allow clearing the value
@@ -158,7 +158,7 @@ export function SkillsFiltersHorizontal({
                 min="1"
                 max="10"
                 placeholder="Max"
-                value={maxDifficulty || ""}
+                value={maxDifficulty ?? ""}
                 onChange={(e) => {
                   if (!e.target.value) {
                     // Allow clearing the value

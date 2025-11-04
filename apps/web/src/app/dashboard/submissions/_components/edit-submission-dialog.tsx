@@ -4,9 +4,10 @@ import {
   ArrayInputField,
   BasicFormFields,
   CheckboxGroupField,
-  skillFormSchema,
-  type SkillFormData,
+  skillFormSchema
+  
 } from "@/components/forms";
+import type {SkillFormData} from "@/components/forms";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@inochi/ui/Button";
 import {
@@ -18,7 +19,7 @@ import {
 } from "@inochi/ui/Dialog";
 import { Form } from "@inochi/ui/Form";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import type { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -30,8 +31,8 @@ import { toast } from "sonner";
 
 interface EditSubmissionDialogProps {
   submission: Doc<"user_submissions"> & {
-    musclesData?: Array<Doc<"muscles">>;
-    equipmentData?: Array<Doc<"equipment">>;
+    musclesData?: Doc<"muscles">[];
+    equipmentData?: Doc<"equipment">[];
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -145,7 +146,7 @@ export function EditSubmissionDialog({
         <DialogHeader>
           <DialogTitle>Edit Submission</DialogTitle>
         </DialogHeader>
-        <Form {...(form as any)}>
+        <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4"

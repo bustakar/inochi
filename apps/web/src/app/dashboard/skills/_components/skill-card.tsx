@@ -8,14 +8,14 @@ import {
 } from "@/components/common/dropdown-menu";
 import { Badge } from "@inochi/ui";
 import { Button } from "@inochi/ui/Button";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import type { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { Dumbbell, MoreVertical, Target } from "lucide-react";
-import React, { useMemo } from "react";
+import { useMemo, memo } from "react";
 
 interface SkillCardProps {
   skill: Doc<"skills"> & {
-    musclesData?: Array<Doc<"muscles">>;
-    equipmentData?: Array<Doc<"equipment">>;
+    musclesData?: Doc<"muscles">[];
+    equipmentData?: Doc<"equipment">[];
   };
   onSuggestEdit?: (skill: Doc<"skills">) => void;
 }
@@ -139,4 +139,4 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
   );
 }
 
-export const SkillCard = React.memo(SkillCardComponent);
+export const SkillCard = memo(SkillCardComponent);

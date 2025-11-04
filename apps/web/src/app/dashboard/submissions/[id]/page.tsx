@@ -1,12 +1,11 @@
 "use client";
 
-import { Roles } from "@/types/globals";
 import { getClientRole, isClientAdminOrModerator } from "@/utils/roles";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { Badge } from "@inochi/ui";
 import { Button } from "@inochi/ui/Button";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
+import type { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowLeft,
@@ -118,8 +117,7 @@ export default function SubmissionDetailPage() {
     );
   }
 
-  const statusInfo =
-    statusConfig[submission.status as "pending" | "approved" | "rejected"];
+  const statusInfo = statusConfig[submission.status];
   const StatusIcon = statusInfo.icon;
   const canEdit = submission.status === "pending";
   const canDelete =
@@ -254,7 +252,7 @@ export default function SubmissionDetailPage() {
           </div>
         </div>
 
-        {submission.musclesData && submission.musclesData.length > 0 && (
+        {submission.musclesData.length > 0 && (
           <div>
             <h3 className="text-sm font-medium mb-2">Muscles</h3>
             <div className="flex flex-wrap gap-2">
@@ -267,7 +265,7 @@ export default function SubmissionDetailPage() {
           </div>
         )}
 
-        {submission.equipmentData && submission.equipmentData.length > 0 && (
+        {submission.equipmentData.length > 0 && (
           <div>
             <h3 className="text-sm font-medium mb-2">Equipment</h3>
             <div className="flex flex-wrap gap-2">
@@ -280,30 +278,27 @@ export default function SubmissionDetailPage() {
           </div>
         )}
 
-        {submission.embedded_videos &&
-          submission.embedded_videos.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium mb-2">Video URLs</h3>
-              <ul className="list-disc list-inside space-y-1">
-                {submission.embedded_videos.map(
-                  (url: string, index: number) => (
-                    <li key={index}>
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline text-sm"
-                      >
-                        {url}
-                      </a>
-                    </li>
-                  ),
-                )}
-              </ul>
-            </div>
-          )}
+        {submission.embedded_videos.length > 0 && (
+          <div>
+            <h3 className="text-sm font-medium mb-2">Video URLs</h3>
+            <ul className="list-disc list-inside space-y-1">
+              {submission.embedded_videos.map((url: string, index: number) => (
+                <li key={index}>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline text-sm"
+                  >
+                    {url}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-        {submission.tips && submission.tips.length > 0 && (
+        {submission.tips.length > 0 && (
           <div>
             <h3 className="text-sm font-medium mb-2">Tips</h3>
             <ul className="list-disc list-inside space-y-1">

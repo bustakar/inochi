@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
+import type { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useMemo } from "react";
 import { SkillCard } from "./skill-card";
@@ -15,8 +15,8 @@ interface SkillsListProps {
   equipmentIds?: Id<"equipment">[];
   onSuggestEdit?: (
     skill: Doc<"skills"> & {
-      musclesData?: Array<Doc<"muscles">>;
-      equipmentData?: Array<Doc<"equipment">>;
+      musclesData?: Doc<"muscles">[];
+      equipmentData?: Doc<"equipment">[];
     },
   ) => void;
 }

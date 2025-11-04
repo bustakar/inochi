@@ -5,8 +5,8 @@ import {
   BasicFormFields,
   CheckboxGroupField,
   skillFormSchema,
-  type SkillFormData,
 } from "@/components/forms";
+import type { SkillFormData } from "@/components/forms";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@inochi/ui/Button";
 import {
@@ -19,7 +19,7 @@ import {
 } from "@inochi/ui/Dialog";
 import { Form } from "@inochi/ui/Form";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import type { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,8 +32,8 @@ import { toast } from "sonner";
 interface CreateSkillDialogProps {
   mode?: "create" | "edit";
   existingSkill?: Doc<"skills"> & {
-    musclesData?: Array<Doc<"muscles">>;
-    equipmentData?: Array<Doc<"equipment">>;
+    musclesData?: Doc<"muscles">[];
+    equipmentData?: Doc<"equipment">[];
   };
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -102,7 +102,7 @@ function useCreateSkillForm(
         tips: existingSkill.tips,
       });
     }
-  }, [open, isEditMode, existingSkill?._id, form]);
+  }, [open, isEditMode, existingSkill?._id, existingSkill, form]);
 
   const onSubmit = async (data: SkillFormData) => {
     try {
@@ -118,7 +118,7 @@ function useCreateSkillForm(
         variants: data.variants,
         tips: data.tips.filter((t) => t.trim() !== ""),
         submissionType: isEditMode ? "edit" : "create",
-        originalSkillId: isEditMode ? existingSkill?._id : undefined,
+        originalSkillId: isEditMode ? (existingSkill?._id ?? undefined) : undefined,
       });
       toast.success(
         isEditMode
@@ -156,7 +156,7 @@ export function CreateSkillDialog({
   const skills = useQuery(api.functions.skills.getSkills, {});
 
   // Use controlled or internal state
-  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const open = controlledOpen ?? internalOpen;
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
       if (controlledOnOpenChange) {
@@ -198,7 +198,7 @@ export function CreateSkillDialog({
             {isEditMode ? "Suggest Skill Edit" : "Suggest New Skill"}
           </DialogTitle>
         </DialogHeader>
-        <Form {...(form as any)}>
+        <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4"

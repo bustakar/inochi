@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@inochi/ui";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import type { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { Clock, CheckCircle, XCircle } from "lucide-react";
 
 function formatTimeAgo(timestamp: number): string {
@@ -20,8 +20,8 @@ function formatTimeAgo(timestamp: number): string {
 
 interface SubmissionCardProps {
   submission: Doc<"user_submissions"> & {
-    musclesData?: Array<Doc<"muscles">>;
-    equipmentData?: Array<Doc<"equipment">>;
+    musclesData?: Doc<"muscles">[];
+    equipmentData?: Doc<"equipment">[];
     originalSkillData?: {
       _id: Doc<"skills">["_id"];
       title: string;

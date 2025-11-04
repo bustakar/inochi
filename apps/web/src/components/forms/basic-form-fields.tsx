@@ -4,11 +4,7 @@ import { Field, FieldContent, FieldError, FieldLabel } from "@inochi/ui";
 import { FormControl, FormField, FormItem } from "@inochi/ui/Form";
 import { Input } from "@inochi/ui/Input";
 import { Textarea } from "@inochi/ui/Textarea";
-import {
-  type Control,
-  type FieldPath,
-  type FieldValues,
-} from "react-hook-form";
+import type {Control, FieldPath, FieldValues} from "react-hook-form";
 import { LevelSelectField } from "./level-select-field";
 
 interface BasicFormFieldsProps<TFieldValues extends FieldValues> {
@@ -29,8 +25,8 @@ export function BasicFormFields<TFieldValues extends FieldValues>({
   return (
     <>
       <FormField
-        control={control as any}
-        name={titleFieldName as any}
+        control={control}
+        name={titleFieldName}
         render={({ field, fieldState }) => (
           <FormItem>
             <Field data-invalid={!!fieldState.error}>
@@ -49,8 +45,8 @@ export function BasicFormFields<TFieldValues extends FieldValues>({
       />
 
       <FormField
-        control={control as any}
-        name={descriptionFieldName as any}
+        control={control}
+        name={descriptionFieldName}
         render={({ field, fieldState }) => (
           <FormItem>
             <Field data-invalid={!!fieldState.error}>
@@ -76,8 +72,8 @@ export function BasicFormFields<TFieldValues extends FieldValues>({
         <LevelSelectField control={control} name={levelFieldName} />
 
         <FormField
-          control={control as any}
-          name={difficultyFieldName as any}
+          control={control}
+          name={difficultyFieldName}
           render={({ field, fieldState }) => (
             <FormItem>
               <Field data-invalid={!!fieldState.error}>
@@ -89,9 +85,10 @@ export function BasicFormFields<TFieldValues extends FieldValues>({
                       min="1"
                       max="10"
                       {...field}
-                      onChange={(e) =>
-                        field.onChange(parseInt(e.target.value) || 1)
-                      }
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        field.onChange(isNaN(value) ? 1 : value);
+                      }}
                     />
                   </FormControl>
                   {fieldState.error && (

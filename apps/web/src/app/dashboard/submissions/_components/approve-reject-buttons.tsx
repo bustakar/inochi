@@ -2,7 +2,7 @@
 
 import { Button } from "@inochi/ui/Button";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { CheckCircle, XCircle } from "lucide-react";
 import { useState } from "react";

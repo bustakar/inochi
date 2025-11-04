@@ -3,7 +3,6 @@
 import { UserButton } from "@clerk/clerk-react";
 import {
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@inochi/ui/Sidebar";
 

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@inochi/ui/Card";
 import { Settings2, Sparkles, Zap } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export default function Features() {
   return (

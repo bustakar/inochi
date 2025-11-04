@@ -2,7 +2,6 @@ import { Button } from "@inochi/ui/Button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import { AnimatedGroup } from "../../../@inochi/ui/animated-group";
 import { TextEffect } from "../../../@inochi/ui/text-effect";
 import { HeroHeader } from "./Header";

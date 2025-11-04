@@ -2,11 +2,7 @@
 
 import { Field, FieldContent, FieldError, FieldLabel } from "@inochi/ui";
 import { FormControl, FormField, FormItem } from "@inochi/ui/Form";
-import {
-  type Control,
-  type FieldPath,
-  type FieldValues,
-} from "react-hook-form";
+import type {Control, FieldPath, FieldValues} from "react-hook-form";
 
 interface LevelSelectFieldProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -19,8 +15,8 @@ export function LevelSelectField<TFieldValues extends FieldValues>({
 }: LevelSelectFieldProps<TFieldValues>) {
   return (
     <FormField
-      control={control as any}
-      name={name as any}
+      control={control}
+      name={name}
       render={({ field, fieldState }) => (
         <FormItem>
           <Field data-invalid={!!fieldState.error}>

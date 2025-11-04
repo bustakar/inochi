@@ -1,4 +1,4 @@
-import { Id } from "@packages/backend/convex/_generated/dataModel";
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import { z } from "zod";
 
 export const skillFormSchema = z.object({

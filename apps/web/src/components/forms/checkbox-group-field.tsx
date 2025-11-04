@@ -1,12 +1,8 @@
 "use client";
 
 import { Field, FieldContent, FieldError, FieldLabel } from "@inochi/ui";
-import { FormControl, FormField, FormItem } from "@inochi/ui/Form";
-import {
-  type Control,
-  type FieldPath,
-  type FieldValues,
-} from "react-hook-form";
+import { FormField, FormItem } from "@inochi/ui/Form";
+import type {Control, FieldPath, FieldValues} from "react-hook-form";
 
 interface CheckboxGroupFieldProps<
   TFieldValues extends FieldValues,
@@ -41,8 +37,8 @@ export function CheckboxGroupField<
 
   return (
     <FormField
-      control={control as any}
-      name={name as any}
+      control={control}
+      name={name}
       render={({ field, fieldState }) => (
         <FormItem>
           <Field data-invalid={!!fieldState.error}>
@@ -50,7 +46,7 @@ export function CheckboxGroupField<
             <FieldContent>
               <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
                 {filteredOptions.map((option) => {
-                  const displayName = option.name || option.title || "";
+                  const displayName = option.name ?? option.title ?? "";
                   return (
                     <label
                       key={option._id}
@@ -58,15 +54,16 @@ export function CheckboxGroupField<
                     >
                       <input
                         type="checkbox"
-                        checked={field.value.includes(option._id as any)}
+                        checked={(field.value as string[]).includes(option._id)}
                         onChange={(e) => {
+                          const currentValue = field.value as string[];
                           if (e.target.checked) {
-                            field.onChange([...field.value, option._id] as any);
+                            field.onChange([...currentValue, option._id]);
                           } else {
                             field.onChange(
-                              field.value.filter(
+                              currentValue.filter(
                                 (id: string) => id !== option._id,
-                              ) as any,
+                              ),
                             );
                           }
                         }}
