@@ -4,10 +4,9 @@ import {
   ArrayInputField,
   BasicFormFields,
   CheckboxGroupField,
-  skillFormSchema
-  
+  skillFormSchema,
 } from "@/components/forms";
-import type {SkillFormData} from "@/components/forms";
+import type { SkillFormData } from "@/components/forms";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@inochi/ui/Button";
 import {

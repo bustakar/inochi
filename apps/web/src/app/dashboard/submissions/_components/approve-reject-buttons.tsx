@@ -166,4 +166,3 @@ export function ApproveRejectButtons({
     </div>
   );
 }
-

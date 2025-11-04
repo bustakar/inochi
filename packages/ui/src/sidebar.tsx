@@ -612,7 +612,9 @@ function SidebarMenuSkeleton({
   const id = React.useId();
   const width = React.useMemo(() => {
     // Generate a stable pseudo-random value based on the component ID
-    const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const hash = id
+      .split("")
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return `${(hash % 40) + 50}%`;
   }, [id]);
 

@@ -33,7 +33,7 @@ export interface TextEffectProps {
   containerTransition?: Transition;
   segmentTransition?: Transition;
   style?: React.CSSProperties;
-};
+}
 
 const defaultStaggerTimes: Record<PerType, number> = {
   char: 0.03,
@@ -53,7 +53,6 @@ const defaultContainerVariants: Variants = {
     transition: { staggerChildren: 0.05, staggerDirection: -1 },
   },
 };
-
 
 const presetVariants: Record<
   PresetType,

@@ -5,7 +5,7 @@ export const getClientRole = (
   sessionClaims: { metadata?: { role?: Roles } } | null | undefined,
 ): Roles => {
   const role = sessionClaims?.metadata?.role;
-  return (role) ?? "user";
+  return role ?? "user";
 };
 
 export const isClientAdminOrModerator = (

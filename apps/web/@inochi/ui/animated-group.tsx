@@ -26,7 +26,7 @@ export interface AnimatedGroupProps {
   preset?: PresetType;
   as?: React.ElementType;
   asChild?: React.ElementType;
-};
+}
 
 const defaultContainerVariants: Variants = {
   visible: {
@@ -119,15 +119,21 @@ function AnimatedGroup({
   // Create motion components outside of render to avoid creating components during render
   const MotionComponent = React.useMemo(() => {
     const elementType = typeof as === "string" ? as : "div";
-    if (elementType in motion && typeof motion[elementType as keyof typeof motion] === "function") {
+    if (
+      elementType in motion &&
+      typeof motion[elementType as keyof typeof motion] === "function"
+    ) {
       return motion[elementType as keyof typeof motion] as typeof motion.div;
     }
     return motion.div;
   }, [as]);
-  
+
   const MotionChild = React.useMemo(() => {
     const elementType = typeof asChild === "string" ? asChild : "div";
-    if (elementType in motion && typeof motion[elementType as keyof typeof motion] === "function") {
+    if (
+      elementType in motion &&
+      typeof motion[elementType as keyof typeof motion] === "function"
+    ) {
       return motion[elementType as keyof typeof motion] as typeof motion.div;
     }
     return motion.div;

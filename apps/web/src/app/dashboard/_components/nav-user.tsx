@@ -1,10 +1,7 @@
 "use client";
 
 import { UserButton } from "@clerk/clerk-react";
-import {
-  SidebarMenu,
-  SidebarMenuItem,
-} from "@inochi/ui/Sidebar";
+import { SidebarMenu, SidebarMenuItem } from "@inochi/ui/Sidebar";
 
 export function NavUser() {
   return (

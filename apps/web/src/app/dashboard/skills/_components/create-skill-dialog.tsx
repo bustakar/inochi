@@ -118,7 +118,9 @@ function useCreateSkillForm(
         variants: data.variants,
         tips: data.tips.filter((t) => t.trim() !== ""),
         submissionType: isEditMode ? "edit" : "create",
-        originalSkillId: isEditMode ? (existingSkill?._id ?? undefined) : undefined,
+        originalSkillId: isEditMode
+          ? (existingSkill?._id ?? undefined)
+          : undefined,
       });
       toast.success(
         isEditMode

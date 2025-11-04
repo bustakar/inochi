@@ -12,10 +12,7 @@ interface SubmissionsListProps {
   userRole: Roles;
 }
 
-export function SubmissionsList({
-  status,
-  userRole,
-}: SubmissionsListProps) {
+export function SubmissionsList({ status, userRole }: SubmissionsListProps) {
   const submissions = useQuery(api.functions.submissions.getUserSubmissions, {
     status,
     userRole,
@@ -42,8 +39,7 @@ export function SubmissionsList({
     );
   }
 
-  const isAdminOrModerator =
-    userRole === "admin" || userRole === "moderator";
+  const isAdminOrModerator = userRole === "admin" || userRole === "moderator";
 
   return (
     <div className="space-y-4">

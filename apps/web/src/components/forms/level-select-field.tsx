@@ -2,7 +2,7 @@
 
 import { Field, FieldContent, FieldError, FieldLabel } from "@inochi/ui";
 import { FormControl, FormField, FormItem } from "@inochi/ui/Form";
-import type {Control, FieldPath, FieldValues} from "react-hook-form";
+import type { Control, FieldPath, FieldValues } from "react-hook-form";
 
 interface LevelSelectFieldProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
