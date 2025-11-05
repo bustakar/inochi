@@ -1,6 +1,6 @@
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 
 interface Props {
   isMobile?: boolean;
@@ -9,10 +9,10 @@ interface Props {
 const Logo = ({ isMobile }: Props) => {
   return (
     <Link href={"/"}>
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-2">
         <Image src={"/images/logo.png"} width={26} height={26} alt="logo" />
         {!isMobile ? (
-          <h1 className="font-montserrat text-black text-3xl sm:text-[35px] not-italic font-normal leading-[90.3%] tracking-[-0.875px]">
+          <h1 className="font-montserrat text-3xl leading-[90.3%] font-normal tracking-[-0.875px] text-black not-italic sm:text-[35px]">
             UseNotes
           </h1>
         ) : null}
