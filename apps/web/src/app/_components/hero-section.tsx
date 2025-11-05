@@ -5,6 +5,8 @@ import { ArrowRight } from "lucide-react";
 
 import { AnimatedGroup, Button, TextEffect } from "@inochi/ui";
 
+import { HeroHeader } from "./header";
+
 const transitionVariants = {
   item: {
     hidden: {
@@ -28,6 +30,7 @@ const transitionVariants = {
 export default function HeroSection() {
   return (
     <>
+      <HeroHeader />
       <main className="overflow-hidden">
         <div
           aria-hidden
@@ -121,7 +124,7 @@ export default function HeroSection() {
               </div>
             </div>
 
-            <AnimatedGroup
+            {/* <AnimatedGroup
               variants={{
                 container: {
                   visible: {
@@ -152,7 +155,7 @@ export default function HeroSection() {
                   />
                 </div>
               </div>
-            </AnimatedGroup>
+            </AnimatedGroup> */}
           </div>
         </section>
       </main>
