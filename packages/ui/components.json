@@ -5,16 +5,14 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "src/styles/globals.css",
+    "css": "unused.css",
     "baseColor": "zinc",
     "cssVariables": true
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "src/components",
-    "utils": "src/lib/utils",
-    "hooks": "src/hooks",
-    "lib": "src/lib",
-    "ui": "src/components"
+    "utils": "@inochi/ui",
+    "components": "src/",
+    "ui": "src/"
   }
 }
