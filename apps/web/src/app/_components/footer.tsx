@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import Logo from "../../components/common/Logo";
+import { Logo } from "./logo";
 
 export default function FooterSection() {
   return (
