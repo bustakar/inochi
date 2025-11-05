@@ -32,11 +32,11 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@packages/backend": "workspace:*",
     "@inochi/eslint-config": "workspace:*",
     "@inochi/prettier-config": "workspace:*",
     "@inochi/tailwind-config": "workspace:*",
     "@inochi/tsconfig": "workspace:*",
+    "@packages/backend": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
