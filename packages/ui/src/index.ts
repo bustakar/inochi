@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge";
 export const cn = (...inputs: Parameters<typeof cx>) => twMerge(cx(inputs));
 
 // Core components
+export { AnimatedGroup } from "./components/animated-group";
 export * from "./components/badge";
 export * from "./components/button";
 export * from "./components/card";
@@ -19,6 +20,7 @@ export * from "./components/sheet";
 export * from "./components/skeleton";
 export * from "./components/sonner";
 export * from "./components/spinner";
+export * from "./components/text-effect";
 export * from "./components/textarea";
 export * from "./components/tooltip";
 

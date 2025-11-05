@@ -1,14 +1,13 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@inochi/ui/Collapsible";
-import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
@@ -17,7 +16,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@inochi/ui/Sidebar";
+} from "@inochi/ui";
 
 export function NavMain({
   items,

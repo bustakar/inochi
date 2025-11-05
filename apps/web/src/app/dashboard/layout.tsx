@@ -1,9 +1,10 @@
-import { Separator } from "@inochi/ui/Separator";
 import {
+  Separator,
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@inochi/ui/Sidebar";
+} from "@inochi/ui";
+
 import { AppSidebar } from "./_components/app-sidebar";
 
 export default function DashboardLayout({

@@ -1,15 +1,22 @@
 "use client";
 
-import { Button } from "@inochi/ui/Button";
-import { Field, FieldContent, FieldError, FieldLabel } from "@inochi/ui";
-import { FormControl, FormField, FormItem } from "@inochi/ui/Form";
-import { Input } from "@inochi/ui/Input";
 import { Plus, X } from "lucide-react";
 import {
   type Control,
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+
+import {
+  Button,
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FormField,
+  FormItem,
+  Input,
+} from "@inochi/ui";
 
 interface ArrayInputFieldProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -61,7 +68,7 @@ export function ArrayInputField<TFieldValues extends FieldValues>({
                           field.onChange(newItems);
                         }}
                       >
-                        <X className="w-4 h-4" />
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
@@ -72,7 +79,7 @@ export function ArrayInputField<TFieldValues extends FieldValues>({
                       field.onChange([...items, ""]);
                     }}
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="mr-2 h-4 w-4" />
                     {addButtonText}
                   </Button>
                 </div>

@@ -1,11 +1,11 @@
 "use client";
 
-import CallToAction from "@/app/_components/call-to-action";
-import FAQs from "@/app/_components/faqs";
-import Features from "@/app/_components/features-1";
-import FooterSection from "@/app/_components/footer";
-import HeroSection from "@/app/_components/hero-section";
-import StatsSection from "@/app/_components/stats";
+import CallToAction from "./_components/call-to-action";
+import FAQs from "./_components/faqs";
+import Features from "./_components/features-1";
+import FooterSection from "./_components/footer";
+import HeroSection from "./_components/hero-section";
+import StatsSection from "./_components/stats";
 
 export default function Home() {
   return (

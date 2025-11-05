@@ -1,10 +1,9 @@
 "use client";
 
-import { Roles } from "@/types/globals";
-import { getClientRole, isClientAdminOrModerator } from "@/utils/roles";
+import { useState } from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { Badge } from "@inochi/ui";
-import { Button } from "@inochi/ui/Button";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
@@ -16,12 +15,16 @@ import {
   Trash2,
   XCircle,
 } from "lucide-react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
+
+import { Badge, Button } from "@inochi/ui";
+
 import { ApproveRejectButtons } from "../_components/approve-reject-buttons";
 import { EditSubmissionDialog } from "../_components/edit-submission-dialog";
+import {
+  getClientRole,
+  isClientAdminOrModerator,
+} from "../../../../utils/roles";
 
 function formatTimeAgo(timestamp: number): string {
   const now = Date.now();
@@ -109,7 +112,7 @@ export default function SubmissionDetailPage() {
 
   if (submission === null) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4">
+      <div className="flex flex-col items-center justify-center space-y-4 p-8">
         <p className="text-muted-foreground">Submission not found.</p>
         <Link href="/dashboard/submissions">
           <Button variant="outline">Back to Submissions</Button>
@@ -138,20 +141,20 @@ export default function SubmissionDetailPage() {
           </Link>
           <div>
             <h1 className="text-3xl font-bold">{submission.title}</h1>
-            <div className="flex items-center gap-2 mt-2">
+            <div className="mt-2 flex items-center gap-2">
               <Badge className={statusInfo.className} variant="outline">
-                <StatusIcon className="w-3 h-3 mr-1" />
+                <StatusIcon className="mr-1 h-3 w-3" />
                 {statusInfo.label}
               </Badge>
               <Badge variant="outline">
                 {submission.submissionType === "create" ? "New Skill" : "Edit"}
               </Badge>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-sm">
                 Submitted {formatTimeAgo(submission.submittedAt)}
               </span>
             </div>
             {isAdminOrModeratorResult && (
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 text-xs">
                 Submitted by: {submission.submittedBy}
               </p>
             )}
@@ -171,13 +174,13 @@ export default function SubmissionDetailPage() {
           )}
           {canEdit && (
             <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
-              <Edit className="w-4 h-4 mr-2" />
+              <Edit className="mr-2 h-4 w-4" />
               Edit
             </Button>
           )}
           {canDelete && (
             <Button variant="destructive" onClick={handleDelete}>
-              <Trash2 className="w-4 h-4 mr-2" />
+              <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </Button>
           )}
@@ -186,13 +189,13 @@ export default function SubmissionDetailPage() {
 
       {/* Original Skill Link (for edits) */}
       {submission.submissionType === "edit" && submission.originalSkillData && (
-        <div className="bg-muted p-4 rounded-lg">
-          <p className="text-sm text-muted-foreground mb-1">
+        <div className="bg-muted rounded-lg p-4">
+          <p className="text-muted-foreground mb-1 text-sm">
             This is an edit suggestion for:
           </p>
           <Link
             href={`/dashboard/skills?skill=${submission.originalSkillData._id}`}
-            className="text-primary hover:underline font-medium"
+            className="text-primary font-medium hover:underline"
           >
             {submission.originalSkillData.title}
           </Link>
@@ -201,14 +204,14 @@ export default function SubmissionDetailPage() {
 
       {/* Review Info */}
       {submission.reviewedAt && (
-        <div className="bg-muted p-4 rounded-lg">
-          <p className="text-sm font-medium mb-1">Review Information</p>
-          <p className="text-sm text-muted-foreground">
+        <div className="bg-muted rounded-lg p-4">
+          <p className="mb-1 text-sm font-medium">Review Information</p>
+          <p className="text-muted-foreground text-sm">
             Reviewed {formatTimeAgo(submission.reviewedAt)}
             {submission.reviewedBy && ` by ${submission.reviewedBy}`}
           </p>
           {submission.rejectionReason && (
-            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
+            <div className="mt-2 rounded border border-red-200 bg-red-50 p-2">
               <p className="text-sm font-medium text-red-800">
                 Rejection Reason:
               </p>
@@ -221,9 +224,9 @@ export default function SubmissionDetailPage() {
       )}
 
       {/* Submission Details */}
-      <div className="bg-card border rounded-lg p-6 space-y-4">
+      <div className="bg-card space-y-4 rounded-lg border p-6">
         <div>
-          <h2 className="text-lg font-semibold mb-2">Description</h2>
+          <h2 className="mb-2 text-lg font-semibold">Description</h2>
           <p className="text-muted-foreground whitespace-pre-wrap">
             {submission.description}
           </p>
@@ -231,23 +234,23 @@ export default function SubmissionDetailPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <h3 className="text-sm font-medium mb-1">Level</h3>
+            <h3 className="mb-1 text-sm font-medium">Level</h3>
             <Badge>{submission.level}</Badge>
           </div>
           <div>
-            <h3 className="text-sm font-medium mb-1">Difficulty</h3>
+            <h3 className="mb-1 text-sm font-medium">Difficulty</h3>
             <div className="flex items-center gap-2">
               <div className="flex gap-1">
                 {Array.from({ length: 10 }).map((_, i) => (
                   <div
                     key={i}
-                    className={`w-2 h-2 rounded-full ${
+                    className={`h-2 w-2 rounded-full ${
                       i < submission.difficulty ? "bg-primary" : "bg-muted"
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-sm">
                 {submission.difficulty}/10
               </span>
             </div>
@@ -256,7 +259,7 @@ export default function SubmissionDetailPage() {
 
         {submission.musclesData && submission.musclesData.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium mb-2">Muscles</h3>
+            <h3 className="mb-2 text-sm font-medium">Muscles</h3>
             <div className="flex flex-wrap gap-2">
               {submission.musclesData.map((muscle: Doc<"muscles">) => (
                 <Badge key={muscle._id} variant="outline">
@@ -269,7 +272,7 @@ export default function SubmissionDetailPage() {
 
         {submission.equipmentData && submission.equipmentData.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium mb-2">Equipment</h3>
+            <h3 className="mb-2 text-sm font-medium">Equipment</h3>
             <div className="flex flex-wrap gap-2">
               {submission.equipmentData.map((equip: Doc<"equipment">) => (
                 <Badge key={equip._id} variant="outline">
@@ -283,8 +286,8 @@ export default function SubmissionDetailPage() {
         {submission.embedded_videos &&
           submission.embedded_videos.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium mb-2">Video URLs</h3>
-              <ul className="list-disc list-inside space-y-1">
+              <h3 className="mb-2 text-sm font-medium">Video URLs</h3>
+              <ul className="list-inside list-disc space-y-1">
                 {submission.embedded_videos.map(
                   (url: string, index: number) => (
                     <li key={index}>
@@ -292,7 +295,7 @@ export default function SubmissionDetailPage() {
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline text-sm"
+                        className="text-primary text-sm hover:underline"
                       >
                         {url}
                       </a>
@@ -305,10 +308,10 @@ export default function SubmissionDetailPage() {
 
         {submission.tips && submission.tips.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium mb-2">Tips</h3>
-            <ul className="list-disc list-inside space-y-1">
+            <h3 className="mb-2 text-sm font-medium">Tips</h3>
+            <ul className="list-inside list-disc space-y-1">
               {submission.tips.map((tip: string, index: number) => (
-                <li key={index} className="text-sm text-muted-foreground">
+                <li key={index} className="text-muted-foreground text-sm">
                   {tip}
                 </li>
               ))}

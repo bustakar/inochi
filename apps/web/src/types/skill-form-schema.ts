@@ -20,4 +20,4 @@ export const skillFormSchema = z.object({
   tips: z.array(z.string().min(1, "Tip cannot be empty")),
 });
 
-export type SkillFormData = z.infer<typeof skillFormSchema>;
+export type SkillFormData = z.output<typeof skillFormSchema>;

@@ -19,7 +19,9 @@
     "./Skeleton": "./src/skeleton.tsx",
     "./Textarea": "./src/textarea.tsx",
     "./Tooltip": "./src/tooltip.tsx",
-    "./Collapsible": "./src/collapsible.tsx"
+    "./Collapsible": "./src/collapsible.tsx",
+    "./AnimatedGroup": "./src/animated-group.tsx",
+    "./TextEffect": "./src/text-effect.tsx"
   },
   "license": "MIT",
   "scripts": {

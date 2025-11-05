@@ -1,12 +1,20 @@
 "use client";
 
-import { Field, FieldContent, FieldError, FieldLabel } from "@inochi/ui";
-import { FormControl, FormField, FormItem } from "@inochi/ui/Form";
 import {
   type Control,
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FormControl,
+  FormField,
+  FormItem,
+} from "@inochi/ui";
 
 interface LevelSelectFieldProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -29,7 +37,7 @@ export function LevelSelectField<TFieldValues extends FieldValues>({
               <FormControl>
                 <select
                   {...field}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="beginner">Beginner</option>
                   <option value="intermediate">Intermediate</option>

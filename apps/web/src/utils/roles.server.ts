@@ -1,5 +1,6 @@
-import { Roles } from "@/types/globals";
 import { auth } from "@clerk/nextjs/server";
+
+import { Roles } from "../types/globals";
 
 // Server-side role checking functions
 export const checkRole = async (role: Roles): Promise<boolean> => {

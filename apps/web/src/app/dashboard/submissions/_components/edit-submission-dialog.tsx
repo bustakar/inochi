@@ -1,28 +1,30 @@
 "use client";
 
+import { useEffect } from "react";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { api } from "@packages/backend/convex/_generated/api";
+import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import {
-  ArrayInputField,
-  BasicFormFields,
-  CheckboxGroupField,
-  skillFormSchema,
-  type SkillFormData,
-} from "@/components/forms";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@inochi/ui/Button";
-import {
+  Button,
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@inochi/ui/Dialog";
-import { Form } from "@inochi/ui/Form";
-import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+  Form,
+} from "@inochi/ui";
+
+import type { SkillFormData } from "../../../../types/skill-form-schema";
+import {
+  ArrayInputField,
+  BasicFormFields,
+  CheckboxGroupField,
+} from "../../../../components/forms";
+import { skillFormSchema } from "../../../../types/skill-form-schema";
 
 // ============================================================================
 // Types
@@ -50,7 +52,7 @@ function useEditSubmissionForm(
   );
 
   const form = useForm<SkillFormData>({
-    resolver: zodResolver(skillFormSchema),
+    resolver: standardSchemaResolver(skillFormSchema),
     defaultValues: {
       title: submission.title,
       description: submission.description,
@@ -93,10 +95,12 @@ function useEditSubmissionForm(
         difficulty: data.difficulty,
         muscles: data.muscles,
         equipment: data.equipment,
-        embedded_videos: data.embedded_videos.filter((v) => v.trim() !== ""),
+        embedded_videos: data.embedded_videos.filter(
+          (v: string) => v.trim() !== "",
+        ),
         prerequisites: data.prerequisites,
         variants: data.variants,
-        tips: data.tips.filter((t) => t.trim() !== ""),
+        tips: data.tips.filter((t: string) => t.trim() !== ""),
       });
       toast.success("Submission updated successfully!");
       return true;
@@ -141,7 +145,7 @@ export function EditSubmissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Submission</DialogTitle>
         </DialogHeader>
@@ -190,7 +194,7 @@ export function EditSubmissionDialog({
                   options={skills.map((s) => ({ _id: s._id, title: s.title }))}
                   label="Prerequisites"
                   description="Select skills that should be mastered before this one"
-                  excludeIds={variants.map((id) => String(id))}
+                  excludeIds={variants.map((id: string) => String(id))}
                 />
 
                 <CheckboxGroupField
@@ -199,7 +203,7 @@ export function EditSubmissionDialog({
                   options={skills.map((s) => ({ _id: s._id, title: s.title }))}
                   label="Variants"
                   description="Select alternative versions of this skill"
-                  excludeIds={prerequisites.map((id) => String(id))}
+                  excludeIds={prerequisites.map((id: string) => String(id))}
                 />
               </>
             )}

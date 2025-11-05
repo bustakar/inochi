@@ -6,7 +6,8 @@ import { cva } from "class-variance-authority";
 import { Button } from "src/components/button";
 import { Input } from "src/components/input";
 import { Textarea } from "src/components/textarea";
-import { cn } from "src/lib/utils";
+
+import { cn } from "../lib/utils";
 
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -164,7 +165,7 @@ export {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
-  InputGroupText,
   InputGroupInput,
+  InputGroupText,
   InputGroupTextarea,
 };
