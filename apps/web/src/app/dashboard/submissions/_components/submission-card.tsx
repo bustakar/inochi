@@ -1,8 +1,9 @@
 "use client";
 
-import { Badge } from "@inochi/ui";
 import { Doc } from "@packages/backend/convex/_generated/dataModel";
-import { Clock, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, Clock, XCircle } from "lucide-react";
+
+import { Badge } from "@inochi/ui";
 
 function formatTimeAgo(timestamp: number): string {
   const now = Date.now();
@@ -76,40 +77,40 @@ export function SubmissionCard({
   const timeAgo = formatTimeAgo(submission.submittedAt);
 
   return (
-    <div className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
-      <div className="flex items-start justify-between mb-3">
+    <div className="bg-card cursor-pointer rounded-lg border p-4 transition-shadow hover:shadow-md">
+      <div className="mb-3 flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-lg font-semibold text-card-foreground">
+          <div className="mb-2 flex items-center gap-2">
+            <h3 className="text-card-foreground text-lg font-semibold">
               {submission.title}
             </h3>
             <Badge className={typeInfo.className}>{typeInfo.label}</Badge>
             <Badge className={statusInfo.className} variant="outline">
-              <StatusIcon className="w-3 h-3 mr-1" />
+              <StatusIcon className="mr-1 h-3 w-3" />
               {statusInfo.label}
             </Badge>
           </div>
           {showSubmitter && (
-            <p className="text-xs text-muted-foreground mb-2">
+            <p className="text-muted-foreground mb-2 text-xs">
               Submitted by: {submission.submittedBy}
             </p>
           )}
           {submission.submissionType === "edit" &&
             submission.originalSkillData && (
-              <p className="text-sm text-muted-foreground mb-2">
+              <p className="text-muted-foreground mb-2 text-sm">
                 Edit suggestion for:{" "}
                 <span className="font-medium">
                   {submission.originalSkillData.title}
                 </span>
               </p>
             )}
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+          <p className="text-muted-foreground mb-2 line-clamp-2 text-sm">
             {submission.description}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-between text-xs">
         <span>Submitted {timeAgo}</span>
         {submission.rejectionReason && (
           <span className="text-red-600">

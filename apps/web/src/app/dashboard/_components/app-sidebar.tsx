@@ -1,7 +1,7 @@
 "use client";
 
-import { FileText, GraduationCap } from "lucide-react";
 import * as React from "react";
+import { FileText, GraduationCap } from "lucide-react";
 
 import {
   Sidebar,
@@ -9,7 +9,8 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@inochi/ui/Sidebar";
+} from "@inochi/ui";
+
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 

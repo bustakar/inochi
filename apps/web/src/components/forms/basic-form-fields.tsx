@@ -1,14 +1,23 @@
 "use client";
 
-import { Field, FieldContent, FieldError, FieldLabel } from "@inochi/ui";
-import { FormControl, FormField, FormItem } from "@inochi/ui/Form";
-import { Input } from "@inochi/ui/Input";
-import { Textarea } from "@inochi/ui/Textarea";
 import {
   type Control,
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FormControl,
+  FormField,
+  FormItem,
+  Input,
+  Textarea,
+} from "@inochi/ui";
+
 import { LevelSelectField } from "./level-select-field";
 
 interface BasicFormFieldsProps<TFieldValues extends FieldValues> {

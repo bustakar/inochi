@@ -1,21 +1,22 @@
 "use client";
 
-import { Button } from "@inochi/ui/Button";
+import { useState } from "react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { CheckCircle, XCircle } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
+
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Textarea,
 } from "@inochi/ui";
-import { Textarea } from "@inochi/ui";
 
 interface ApproveRejectButtonsProps {
   submissionId: Id<"user_submissions">;
@@ -113,7 +114,7 @@ export function ApproveRejectButtons({
         disabled={isProcessing}
         className="bg-green-600 hover:bg-green-700"
       >
-        <CheckCircle className="w-4 h-4 mr-2" />
+        <CheckCircle className="mr-2 h-4 w-4" />
         Approve
       </Button>
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
@@ -122,7 +123,7 @@ export function ApproveRejectButtons({
           onClick={() => setRejectDialogOpen(true)}
           disabled={isProcessing}
         >
-          <XCircle className="w-4 h-4 mr-2" />
+          <XCircle className="mr-2 h-4 w-4" />
           Reject
         </Button>
         <DialogContent>
@@ -166,4 +167,3 @@ export function ApproveRejectButtons({
     </div>
   );
 }
-

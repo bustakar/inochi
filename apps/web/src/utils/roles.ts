@@ -1,4 +1,4 @@
-import { Roles } from "@/types/globals";
+import { Roles } from "../types/globals";
 
 // Client-side role checking helpers
 export const getClientRole = (

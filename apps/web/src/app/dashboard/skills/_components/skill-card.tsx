@@ -1,16 +1,17 @@
 "use client";
 
+import React, { useMemo } from "react";
+import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import { Dumbbell, MoreVertical, Target } from "lucide-react";
+
 import {
+  Badge,
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/common/dropdown-menu";
-import { Badge } from "@inochi/ui";
-import { Button } from "@inochi/ui/Button";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
-import { Dumbbell, MoreVertical, Target } from "lucide-react";
-import React, { useMemo } from "react";
+} from "@inochi/ui";
 
 interface SkillCardProps {
   skill: Doc<"skills"> & {
@@ -48,10 +49,10 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
     return skill.description.substring(0, cutoff) + "...";
   }, [skill.description]);
   return (
-    <div className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow relative">
+    <div className="bg-card relative rounded-lg border p-4 transition-shadow hover:shadow-md">
       {/* Header with title and more button */}
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="text-lg font-semibold text-card-foreground pr-8 flex-1">
+      <div className="mb-2 flex items-start justify-between">
+        <h3 className="text-card-foreground flex-1 pr-8 text-lg font-semibold">
           {skill.title}
         </h3>
         {onSuggestEdit && (
@@ -87,39 +88,39 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
         </Badge>
       </div>
 
-      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+      <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
         {displayDescription}
       </p>
 
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs font-medium text-muted-foreground">
+      <div className="mb-3 flex items-center gap-2">
+        <span className="text-muted-foreground text-xs font-medium">
           Difficulty:
         </span>
         <div className="flex gap-1">
           {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full ${
+              className={`h-2 w-2 rounded-full ${
                 i < skill.difficulty ? "bg-primary" : "bg-muted"
               }`}
             />
           ))}
         </div>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-muted-foreground text-xs">
           {skill.difficulty}/10
         </span>
       </div>
 
       {(skill.musclesData && skill.musclesData.length > 0) ||
       (skill.equipmentData && skill.equipmentData.length > 0) ? (
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="mt-3 flex flex-wrap gap-2">
           {skill.musclesData?.map((muscle) => (
             <Badge
               key={muscle._id}
               variant="outline"
-              className="text-xs flex items-center gap-1"
+              className="flex items-center gap-1 text-xs"
             >
-              <Target className="w-3 h-3" />
+              <Target className="h-3 w-3" />
               {muscle.name}
             </Badge>
           ))}
@@ -127,9 +128,9 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
             <Badge
               key={equip._id}
               variant="outline"
-              className="text-xs flex items-center gap-1"
+              className="flex items-center gap-1 text-xs"
             >
-              <Dumbbell className="w-3 h-3" />
+              <Dumbbell className="h-3 w-3" />
               {equip.name}
             </Badge>
           ))}

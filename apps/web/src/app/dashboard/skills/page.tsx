@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@inochi/ui/Button";
-import { Input } from "@inochi/ui/Input";
+import { useReducer, useState } from "react";
 import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { Search, X } from "lucide-react";
-import { useReducer, useState } from "react";
+
+import { Button, Input } from "@inochi/ui";
+
 import { CreateSkillDialog } from "./_components/create-skill-dialog";
 import { SkillsFiltersHorizontal } from "./_components/skills-filters-horizontal";
 import { SkillsList } from "./_components/skills-list";
@@ -126,7 +127,7 @@ export default function SkillsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Skills</h1>
+        <h1 className="text-foreground text-3xl font-bold">Skills</h1>
         <CreateSkillDialog />
       </div>
 
@@ -147,9 +148,9 @@ export default function SkillsPage() {
       )}
 
       {/* Search and Filters Row */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-        <div className="relative flex-1 w-full sm:w-auto sm:min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+        <div className="relative w-full flex-1 sm:w-auto sm:min-w-[200px]">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
           <Input
             type="text"
             placeholder="Search skills..."
@@ -167,7 +168,7 @@ export default function SkillsPage() {
             className="h-9"
             onClick={clearAllFilters}
           >
-            <X className="h-4 w-4 mr-2" />
+            <X className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Clear All</span>
           </Button>
         )}

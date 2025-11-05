@@ -1,8 +1,9 @@
 "use client";
 
-import { getClientRole, isClientAdminOrModerator } from "@/utils/roles";
-import { useAuth } from "@clerk/clerk-react";
 import { useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
+
+import { getClientRole, isClientAdminOrModerator } from "../../../utils/roles";
 import { SubmissionsList } from "./_components/submissions-list";
 
 type SubmissionStatus = "pending" | "approved" | "rejected" | undefined;
@@ -25,40 +26,40 @@ export default function SubmissionsPage() {
       <div className="flex gap-2 border-b">
         <button
           onClick={() => setStatusFilter(undefined)}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
             statusFilter === undefined
               ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground border-transparent"
           }`}
         >
           All
         </button>
         <button
           onClick={() => setStatusFilter("pending")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
             statusFilter === "pending"
               ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground border-transparent"
           }`}
         >
           Pending
         </button>
         <button
           onClick={() => setStatusFilter("approved")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
             statusFilter === "approved"
               ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground border-transparent"
           }`}
         >
           Approved
         </button>
         <button
           onClick={() => setStatusFilter("rejected")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
             statusFilter === "rejected"
               ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground border-transparent"
           }`}
         >
           Rejected

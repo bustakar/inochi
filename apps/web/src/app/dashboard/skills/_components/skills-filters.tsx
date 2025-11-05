@@ -1,11 +1,11 @@
 "use client";
 
-import { Input } from "@inochi/ui/Input";
-import { Label } from "@inochi/ui/Label";
+import { useState } from "react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { useState } from "react";
+
+import { Input, Label } from "@inochi/ui";
 
 interface SkillsFiltersProps {
   level?: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
@@ -49,7 +49,7 @@ export function SkillsFilters({
   };
 
   return (
-    <div className="space-y-4 p-4 border rounded-lg bg-card">
+    <div className="bg-card space-y-4 rounded-lg border p-4">
       <h3 className="text-lg font-semibold">Filters</h3>
 
       {/* Level Filter */}
@@ -59,7 +59,7 @@ export function SkillsFilters({
           id="level"
           value={level || ""}
           onChange={(e) => onLevelChange(e.target.value || undefined)}
-          className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm"
         >
           <option value="">All Levels</option>
           <option value="beginner">Beginner</option>
@@ -111,11 +111,11 @@ export function SkillsFilters({
       {muscles && (
         <div>
           <Label>Muscles</Label>
-          <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+          <div className="mt-2 max-h-32 space-y-1 overflow-y-auto">
             {muscles.map((muscle: { _id: Id<"muscles">; name: string }) => (
               <label
                 key={muscle._id}
-                className="flex items-center gap-2 text-sm cursor-pointer"
+                className="flex cursor-pointer items-center gap-2 text-sm"
               >
                 <input
                   type="checkbox"
@@ -129,7 +129,7 @@ export function SkillsFilters({
                       );
                     }
                   }}
-                  className="rounded border-input"
+                  className="border-input rounded"
                 />
                 <span>{muscle.name}</span>
               </label>
@@ -142,11 +142,11 @@ export function SkillsFilters({
       {equipment && (
         <div>
           <Label>Equipment</Label>
-          <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+          <div className="mt-2 max-h-32 space-y-1 overflow-y-auto">
             {equipment.map((equip: { _id: Id<"equipment">; name: string }) => (
               <label
                 key={equip._id}
-                className="flex items-center gap-2 text-sm cursor-pointer"
+                className="flex cursor-pointer items-center gap-2 text-sm"
               >
                 <input
                   type="checkbox"
@@ -160,7 +160,7 @@ export function SkillsFilters({
                       );
                     }
                   }}
-                  className="rounded border-input"
+                  className="border-input rounded"
                 />
                 <span>{equip.name}</span>
               </label>

@@ -1,29 +1,31 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { api } from "@packages/backend/convex/_generated/api";
+import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import {
-  ArrayInputField,
-  BasicFormFields,
-  CheckboxGroupField,
-  skillFormSchema,
-  type SkillFormData,
-} from "@/components/forms";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@inochi/ui/Button";
-import {
+  Button,
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@inochi/ui/Dialog";
-import { Form } from "@inochi/ui/Form";
-import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+  Form,
+} from "@inochi/ui";
+
+import type { SkillFormData } from "../../../../types/skill-form-schema";
+import {
+  ArrayInputField,
+  BasicFormFields,
+  CheckboxGroupField,
+} from "../../../../components/forms";
+import { skillFormSchema } from "../../../../types/skill-form-schema";
 
 // ============================================================================
 // Types
@@ -53,7 +55,7 @@ function useCreateSkillForm(
   );
 
   const form = useForm<SkillFormData>({
-    resolver: zodResolver(skillFormSchema),
+    resolver: standardSchemaResolver(skillFormSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -192,7 +194,7 @@ export function CreateSkillDialog({
           <Button>Suggest Skill</Button>
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditMode ? "Suggest Skill Edit" : "Suggest New Skill"}

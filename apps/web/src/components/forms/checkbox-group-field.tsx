@@ -1,12 +1,15 @@
 "use client";
 
-import { Field, FieldContent, FieldError, FieldLabel } from "@inochi/ui";
-import { FormControl, FormField, FormItem } from "@inochi/ui/Form";
+import type { Control, FieldPath, FieldValues } from "react-hook-form";
+
 import {
-  type Control,
-  type FieldPath,
-  type FieldValues,
-} from "react-hook-form";
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FormField,
+  FormItem,
+} from "@inochi/ui";
 
 interface CheckboxGroupFieldProps<
   TFieldValues extends FieldValues,
@@ -41,36 +44,37 @@ export function CheckboxGroupField<
 
   return (
     <FormField
-      control={control as any}
-      name={name as any}
+      control={control}
+      name={name}
       render={({ field, fieldState }) => (
         <FormItem>
           <Field data-invalid={!!fieldState.error}>
             <FieldLabel>{label}</FieldLabel>
             <FieldContent>
-              <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
+              <div className="max-h-32 space-y-1 overflow-y-auto rounded-md border p-2">
                 {filteredOptions.map((option) => {
-                  const displayName = option.name || option.title || "";
+                  const displayName = option.name ?? option.title ?? "";
                   return (
                     <label
                       key={option._id}
-                      className="flex items-center gap-2 text-sm cursor-pointer hover:bg-accent/50 rounded px-2 py-1"
+                      className="hover:bg-accent/50 flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm"
                     >
                       <input
                         type="checkbox"
-                        checked={field.value.includes(option._id as any)}
+                        checked={(field.value as string[]).includes(option._id)}
                         onChange={(e) => {
+                          const currentValue = field.value as string[];
                           if (e.target.checked) {
-                            field.onChange([...field.value, option._id] as any);
+                            field.onChange([...currentValue, option._id]);
                           } else {
                             field.onChange(
-                              field.value.filter(
+                              currentValue.filter(
                                 (id: string) => id !== option._id,
-                              ) as any,
+                              ),
                             );
                           }
                         }}
-                        className="rounded border-input"
+                        className="border-input rounded"
                       />
                       <span>{displayName}</span>
                     </label>

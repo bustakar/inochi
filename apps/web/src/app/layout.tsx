@@ -1,8 +1,11 @@
-import { ThemeProvider } from "@/app/_components/theme-provider";
-import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Inter, Lato, Montserrat } from "next/font/google";
+
+import { cn } from "@inochi/ui";
+
 import ConvexClientProvider from "./_components/ConvexClientProvider";
+import { ThemeProvider } from "./_components/theme-provider";
+
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });

@@ -1,9 +1,17 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Ensure PostCSS is processed correctly
-  experimental: {
-    // Turbopack should handle PostCSS automatically, but we ensure it's enabled
-  },
+// import { createJiti } from "jiti";
+
+// const jiti = createJiti(import.meta.url);
+
+// Import env files to validate at build time. Use jiti so we can load .ts files in here.
+// await jiti.import("./src/env");
+
+/** @type {import("next").NextConfig} */
+const config = {
+  /** Enables hot reloading for local packages without a build step */
+  transpilePackages: ["@inochi/backend", "@inochi/ui"],
+
+  /** We already do linting and typechecking as separate tasks in CI */
+  typescript: { ignoreBuildErrors: true },
 };
 
-module.exports = nextConfig;
+export default config;

@@ -1,21 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import Link from "next/link";
+
+import { Roles } from "../../../../types/globals";
 import { SubmissionCard } from "./submission-card";
-import { Roles } from "@/types/globals";
 
 interface SubmissionsListProps {
   status?: "pending" | "approved" | "rejected";
   userRole: Roles;
 }
 
-export function SubmissionsList({
-  status,
-  userRole,
-}: SubmissionsListProps) {
+export function SubmissionsList({ status, userRole }: SubmissionsListProps) {
   const submissions = useQuery(api.functions.submissions.getUserSubmissions, {
     status,
     userRole,
@@ -31,7 +29,7 @@ export function SubmissionsList({
 
   if (submissions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4">
+      <div className="flex flex-col items-center justify-center space-y-4 p-8">
         <p className="text-muted-foreground">
           {status ? `No ${status} submissions found.` : "No submissions found."}
         </p>
@@ -42,8 +40,7 @@ export function SubmissionsList({
     );
   }
 
-  const isAdminOrModerator =
-    userRole === "admin" || userRole === "moderator";
+  const isAdminOrModerator = userRole === "admin" || userRole === "moderator";
 
   return (
     <div className="space-y-4">

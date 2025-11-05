@@ -1,8 +1,9 @@
 "use client";
 
-import { SignIn, useUser } from "@clerk/clerk-react";
-import { Spinner } from "@inochi/ui/Spinner";
 import { useRouter } from "next/navigation";
+import { SignIn, useUser } from "@clerk/clerk-react";
+
+import { Spinner } from "@inochi/ui";
 
 export default function Page() {
   const router = useRouter();

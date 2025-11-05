@@ -1,19 +1,20 @@
 "use client";
 
+import { useState } from "react";
+import { api } from "@packages/backend/convex/_generated/api";
+import { Id } from "@packages/backend/convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import { ChevronDown, Dumbbell, Gauge, Target, TrendingUp } from "lucide-react";
+
 import {
+  Button,
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/common/dropdown-menu";
-import { Button } from "@inochi/ui/Button";
-import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
-import { ChevronDown, Dumbbell, Gauge, Target, TrendingUp } from "lucide-react";
-import { useState } from "react";
+} from "@inochi/ui";
 
 interface SkillsFiltersHorizontalProps {
   level?: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
@@ -73,9 +74,9 @@ export function SkillsFiltersHorizontal({
             size="sm"
             className="h-9"
           >
-            <TrendingUp className="h-4 w-4 mr-2" />
+            <TrendingUp className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">{levelLabel}</span>
-            <ChevronDown className="h-4 w-4 ml-2" />
+            <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
@@ -117,15 +118,15 @@ export function SkillsFiltersHorizontal({
             size="sm"
             className="h-9"
           >
-            <Gauge className="h-4 w-4 mr-2" />
+            <Gauge className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">{difficultyLabel}</span>
-            <ChevronDown className="h-4 w-4 ml-2" />
+            <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64">
           <DropdownMenuLabel>Difficulty Range</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <div className="p-2 space-y-2">
+          <div className="space-y-2 p-2">
             <div className="flex gap-2">
               <input
                 type="number"
@@ -151,7 +152,7 @@ export function SkillsFiltersHorizontal({
                   }
                   onDifficultyChange(val, currentMax);
                 }}
-                className="w-full rounded-md border border-input bg-background text-foreground px-2 py-1 text-sm placeholder:text-muted-foreground"
+                className="border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-md border px-2 py-1 text-sm"
               />
               <input
                 type="number"
@@ -177,7 +178,7 @@ export function SkillsFiltersHorizontal({
                   }
                   onDifficultyChange(currentMin, val);
                 }}
-                className="w-full rounded-md border border-input bg-background text-foreground px-2 py-1 text-sm placeholder:text-muted-foreground"
+                className="border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-md border px-2 py-1 text-sm"
               />
             </div>
             <Button
@@ -205,14 +206,14 @@ export function SkillsFiltersHorizontal({
               size="sm"
               className="h-9"
             >
-              <Target className="h-4 w-4 mr-2" />
+              <Target className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">{musclesLabel}</span>
-              <ChevronDown className="h-4 w-4 ml-2" />
+              <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="w-64 max-h-96 overflow-y-auto"
+            className="max-h-96 w-64 overflow-y-auto"
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <DropdownMenuLabel>Muscles</DropdownMenuLabel>
@@ -271,14 +272,14 @@ export function SkillsFiltersHorizontal({
               size="sm"
               className="h-9"
             >
-              <Dumbbell className="h-4 w-4 mr-2" />
+              <Dumbbell className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">{equipmentLabel}</span>
-              <ChevronDown className="h-4 w-4 ml-2" />
+              <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="w-64 max-h-96 overflow-y-auto"
+            className="max-h-96 w-64 overflow-y-auto"
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <DropdownMenuLabel>Equipment</DropdownMenuLabel>
