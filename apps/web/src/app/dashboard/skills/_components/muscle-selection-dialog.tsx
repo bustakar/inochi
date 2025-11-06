@@ -97,7 +97,7 @@ export function MuscleSelectionDialog({
               const isSelected =
                 selectedMuscleIds?.includes(muscle._id) ?? false;
               return (
-                <div className="flex items-center gap-3">
+                <div key={muscle._id} className="flex items-center gap-3">
                   <Checkbox
                     id={muscle._id}
                     checked={isSelected}
