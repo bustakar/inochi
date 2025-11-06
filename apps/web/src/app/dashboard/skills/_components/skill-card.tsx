@@ -61,9 +61,7 @@ function SkillCardComponent({
     setIsSuggesting(true);
     try {
       // Validate prerequisites and variants are public
-      const publicSkillIds = new Set(
-        publicSkills?.map((s) => s._id) || [],
-      );
+      const publicSkillIds = new Set(publicSkills?.map((s) => s._id) || []);
 
       const allPrereqsPublic = (skill.prerequisites || []).every((id: string) =>
         publicSkillIds.has(id as Doc<"skills">["_id"]),
@@ -156,7 +154,9 @@ function SkillCardComponent({
             <DropdownMenuContent align="end">
               {isPrivate && onEditPrivateSkill ? (
                 <DropdownMenuItem
-                  onClick={() => onEditPrivateSkill(skill as Doc<"private_skills">)}
+                  onClick={() =>
+                    onEditPrivateSkill(skill as Doc<"private_skills">)
+                  }
                 >
                   Edit
                 </DropdownMenuItem>
