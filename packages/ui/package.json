@@ -21,7 +21,11 @@
     "./Tooltip": "./src/tooltip.tsx",
     "./Collapsible": "./src/collapsible.tsx",
     "./AnimatedGroup": "./src/animated-group.tsx",
-    "./TextEffect": "./src/text-effect.tsx"
+    "./TextEffect": "./src/text-effect.tsx",
+    "./InputGroup": "./src/input-group.tsx",
+    "./InputGroupTextarea": "./src/input-group-textarea.tsx",
+    "./InputGroupAddon": "./src/input-group-addon.tsx",
+    "./InputGroupText": "./src/input-group-text.tsx"
   },
   "license": "MIT",
   "scripts": {
