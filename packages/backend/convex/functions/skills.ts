@@ -4,6 +4,8 @@ import { Doc, Id } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
 import {
   levelValidator,
+  partialSkillDataValidator,
+  skillDataValidator,
   validateDifficulty,
   validateUrlArray,
 } from "../validators/validators";
@@ -546,5 +548,887 @@ export const getEquipment = query({
   ),
   handler: async (ctx) => {
     return await ctx.db.query("equipment").collect();
+  },
+});
+
+// Unified query to get all skills (public, private, or both) with optional filtering
+export const getAllSkills = query({
+  args: {
+    type: v.union(v.literal("all"), v.literal("public"), v.literal("private")),
+    level: v.optional(levelValidator),
+    minDifficulty: v.optional(v.number()),
+    maxDifficulty: v.optional(v.number()),
+    muscleIds: v.optional(v.array(v.id("muscles"))),
+    equipmentIds: v.optional(v.array(v.id("equipment"))),
+    searchQuery: v.optional(v.string()),
+  },
+  returns: v.array(
+    v.union(
+      v.object({
+        _id: v.id("skills"),
+        _creationTime: v.number(),
+        title: v.string(),
+        description: v.string(),
+        level: levelValidator,
+        difficulty: v.number(),
+        muscles: v.array(v.id("muscles")),
+        equipment: v.array(v.id("equipment")),
+        embedded_videos: v.array(v.string()),
+        prerequisites: v.array(v.id("skills")),
+        variants: v.array(v.id("skills")),
+        tips: v.array(v.string()),
+        createdAt: v.number(),
+        updatedAt: v.number(),
+        createdBy: v.string(),
+        isPrivate: v.literal(false),
+        musclesData: v.array(
+          v.object({
+            _id: v.id("muscles"),
+            _creationTime: v.number(),
+            name: v.string(),
+            slug: v.string(),
+            recommendedRestHours: v.number(),
+            parts: v.array(
+              v.object({
+                name: v.string(),
+                slug: v.string(),
+              }),
+            ),
+          }),
+        ),
+        equipmentData: v.array(
+          v.object({
+            _id: v.id("equipment"),
+            _creationTime: v.number(),
+            name: v.string(),
+            slug: v.string(),
+            category: v.string(),
+          }),
+        ),
+      }),
+      v.object({
+        _id: v.id("private_skills"),
+        _creationTime: v.number(),
+        title: v.string(),
+        description: v.string(),
+        level: levelValidator,
+        difficulty: v.number(),
+        muscles: v.array(v.id("muscles")),
+        equipment: v.array(v.id("equipment")),
+        embedded_videos: v.array(v.string()),
+        prerequisites: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+        variants: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+        tips: v.array(v.string()),
+        createdAt: v.number(),
+        updatedAt: v.number(),
+        userId: v.string(),
+        isPrivate: v.literal(true),
+        musclesData: v.array(
+          v.object({
+            _id: v.id("muscles"),
+            _creationTime: v.number(),
+            name: v.string(),
+            slug: v.string(),
+            recommendedRestHours: v.number(),
+            parts: v.array(
+              v.object({
+                name: v.string(),
+                slug: v.string(),
+              }),
+            ),
+          }),
+        ),
+        equipmentData: v.array(
+          v.object({
+            _id: v.id("equipment"),
+            _creationTime: v.number(),
+            name: v.string(),
+            slug: v.string(),
+            category: v.string(),
+          }),
+        ),
+      }),
+    ),
+  ),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    const shouldQueryPublic = args.type === "all" || args.type === "public";
+    const shouldQueryPrivate = args.type === "all" || args.type === "private";
+
+    // Helper function to filter and enrich skills
+    const filterAndEnrich = async <
+      T extends Doc<"skills"> | Doc<"private_skills">,
+    >(
+      skills: T[],
+    ) => {
+      // Filter by difficulty range if provided
+      let filtered = skills;
+      if (
+        args.minDifficulty !== undefined ||
+        args.maxDifficulty !== undefined
+      ) {
+        filtered = filtered.filter((skill) => {
+          if (
+            args.minDifficulty !== undefined &&
+            skill.difficulty < args.minDifficulty
+          ) {
+            return false;
+          }
+          if (
+            args.maxDifficulty !== undefined &&
+            skill.difficulty > args.maxDifficulty
+          ) {
+            return false;
+          }
+          return true;
+        });
+      }
+
+      // Filter by muscles if provided
+      if (args.muscleIds && args.muscleIds.length > 0) {
+        filtered = filtered.filter((skill) =>
+          skill.muscles.some((id) => args.muscleIds!.includes(id)),
+        );
+      }
+
+      // Filter by equipment if provided
+      if (args.equipmentIds && args.equipmentIds.length > 0) {
+        filtered = filtered.filter((skill) =>
+          skill.equipment.some((id) => args.equipmentIds!.includes(id)),
+        );
+      }
+
+      // Enrich with muscle and equipment data
+      const muscles = await ctx.db.query("muscles").collect();
+      const equipment = await ctx.db.query("equipment").collect();
+
+      return filtered.map((skill) => ({
+        ...skill,
+        musclesData: skill.muscles
+          .map((id) => muscles.find((m) => m._id === id))
+          .filter((m): m is Doc<"muscles"> => m !== undefined),
+        equipmentData: skill.equipment
+          .map((id) => equipment.find((e) => e._id === id))
+          .filter((e): e is Doc<"equipment"> => e !== undefined),
+      }));
+    };
+
+    // Query public skills
+    let publicSkills: Array<Doc<"skills">> = [];
+    if (shouldQueryPublic) {
+      if (args.searchQuery) {
+        // Search in title first
+        const titleQuery = ctx.db
+          .query("skills")
+          .withSearchIndex("search_title", (q) => {
+            let searchQuery = q.search("title", args.searchQuery!);
+            if (args.level) {
+              searchQuery = searchQuery.eq("level", args.level);
+            }
+            return searchQuery;
+          });
+        const titleResults = await titleQuery.take(50);
+
+        // Also search in description
+        const descQuery = ctx.db
+          .query("skills")
+          .withSearchIndex("search_description", (q) => {
+            let searchQuery = q.search("description", args.searchQuery!);
+            if (args.level) {
+              searchQuery = searchQuery.eq("level", args.level);
+            }
+            return searchQuery;
+          });
+        const descResults = await descQuery.take(50);
+
+        // Combine and deduplicate
+        const skillMap = new Map<Id<"skills">, Doc<"skills">>();
+        [...titleResults, ...descResults].forEach((skill) => {
+          if (!skillMap.has(skill._id)) {
+            skillMap.set(skill._id, skill);
+          }
+        });
+        publicSkills = Array.from(skillMap.values());
+      } else {
+        if (args.level) {
+          publicSkills = await ctx.db
+            .query("skills")
+            .withIndex("by_level", (q) => q.eq("level", args.level!))
+            .collect();
+        } else if (
+          args.minDifficulty !== undefined ||
+          args.maxDifficulty !== undefined
+        ) {
+          publicSkills = await ctx.db
+            .query("skills")
+            .withIndex("by_difficulty")
+            .collect();
+        } else {
+          publicSkills = await ctx.db.query("skills").collect();
+        }
+      }
+    }
+
+    // Query private skills
+    let privateSkills: Array<Doc<"private_skills">> = [];
+    if (shouldQueryPrivate && userId) {
+      if (args.searchQuery) {
+        // Search in title first
+        const titleQuery = ctx.db
+          .query("private_skills")
+          .withSearchIndex("search_title", (q) => {
+            let searchQuery = q.search("title", args.searchQuery!);
+            if (args.level) {
+              searchQuery = searchQuery.eq("level", args.level);
+            }
+            return searchQuery;
+          });
+        const titleResults = await titleQuery.take(50);
+
+        // Also search in description
+        const descQuery = ctx.db
+          .query("private_skills")
+          .withSearchIndex("search_description", (q) => {
+            let searchQuery = q.search("description", args.searchQuery!);
+            if (args.level) {
+              searchQuery = searchQuery.eq("level", args.level);
+            }
+            return searchQuery;
+          });
+        const descResults = await descQuery.take(50);
+
+        // Combine, deduplicate, and filter by user
+        const skillMap = new Map<Id<"private_skills">, Doc<"private_skills">>();
+        [...titleResults, ...descResults]
+          .filter((skill) => skill.userId === userId)
+          .forEach((skill) => {
+            if (!skillMap.has(skill._id)) {
+              skillMap.set(skill._id, skill);
+            }
+          });
+        privateSkills = Array.from(skillMap.values());
+      } else {
+        if (args.level) {
+          const levelSkills = await ctx.db
+            .query("private_skills")
+            .withIndex("by_level", (q) => q.eq("level", args.level!))
+            .collect();
+          privateSkills = levelSkills.filter(
+            (skill) => skill.userId === userId,
+          );
+        } else if (
+          args.minDifficulty !== undefined ||
+          args.maxDifficulty !== undefined
+        ) {
+          const difficultySkills = await ctx.db
+            .query("private_skills")
+            .withIndex("by_difficulty")
+            .collect();
+          privateSkills = difficultySkills.filter(
+            (skill) => skill.userId === userId,
+          );
+        } else {
+          privateSkills = await ctx.db
+            .query("private_skills")
+            .withIndex("by_user", (q) => q.eq("userId", userId))
+            .collect();
+        }
+      }
+    }
+
+    // Filter and enrich both sets
+    const enrichedPublic = await filterAndEnrich(publicSkills);
+    const enrichedPrivate = await filterAndEnrich(privateSkills);
+
+    // Combine results
+    const results = [
+      ...enrichedPublic.map((s) => ({ ...s, isPrivate: false as const })),
+      ...enrichedPrivate.map((s) => ({ ...s, isPrivate: true as const })),
+    ];
+
+    return results;
+  },
+});
+
+// Get user's private skills with optional filtering
+export const getPrivateSkills = query({
+  args: {
+    level: v.optional(levelValidator),
+    minDifficulty: v.optional(v.number()),
+    maxDifficulty: v.optional(v.number()),
+    muscleIds: v.optional(v.array(v.id("muscles"))),
+    equipmentIds: v.optional(v.array(v.id("equipment"))),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("private_skills"),
+      _creationTime: v.number(),
+      title: v.string(),
+      description: v.string(),
+      level: levelValidator,
+      difficulty: v.number(),
+      muscles: v.array(v.id("muscles")),
+      equipment: v.array(v.id("equipment")),
+      embedded_videos: v.array(v.string()),
+      prerequisites: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      variants: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      tips: v.array(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      userId: v.string(),
+      musclesData: v.array(
+        v.object({
+          _id: v.id("muscles"),
+          _creationTime: v.number(),
+          name: v.string(),
+          slug: v.string(),
+          recommendedRestHours: v.number(),
+          parts: v.array(
+            v.object({
+              name: v.string(),
+              slug: v.string(),
+            }),
+          ),
+        }),
+      ),
+      equipmentData: v.array(
+        v.object({
+          _id: v.id("equipment"),
+          _creationTime: v.number(),
+          name: v.string(),
+          slug: v.string(),
+          category: v.string(),
+        }),
+      ),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    let privateSkills: Array<Doc<"private_skills">>;
+
+    if (args.level) {
+      const level = args.level;
+      const levelSkills = await ctx.db
+        .query("private_skills")
+        .withIndex("by_level", (q) => q.eq("level", level))
+        .collect();
+      privateSkills = levelSkills.filter((skill) => skill.userId === userId);
+    } else if (
+      args.minDifficulty !== undefined ||
+      args.maxDifficulty !== undefined
+    ) {
+      const difficultySkills = await ctx.db
+        .query("private_skills")
+        .withIndex("by_difficulty")
+        .collect();
+      privateSkills = difficultySkills.filter(
+        (skill) => skill.userId === userId,
+      );
+    } else {
+      privateSkills = await ctx.db
+        .query("private_skills")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .collect();
+    }
+
+    // Filter by difficulty range if provided
+    if (args.minDifficulty !== undefined || args.maxDifficulty !== undefined) {
+      privateSkills = privateSkills.filter((skill) => {
+        if (
+          args.minDifficulty !== undefined &&
+          skill.difficulty < args.minDifficulty
+        ) {
+          return false;
+        }
+        if (
+          args.maxDifficulty !== undefined &&
+          skill.difficulty > args.maxDifficulty
+        ) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    // Filter by muscles if provided
+    if (args.muscleIds && args.muscleIds.length > 0) {
+      privateSkills = privateSkills.filter((skill) =>
+        skill.muscles.some((id) => args.muscleIds!.includes(id)),
+      );
+    }
+
+    // Filter by equipment if provided
+    if (args.equipmentIds && args.equipmentIds.length > 0) {
+      privateSkills = privateSkills.filter((skill) =>
+        skill.equipment.some((id) => args.equipmentIds!.includes(id)),
+      );
+    }
+
+    // Enrich with muscle and equipment data
+    const muscles = await ctx.db.query("muscles").collect();
+    const equipment = await ctx.db.query("equipment").collect();
+
+    return privateSkills.map((skill) => ({
+      ...skill,
+      musclesData: skill.muscles
+        .map((id) => muscles.find((m) => m._id === id))
+        .filter((m): m is Doc<"muscles"> => m !== undefined),
+      equipmentData: skill.equipment
+        .map((id) => equipment.find((e) => e._id === id))
+        .filter((e): e is Doc<"equipment"> => e !== undefined),
+    }));
+  },
+});
+
+// Get a specific private skill by ID
+export const getPrivateSkill = query({
+  args: {
+    id: v.id("private_skills"),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("private_skills"),
+      _creationTime: v.number(),
+      title: v.string(),
+      description: v.string(),
+      level: levelValidator,
+      difficulty: v.number(),
+      muscles: v.array(v.id("muscles")),
+      equipment: v.array(v.id("equipment")),
+      embedded_videos: v.array(v.string()),
+      prerequisites: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      variants: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      tips: v.array(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      userId: v.string(),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const skill = await ctx.db.get(args.id);
+    if (!skill) {
+      return null;
+    }
+
+    // Verify ownership
+    if (skill.userId !== userId) {
+      throw new Error(
+        "Unauthorized: You can only view your own private skills",
+      );
+    }
+
+    return skill;
+  },
+});
+
+// Search user's private skills by title or description
+export const searchPrivateSkills = query({
+  args: {
+    searchQuery: v.string(),
+    level: v.optional(levelValidator),
+    minDifficulty: v.optional(v.number()),
+    maxDifficulty: v.optional(v.number()),
+    muscleIds: v.optional(v.array(v.id("muscles"))),
+    equipmentIds: v.optional(v.array(v.id("equipment"))),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("private_skills"),
+      _creationTime: v.number(),
+      title: v.string(),
+      description: v.string(),
+      level: levelValidator,
+      difficulty: v.number(),
+      muscles: v.array(v.id("muscles")),
+      equipment: v.array(v.id("equipment")),
+      embedded_videos: v.array(v.string()),
+      prerequisites: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      variants: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      tips: v.array(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      userId: v.string(),
+      musclesData: v.array(
+        v.object({
+          _id: v.id("muscles"),
+          _creationTime: v.number(),
+          name: v.string(),
+          slug: v.string(),
+          recommendedRestHours: v.number(),
+          parts: v.array(
+            v.object({
+              name: v.string(),
+              slug: v.string(),
+            }),
+          ),
+        }),
+      ),
+      equipmentData: v.array(
+        v.object({
+          _id: v.id("equipment"),
+          _creationTime: v.number(),
+          name: v.string(),
+          slug: v.string(),
+          category: v.string(),
+        }),
+      ),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    // Search in title first
+    let titleQuery = ctx.db
+      .query("private_skills")
+      .withSearchIndex("search_title", (q) => {
+        let searchQuery = q.search("title", args.searchQuery);
+        if (args.level) {
+          const level = args.level;
+          searchQuery = searchQuery.eq("level", level);
+        }
+        return searchQuery;
+      });
+
+    const titleResults = await titleQuery.take(50);
+
+    // Also search in description
+    let descQuery = ctx.db
+      .query("private_skills")
+      .withSearchIndex("search_description", (q) => {
+        let searchQuery = q.search("description", args.searchQuery);
+        if (args.level) {
+          const level = args.level;
+          searchQuery = searchQuery.eq("level", level);
+        }
+        return searchQuery;
+      });
+
+    const descResults = await descQuery.take(50);
+
+    // Combine and deduplicate results, filter by user
+    const skillMap = new Map<Id<"private_skills">, Doc<"private_skills">>();
+    [...titleResults, ...descResults]
+      .filter((skill) => skill.userId === userId)
+      .forEach((skill) => {
+        if (!skillMap.has(skill._id)) {
+          skillMap.set(skill._id, skill);
+        }
+      });
+
+    // Filter by difficulty range if provided
+    let results = Array.from(skillMap.values());
+    if (args.minDifficulty !== undefined || args.maxDifficulty !== undefined) {
+      results = results.filter((skill) => {
+        if (
+          args.minDifficulty !== undefined &&
+          skill.difficulty < args.minDifficulty
+        ) {
+          return false;
+        }
+        if (
+          args.maxDifficulty !== undefined &&
+          skill.difficulty > args.maxDifficulty
+        ) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    // Filter by muscles if provided
+    if (args.muscleIds && args.muscleIds.length > 0) {
+      results = results.filter((skill) =>
+        skill.muscles.some((id) => args.muscleIds!.includes(id)),
+      );
+    }
+
+    // Filter by equipment if provided
+    if (args.equipmentIds && args.equipmentIds.length > 0) {
+      results = results.filter((skill) =>
+        skill.equipment.some((id) => args.equipmentIds!.includes(id)),
+      );
+    }
+
+    // Enrich with muscle and equipment data
+    const muscles = await ctx.db.query("muscles").collect();
+    const equipment = await ctx.db.query("equipment").collect();
+
+    return results.map((skill) => ({
+      ...skill,
+      musclesData: skill.muscles
+        .map((id) => muscles.find((m) => m._id === id))
+        .filter((m): m is Doc<"muscles"> => m !== undefined),
+      equipmentData: skill.equipment
+        .map((id) => equipment.find((e) => e._id === id))
+        .filter((e): e is Doc<"equipment"> => e !== undefined),
+    }));
+  },
+});
+
+// Create a new private skill
+export const createPrivateSkill = mutation({
+  args: {
+    skillData: skillDataValidator,
+  },
+  returns: v.id("private_skills"),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) throw new Error("User not found");
+
+    // Validate difficulty
+    validateDifficulty(args.skillData.difficulty);
+
+    // Validate URLs
+    validateUrlArray(args.skillData.embedded_videos);
+
+    // Validate that prerequisites and variants exist and user has access
+    for (const prereqId of args.skillData.prerequisites) {
+      // Check if it's a public skill or private skill
+      const prereqPublic = await ctx.db.get(prereqId as Id<"skills">);
+      const prereqPrivate = prereqPublic
+        ? null
+        : await ctx.db.get(prereqId as Id<"private_skills">);
+
+      if (!prereqPublic && !prereqPrivate) {
+        throw new Error(`Prerequisite skill not found: ${prereqId}`);
+      }
+
+      // If private, verify ownership
+      if (prereqPrivate && prereqPrivate.userId !== userId) {
+        throw new Error(
+          `Unauthorized: You can only reference your own private skills`,
+        );
+      }
+    }
+
+    for (const variantId of args.skillData.variants) {
+      const variantPublic = await ctx.db.get(variantId as Id<"skills">);
+      const variantPrivate = variantPublic
+        ? null
+        : await ctx.db.get(variantId as Id<"private_skills">);
+
+      if (!variantPublic && !variantPrivate) {
+        throw new Error(`Variant skill not found: ${variantId}`);
+      }
+
+      if (variantPrivate && variantPrivate.userId !== userId) {
+        throw new Error(
+          `Unauthorized: You can only reference your own private skills`,
+        );
+      }
+    }
+
+    // Validate that muscles and equipment exist
+    for (const muscleId of args.skillData.muscles) {
+      const muscle = await ctx.db.get(muscleId);
+      if (!muscle) {
+        throw new Error(`Muscle not found: ${muscleId}`);
+      }
+    }
+
+    for (const equipmentId of args.skillData.equipment) {
+      const equipment = await ctx.db.get(equipmentId);
+      if (!equipment) {
+        throw new Error(`Equipment not found: ${equipmentId}`);
+      }
+    }
+
+    const now = Date.now();
+    const skillId = await ctx.db.insert("private_skills", {
+      title: args.skillData.title,
+      description: args.skillData.description,
+      level: args.skillData.level,
+      difficulty: args.skillData.difficulty,
+      muscles: args.skillData.muscles,
+      equipment: args.skillData.equipment,
+      embedded_videos: args.skillData.embedded_videos,
+      prerequisites: args.skillData.prerequisites,
+      variants: args.skillData.variants,
+      tips: args.skillData.tips,
+      createdAt: now,
+      updatedAt: now,
+      userId: userId,
+    });
+
+    return skillId;
+  },
+});
+
+// Update an existing private skill
+export const updatePrivateSkill = mutation({
+  args: {
+    id: v.id("private_skills"),
+    skillData: partialSkillDataValidator,
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const skill = await ctx.db.get(args.id);
+    if (!skill) {
+      throw new Error("Private skill not found");
+    }
+
+    // Verify ownership
+    if (skill.userId !== userId) {
+      throw new Error(
+        "Unauthorized: You can only update your own private skills",
+      );
+    }
+
+    // Validate difficulty if provided
+    if (args.skillData.difficulty !== undefined) {
+      validateDifficulty(args.skillData.difficulty);
+    }
+
+    // Validate URLs if provided
+    if (args.skillData.embedded_videos !== undefined) {
+      validateUrlArray(args.skillData.embedded_videos);
+    }
+
+    // Validate that prerequisites exist if provided
+    if (args.skillData.prerequisites !== undefined) {
+      for (const prereqId of args.skillData.prerequisites) {
+        const prereqPublic = await ctx.db.get(prereqId as Id<"skills">);
+        const prereqPrivate = prereqPublic
+          ? null
+          : await ctx.db.get(prereqId as Id<"private_skills">);
+
+        if (!prereqPublic && !prereqPrivate) {
+          throw new Error(`Prerequisite skill not found: ${prereqId}`);
+        }
+
+        if (prereqPrivate && prereqPrivate.userId !== userId) {
+          throw new Error(
+            `Unauthorized: You can only reference your own private skills`,
+          );
+        }
+      }
+    }
+
+    // Validate that variants exist if provided
+    if (args.skillData.variants !== undefined) {
+      for (const variantId of args.skillData.variants) {
+        const variantPublic = await ctx.db.get(variantId as Id<"skills">);
+        const variantPrivate = variantPublic
+          ? null
+          : await ctx.db.get(variantId as Id<"private_skills">);
+
+        if (!variantPublic && !variantPrivate) {
+          throw new Error(`Variant skill not found: ${variantId}`);
+        }
+
+        if (variantPrivate && variantPrivate.userId !== userId) {
+          throw new Error(
+            `Unauthorized: You can only reference your own private skills`,
+          );
+        }
+      }
+    }
+
+    // Validate that muscles exist if provided
+    if (args.skillData.muscles !== undefined) {
+      for (const muscleId of args.skillData.muscles) {
+        const muscle = await ctx.db.get(muscleId);
+        if (!muscle) {
+          throw new Error(`Muscle not found: ${muscleId}`);
+        }
+      }
+    }
+
+    // Validate that equipment exists if provided
+    if (args.skillData.equipment !== undefined) {
+      for (const equipmentId of args.skillData.equipment) {
+        const equipment = await ctx.db.get(equipmentId);
+        if (!equipment) {
+          throw new Error(`Equipment not found: ${equipmentId}`);
+        }
+      }
+    }
+
+    // Build update object
+    const updates: {
+      title?: string;
+      description?: string;
+      level?: Doc<"private_skills">["level"];
+      difficulty?: number;
+      muscles?: Id<"muscles">[];
+      equipment?: Id<"equipment">[];
+      embedded_videos?: string[];
+      prerequisites?: Array<Id<"skills"> | Id<"private_skills">>;
+      variants?: Array<Id<"skills"> | Id<"private_skills">>;
+      tips?: string[];
+      updatedAt: number;
+    } = {
+      updatedAt: Date.now(),
+    };
+
+    if (args.skillData.title !== undefined)
+      updates.title = args.skillData.title;
+    if (args.skillData.description !== undefined)
+      updates.description = args.skillData.description;
+    if (args.skillData.level !== undefined)
+      updates.level = args.skillData.level;
+    if (args.skillData.difficulty !== undefined)
+      updates.difficulty = args.skillData.difficulty;
+    if (args.skillData.muscles !== undefined)
+      updates.muscles = args.skillData.muscles;
+    if (args.skillData.equipment !== undefined)
+      updates.equipment = args.skillData.equipment;
+    if (args.skillData.embedded_videos !== undefined)
+      updates.embedded_videos = args.skillData.embedded_videos;
+    if (args.skillData.prerequisites !== undefined)
+      updates.prerequisites = args.skillData.prerequisites;
+    if (args.skillData.variants !== undefined)
+      updates.variants = args.skillData.variants;
+    if (args.skillData.tips !== undefined) updates.tips = args.skillData.tips;
+
+    await ctx.db.patch(args.id, updates);
+    return null;
+  },
+});
+
+// Delete a private skill
+export const deletePrivateSkill = mutation({
+  args: {
+    id: v.id("private_skills"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const skill = await ctx.db.get(args.id);
+    if (!skill) {
+      throw new Error("Private skill not found");
+    }
+
+    // Verify ownership
+    if (skill.userId !== userId) {
+      throw new Error(
+        "Unauthorized: You can only delete your own private skills",
+      );
+    }
+
+    await ctx.db.delete(args.id);
+    return null;
   },
 });

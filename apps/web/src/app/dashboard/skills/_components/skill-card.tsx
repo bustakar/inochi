@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { api } from "@packages/backend/convex/_generated/api";
 import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { Dumbbell, MoreVertical, Target } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   Badge,
@@ -14,11 +17,18 @@ import {
 } from "@inochi/ui";
 
 interface SkillCardProps {
-  skill: Doc<"skills"> & {
-    musclesData?: Array<Doc<"muscles">>;
-    equipmentData?: Array<Doc<"equipment">>;
-  };
+  skill:
+    | (Doc<"skills"> & {
+        musclesData?: Array<Doc<"muscles">>;
+        equipmentData?: Array<Doc<"equipment">>;
+      })
+    | (Doc<"private_skills"> & {
+        musclesData?: Array<Doc<"muscles">>;
+        equipmentData?: Array<Doc<"equipment">>;
+      });
+  isPrivate?: boolean;
   onSuggestEdit?: (skill: Doc<"skills">) => void;
+  onEditPrivateSkill?: (skill: Doc<"private_skills">) => void;
 }
 
 const levelColors: Record<string, string> = {
@@ -33,7 +43,80 @@ const levelColors: Record<string, string> = {
   elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
 };
 
-function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
+function SkillCardComponent({
+  skill,
+  isPrivate = false,
+  onSuggestEdit,
+  onEditPrivateSkill,
+}: SkillCardProps) {
+  const createSubmission = useMutation(
+    api.functions.submissions.createSubmission,
+  );
+  const publicSkills = useQuery(api.functions.skills.getSkills, {});
+  const [isSuggesting, setIsSuggesting] = useState(false);
+
+  const handleSuggestToPublic = async () => {
+    if (!isPrivate || !("userId" in skill)) return;
+
+    setIsSuggesting(true);
+    try {
+      // Validate prerequisites and variants are public
+      const publicSkillIds = new Set(publicSkills?.map((s) => s._id) || []);
+
+      const allPrereqsPublic = (skill.prerequisites || []).every((id: string) =>
+        publicSkillIds.has(id as Doc<"skills">["_id"]),
+      );
+      const allVariantsPublic = (skill.variants || []).every((id: string) =>
+        publicSkillIds.has(id as Doc<"skills">["_id"]),
+      );
+
+      if (!allPrereqsPublic || !allVariantsPublic) {
+        toast.error(
+          "All prerequisites and variants must be public skills before suggesting to public database.",
+        );
+        setIsSuggesting(false);
+        return;
+      }
+
+      await createSubmission({
+        title: skill.title,
+        description: skill.description,
+        level: skill.level as
+          | "beginner"
+          | "intermediate"
+          | "advanced"
+          | "expert"
+          | "elite",
+        difficulty: skill.difficulty,
+        muscles: skill.muscles as Doc<"muscles">["_id"][],
+        equipment: skill.equipment as Doc<"equipment">["_id"][],
+        embedded_videos: skill.embedded_videos.filter(
+          (v: string) => v.trim() !== "",
+        ),
+        prerequisites: skill.prerequisites.filter((id: string) =>
+          publicSkillIds.has(id as Doc<"skills">["_id"]),
+        ) as Doc<"skills">["_id"][],
+        variants: skill.variants.filter((id: string) =>
+          publicSkillIds.has(id as Doc<"skills">["_id"]),
+        ) as Doc<"skills">["_id"][],
+        tips: skill.tips.filter((t: string) => t.trim() !== ""),
+        submissionType: "create",
+        privateSkillId: skill._id as Doc<"private_skills">["_id"],
+      });
+
+      toast.success("Private skill suggested to public database!");
+    } catch (error) {
+      console.error("Error suggesting skill:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to suggest skill. Please try again.",
+      );
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
+
   const displayDescription = useMemo(() => {
     // Truncate at word boundary to avoid breaking words
     const maxLength = 150; // Allow more characters since line-clamp-2 will handle display
@@ -48,6 +131,7 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
 
     return skill.description.substring(0, cutoff) + "...";
   }, [skill.description]);
+
   return (
     <div className="bg-card relative rounded-lg border p-4 transition-shadow hover:shadow-md">
       {/* Header with title and more button */}
@@ -55,7 +139,7 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
         <h3 className="text-card-foreground flex-1 pr-8 text-lg font-semibold">
           {skill.title}
         </h3>
-        {onSuggestEdit && (
+        {(onSuggestEdit || onEditPrivateSkill) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -68,16 +152,36 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onSuggestEdit(skill)}>
-                Suggest Edit
-              </DropdownMenuItem>
+              {isPrivate && onEditPrivateSkill ? (
+                <DropdownMenuItem
+                  onClick={() =>
+                    onEditPrivateSkill(skill as Doc<"private_skills">)
+                  }
+                >
+                  Edit
+                </DropdownMenuItem>
+              ) : onSuggestEdit ? (
+                <DropdownMenuItem
+                  onClick={() => onSuggestEdit(skill as Doc<"skills">)}
+                >
+                  Suggest Edit
+                </DropdownMenuItem>
+              ) : null}
+              {isPrivate && (
+                <DropdownMenuItem
+                  onClick={handleSuggestToPublic}
+                  disabled={isSuggesting}
+                >
+                  {isSuggesting ? "Suggesting..." : "Suggest to Public"}
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
       </div>
 
-      {/* Level badge on its own row */}
-      <div className="mb-2">
+      {/* Level badge and private indicator */}
+      <div className="mb-2 flex items-center gap-2">
         <Badge
           className={
             levelColors[skill.level] ||
@@ -86,6 +190,11 @@ function SkillCardComponent({ skill, onSuggestEdit }: SkillCardProps) {
         >
           {skill.level}
         </Badge>
+        {isPrivate && (
+          <Badge variant="outline" className="text-xs">
+            Private
+          </Badge>
+        )}
       </div>
 
       <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">

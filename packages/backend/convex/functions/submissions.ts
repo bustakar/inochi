@@ -338,6 +338,7 @@ export const createSubmission = mutation({
     tips: v.array(v.string()),
     submissionType: v.union(v.literal("create"), v.literal("edit")),
     originalSkillId: v.optional(v.id("skills")),
+    privateSkillId: v.optional(v.id("private_skills")),
   },
   returns: v.id("user_submissions"),
   handler: async (ctx, args) => {
@@ -351,6 +352,39 @@ export const createSubmission = mutation({
 
     // Validate URLs
     validateUrlArray(args.embedded_videos);
+
+    // Validate privateSkillId if provided
+    if (args.privateSkillId) {
+      const privateSkill = await ctx.db.get(args.privateSkillId);
+      if (!privateSkill) {
+        throw new Error(`Private skill not found: ${args.privateSkillId}`);
+      }
+      if (privateSkill.userId !== userId) {
+        throw new Error(
+          "Unauthorized: You can only suggest your own private skills",
+        );
+      }
+
+      // Validate that all prerequisites and variants are public skills
+      // Since args.prerequisites/variants are typed as Id<"skills">[], they should be public
+      // We verify they exist in the public skills table
+      for (const prereqId of args.prerequisites) {
+        const prereq = await ctx.db.get(prereqId);
+        if (!prereq) {
+          throw new Error(`Prerequisite skill not found: ${prereqId}`);
+        }
+        // If we successfully got it from the skills table, it's a public skill
+        // (Convex IDs are table-specific, so it can't be a private skill)
+      }
+
+      for (const variantId of args.variants) {
+        const variant = await ctx.db.get(variantId);
+        if (!variant) {
+          throw new Error(`Variant skill not found: ${variantId}`);
+        }
+        // If we successfully got it from the skills table, it's a public skill
+      }
+    }
 
     // Validate submission type and originalSkillId
     if (args.submissionType === "edit") {
@@ -369,18 +403,20 @@ export const createSubmission = mutation({
       }
     }
 
-    // Validate that prerequisites and variants exist
-    for (const prereqId of args.prerequisites) {
-      const prereq = await ctx.db.get(prereqId);
-      if (!prereq) {
-        throw new Error(`Prerequisite skill not found: ${prereqId}`);
+    // Validate that prerequisites and variants exist (if not already validated above)
+    if (!args.privateSkillId) {
+      for (const prereqId of args.prerequisites) {
+        const prereq = await ctx.db.get(prereqId);
+        if (!prereq) {
+          throw new Error(`Prerequisite skill not found: ${prereqId}`);
+        }
       }
-    }
 
-    for (const variantId of args.variants) {
-      const variant = await ctx.db.get(variantId);
-      if (!variant) {
-        throw new Error(`Variant skill not found: ${variantId}`);
+      for (const variantId of args.variants) {
+        const variant = await ctx.db.get(variantId);
+        if (!variant) {
+          throw new Error(`Variant skill not found: ${variantId}`);
+        }
       }
     }
 
@@ -414,6 +450,7 @@ export const createSubmission = mutation({
       submissionType: args.submissionType,
       status: "pending",
       originalSkillId: args.originalSkillId,
+      privateSkillId: args.privateSkillId,
       submittedBy: userId,
       submittedAt: now,
     });
@@ -556,7 +593,9 @@ export const approveSubmission = mutation({
 
     const role = await getUserRole(ctx, args.userRole);
     if (role !== "admin" && role !== "moderator") {
-      throw new Error("Unauthorized: Only admins and moderators can approve submissions");
+      throw new Error(
+        "Unauthorized: Only admins and moderators can approve submissions",
+      );
     }
 
     const submission = await ctx.db.get(args.id);
@@ -569,6 +608,73 @@ export const approveSubmission = mutation({
     }
 
     const now = Date.now();
+
+    // If this is a submission from a private skill, copy it to public skills table
+    if (submission.privateSkillId) {
+      const privateSkill = await ctx.db.get(submission.privateSkillId);
+      if (!privateSkill) {
+        throw new Error(
+          `Private skill not found: ${submission.privateSkillId}`,
+        );
+      }
+
+      // Create public skill from submission data
+      await ctx.db.insert("skills", {
+        title: submission.title,
+        description: submission.description,
+        level: submission.level,
+        difficulty: submission.difficulty,
+        muscles: submission.muscles,
+        equipment: submission.equipment,
+        embedded_videos: submission.embedded_videos,
+        prerequisites: submission.prerequisites,
+        variants: submission.variants,
+        tips: submission.tips,
+        createdAt: now,
+        updatedAt: now,
+        createdBy: submission.submittedBy,
+      });
+
+      // Delete the private skill
+      await ctx.db.delete(submission.privateSkillId);
+    } else if (submission.submissionType === "create") {
+      // For regular create submissions, also create the skill in public table
+      await ctx.db.insert("skills", {
+        title: submission.title,
+        description: submission.description,
+        level: submission.level,
+        difficulty: submission.difficulty,
+        muscles: submission.muscles,
+        equipment: submission.equipment,
+        embedded_videos: submission.embedded_videos,
+        prerequisites: submission.prerequisites,
+        variants: submission.variants,
+        tips: submission.tips,
+        createdAt: now,
+        updatedAt: now,
+        createdBy: submission.submittedBy,
+      });
+    } else if (
+      submission.submissionType === "edit" &&
+      submission.originalSkillId
+    ) {
+      // For edit submissions, update the existing skill
+      await ctx.db.patch(submission.originalSkillId, {
+        title: submission.title,
+        description: submission.description,
+        level: submission.level,
+        difficulty: submission.difficulty,
+        muscles: submission.muscles,
+        equipment: submission.equipment,
+        embedded_videos: submission.embedded_videos,
+        prerequisites: submission.prerequisites,
+        variants: submission.variants,
+        tips: submission.tips,
+        updatedAt: now,
+      });
+    }
+
+    // Mark submission as approved
     await ctx.db.patch(args.id, {
       status: "approved",
       reviewedBy: userId,
@@ -595,7 +701,9 @@ export const rejectSubmission = mutation({
 
     const role = await getUserRole(ctx, args.userRole);
     if (role !== "admin" && role !== "moderator") {
-      throw new Error("Unauthorized: Only admins and moderators can reject submissions");
+      throw new Error(
+        "Unauthorized: Only admins and moderators can reject submissions",
+      );
     }
 
     const submission = await ctx.db.get(args.id);
