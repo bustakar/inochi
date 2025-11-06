@@ -501,6 +501,8 @@ const formSchema = z.object({
   tips: tipsSchema,
 });
 
+export type SkillFormData = z.output<typeof formSchema>;
+
 export function CreateSkillDialog({
   existingSkill,
   open,
@@ -517,95 +519,69 @@ export function CreateSkillDialog({
 
   const form = useAppForm({
     defaultValues: {
-      title: "",
-      description: "",
-      level: "beginner",
-      difficulty: 1,
-      muscles: [] as string[],
-      equipment: [] as string[],
-      prerequisites: [] as string[],
-      variants: [] as string[],
-      embedded_videos: [] as string[],
-      tips: [] as string[],
+      title: existingSkill?.title ?? "",
+      description: existingSkill?.description ?? "",
+      level: existingSkill?.level ?? "beginner",
+      difficulty: existingSkill?.difficulty ?? 1,
+      muscles: (existingSkill?.muscles as string[]) ?? [],
+      equipment: (existingSkill?.equipment as string[]) ?? [],
+      prerequisites: (existingSkill?.prerequisites as string[]) ?? [],
+      variants: (existingSkill?.variants as string[]) ?? [],
+      embedded_videos: existingSkill?.embedded_videos ?? [],
+      tips: existingSkill?.tips ?? [],
     },
     validators: {
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
-      try {
-        await createSubmission({
-          title: value.title,
-          description: value.description,
-          level: value.level as
-            | "beginner"
-            | "intermediate"
-            | "advanced"
-            | "expert"
-            | "elite",
-          difficulty: value.difficulty,
-          muscles: value.muscles as Doc<"muscles">["_id"][],
-          equipment: value.equipment as Doc<"equipment">["_id"][],
-          embedded_videos: value.embedded_videos.filter(
-            (v: string) => v.trim() !== "",
-          ),
-          prerequisites: value.prerequisites as Doc<"skills">["_id"][],
-          variants: value.variants as Doc<"skills">["_id"][],
-          tips: value.tips.filter((t: string) => t.trim() !== ""),
-          submissionType: isEditMode ? "edit" : "create",
-          originalSkillId: isEditMode ? existingSkill?._id : undefined,
-        });
-        toast.success(
-          isEditMode
-            ? "Edit suggestion submitted!"
-            : "Skill suggestion submitted!",
-        );
-        onOpenChange(false);
-      } catch (error) {
-        console.error("Error submitting suggestion:", error);
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "Failed to submit suggestion. Please try again.",
-        );
-      }
+      await onSubmit(value);
     },
   });
 
-  // Reset form when dialog opens/closes or edit mode changes
-  useEffect(() => {
-    if (!open) {
-      // Reset to defaults when dialog closes
-      form.reset({
-        title: "",
-        description: "",
-        level: "beginner",
-        difficulty: 1,
-        muscles: [],
-        equipment: [],
-        prerequisites: [],
-        variants: [],
-        embedded_videos: [],
-        tips: [],
+  const onSubmit = async (data: SkillFormData) => {
+    try {
+      await createSubmission({
+        title: data.title,
+        description: data.description,
+        level: data.level as
+          | "beginner"
+          | "intermediate"
+          | "advanced"
+          | "expert"
+          | "elite",
+        difficulty: data.difficulty,
+        muscles: data.muscles as Doc<"muscles">["_id"][],
+        equipment: data.equipment as Doc<"equipment">["_id"][],
+        embedded_videos: data.embedded_videos.filter(
+          (v: string) => v.trim() !== "",
+        ),
+        prerequisites: data.prerequisites as Doc<"skills">["_id"][],
+        variants: data.variants as Doc<"skills">["_id"][],
+        tips: data.tips.filter((t: string) => t.trim() !== ""),
+        submissionType: isEditMode ? "edit" : "create",
+        originalSkillId: isEditMode ? existingSkill?._id : undefined,
       });
-      return;
+      toast.success(
+        isEditMode
+          ? "Edit suggestion submitted!"
+          : "Skill suggestion submitted!",
+      );
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.error("Error submitting suggestion:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit suggestion. Please try again.",
+      );
     }
+  };
 
-    // Prefill form when editing
-    if (isEditMode && existingSkill) {
-      form.reset({
-        title: existingSkill.title,
-        description: existingSkill.description,
-        level: existingSkill.level,
-        difficulty: existingSkill.difficulty,
-        muscles: existingSkill.muscles,
-        equipment: existingSkill.equipment,
-        embedded_videos: existingSkill.embedded_videos,
-        prerequisites: existingSkill.prerequisites,
-        variants: existingSkill.variants,
-        tips: existingSkill.tips,
-      });
-    }
-  }, [open, isEditMode, existingSkill?._id, form]);
+  const onCancel = () => {
+    onOpenChange(false);
+    form.reset();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -695,7 +671,9 @@ export function CreateSkillDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                onCancel();
+              }}
             >
               Cancel
             </Button>
