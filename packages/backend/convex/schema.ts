@@ -51,6 +51,33 @@ export default defineSchema({
       filterFields: ["level", "difficulty"],
     }),
 
+  private_skills: defineTable({
+    title: v.string(),
+    description: v.string(),
+    level: levelValidator,
+    difficulty: v.number(),
+    muscles: v.array(v.id("muscles")),
+    equipment: v.array(v.id("equipment")),
+    embedded_videos: v.array(urlValidator),
+    prerequisites: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+    variants: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+    tips: v.array(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    userId: v.string(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_level", ["level"])
+    .index("by_difficulty", ["difficulty"])
+    .searchIndex("search_title", {
+      searchField: "title",
+      filterFields: ["level", "difficulty"],
+    })
+    .searchIndex("search_description", {
+      searchField: "description",
+      filterFields: ["level", "difficulty"],
+    }),
+
   user_submissions: defineTable({
     // All skill fields
     title: v.string(),
@@ -71,6 +98,7 @@ export default defineSchema({
       v.literal("rejected"),
     ),
     originalSkillId: v.optional(v.id("skills")),
+    privateSkillId: v.optional(v.id("private_skills")),
     submittedBy: v.string(),
     submittedAt: v.number(),
     reviewedBy: v.optional(v.string()),

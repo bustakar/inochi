@@ -7,7 +7,10 @@ import { useQuery } from "convex/react";
 
 import { SkillCard } from "./skill-card";
 
+type SkillFilter = "all" | "public" | "private";
+
 interface SkillsListProps {
+  filter: SkillFilter;
   level?: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
   minDifficulty?: number;
   maxDifficulty?: number;
@@ -15,9 +18,11 @@ interface SkillsListProps {
   muscleIds?: Id<"muscles">[];
   equipmentIds?: Id<"equipment">[];
   onSuggestEdit: (skill: Doc<"skills">) => void;
+  onEditPrivateSkill: (skill: Doc<"private_skills">) => void;
 }
 
 export function SkillsList({
+  filter,
   level,
   minDifficulty,
   maxDifficulty,
@@ -25,30 +30,33 @@ export function SkillsList({
   muscleIds,
   equipmentIds,
   onSuggestEdit,
+  onEditPrivateSkill,
 }: SkillsListProps) {
   // Build query args with all filters
   const queryArgs = useMemo(
     () => ({
+      type: filter as "all" | "public" | "private",
       level,
       minDifficulty,
       maxDifficulty,
       muscleIds: muscleIds && muscleIds.length > 0 ? muscleIds : undefined,
       equipmentIds:
         equipmentIds && equipmentIds.length > 0 ? equipmentIds : undefined,
+      searchQuery: searchQuery?.trim() || undefined,
     }),
-    [level, minDifficulty, maxDifficulty, muscleIds, equipmentIds],
+    [
+      filter,
+      level,
+      minDifficulty,
+      maxDifficulty,
+      muscleIds,
+      equipmentIds,
+      searchQuery,
+    ],
   );
 
-  // Use search if query provided, otherwise use regular getSkills
-  const searchSkillsResult = useQuery(
-    api.functions.skills.searchSkills,
-    searchQuery ? { searchQuery, ...queryArgs } : "skip",
-  );
-  const allSkillsResult = useQuery(
-    api.functions.skills.getSkills,
-    !searchQuery ? queryArgs : "skip",
-  );
-  const skills = searchQuery ? searchSkillsResult : allSkillsResult;
+  // Use unified getAllSkills query
+  const skills = useQuery(api.functions.skills.getAllSkills, queryArgs);
 
   if (skills === undefined) {
     return (
@@ -71,8 +79,10 @@ export function SkillsList({
       {skills.map((skill) => (
         <SkillCard
           key={skill._id}
-          skill={skill}
+          skill={skill as any}
+          isPrivate={skill.isPrivate}
           onSuggestEdit={onSuggestEdit}
+          onEditPrivateSkill={onEditPrivateSkill}
         />
       ))}
     </div>

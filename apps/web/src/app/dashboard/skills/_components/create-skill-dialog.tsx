@@ -55,7 +55,7 @@ interface Skill {
 }
 
 interface CreateSkillDialogProps {
-  existingSkill?: Doc<"skills"> | undefined;
+  existingSkill?: Doc<"skills"> | Doc<"private_skills"> | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -511,11 +511,31 @@ export function CreateSkillDialog({
   const muscles = useQuery(api.functions.skills.getMuscles, {});
   const equipment = useQuery(api.functions.skills.getEquipment, {});
   const skills = useQuery(api.functions.skills.getSkills, {});
+  const privateSkills = useQuery(api.functions.skills.getPrivateSkills, {});
+  const createPrivateSkill = useMutation(
+    api.functions.skills.createPrivateSkill,
+  );
+  const updatePrivateSkill = useMutation(
+    api.functions.skills.updatePrivateSkill,
+  );
   const createSubmission = useMutation(
     api.functions.submissions.createSubmission,
   );
 
+  // Check if existing skill is private
+  const isPrivateSkill =
+    existingSkill && "_id" in existingSkill && "userId" in existingSkill;
   const isEditMode = Boolean(existingSkill);
+  const isEditPrivateSkill = isEditMode && isPrivateSkill;
+
+  // Combine public and private skills for selection
+  const allSkillsForSelection = React.useMemo(() => {
+    const publicSkills =
+      skills?.map((s) => ({ _id: s._id, title: s.title })) || [];
+    const privateSkillsList =
+      privateSkills?.map((s) => ({ _id: s._id, title: s.title })) || [];
+    return [...publicSkills, ...privateSkillsList];
+  }, [skills, privateSkills]);
 
   const form = useAppForm({
     defaultValues: {
@@ -540,7 +560,7 @@ export function CreateSkillDialog({
 
   const onSubmit = async (data: SkillFormData) => {
     try {
-      await createSubmission({
+      const skillData = {
         title: data.title,
         description: data.description,
         level: data.level as
@@ -555,25 +575,61 @@ export function CreateSkillDialog({
         embedded_videos: data.embedded_videos.filter(
           (v: string) => v.trim() !== "",
         ),
-        prerequisites: data.prerequisites as Doc<"skills">["_id"][],
-        variants: data.variants as Doc<"skills">["_id"][],
+        prerequisites: data.prerequisites as Array<
+          Doc<"skills">["_id"] | Doc<"private_skills">["_id"]
+        >,
+        variants: data.variants as Array<
+          Doc<"skills">["_id"] | Doc<"private_skills">["_id"]
+        >,
         tips: data.tips.filter((t: string) => t.trim() !== ""),
-        submissionType: isEditMode ? "edit" : "create",
-        originalSkillId: isEditMode ? existingSkill?._id : undefined,
-      });
-      toast.success(
-        isEditMode
-          ? "Edit suggestion submitted!"
-          : "Skill suggestion submitted!",
-      );
+      };
+
+      if (isEditPrivateSkill) {
+        // Direct edit of private skill
+        await updatePrivateSkill({
+          id: existingSkill!._id as Doc<"private_skills">["_id"],
+          skillData,
+        });
+        toast.success("Private skill updated!");
+      } else if (isEditMode) {
+        // Suggest edit for public skill
+        await createSubmission({
+          title: data.title,
+          description: data.description,
+          level: data.level as
+            | "beginner"
+            | "intermediate"
+            | "advanced"
+            | "expert"
+            | "elite",
+          difficulty: data.difficulty,
+          muscles: data.muscles as Doc<"muscles">["_id"][],
+          equipment: data.equipment as Doc<"equipment">["_id"][],
+          embedded_videos: data.embedded_videos.filter(
+            (v: string) => v.trim() !== "",
+          ),
+          prerequisites: data.prerequisites as Doc<"skills">["_id"][],
+          variants: data.variants as Doc<"skills">["_id"][],
+          tips: data.tips.filter((t: string) => t.trim() !== ""),
+          submissionType: "edit",
+          originalSkillId: existingSkill?._id as Doc<"skills">["_id"],
+        });
+        toast.success("Edit suggestion submitted!");
+      } else {
+        // Create new private skill
+        await createPrivateSkill({
+          skillData,
+        });
+        toast.success("Private skill created!");
+      }
       onOpenChange(false);
       form.reset();
     } catch (error) {
-      console.error("Error submitting suggestion:", error);
+      console.error("Error saving skill:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to submit suggestion. Please try again.",
+          : "Failed to save skill. Please try again.",
       );
     }
   };
@@ -587,13 +643,17 @@ export function CreateSkillDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       {!isEditMode && (
         <DialogTrigger asChild>
-          <Button>Suggest Skill</Button>
+          <Button>Create Skill</Button>
         </DialogTrigger>
       )}
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditMode ? "Suggest Skill Edit" : "Suggest New Skill"}
+            {isEditPrivateSkill
+              ? "Edit Private Skill"
+              : isEditMode
+                ? "Suggest Skill Edit"
+                : "Create Private Skill"}
           </DialogTitle>
         </DialogHeader>
         <form
@@ -648,7 +708,7 @@ export function CreateSkillDialog({
               name="prerequisites"
               children={() => (
                 <SkillSelectionField
-                  skills={skills}
+                  skills={allSkillsForSelection}
                   excludeIds={form.state.values.variants}
                   label="Prerequisites"
                   dialogTitle="Select Prerequisites"
@@ -659,7 +719,7 @@ export function CreateSkillDialog({
               name="variants"
               children={() => (
                 <SkillSelectionField
-                  skills={skills}
+                  skills={allSkillsForSelection}
                   excludeIds={form.state.values.prerequisites}
                   label="Variants"
                   dialogTitle="Select Variants"
@@ -678,7 +738,11 @@ export function CreateSkillDialog({
               Cancel
             </Button>
             <Button type="submit" form="skill-form">
-              {isEditMode ? "Suggest Edit" : "Suggest Skill"}
+              {isEditPrivateSkill
+                ? "Update Skill"
+                : isEditMode
+                  ? "Suggest Edit"
+                  : "Create Skill"}
             </Button>
           </DialogFooter>
         </form>
