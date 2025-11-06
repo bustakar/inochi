@@ -14,12 +14,7 @@ interface SkillsListProps {
   searchQuery?: string;
   muscleIds?: Id<"muscles">[];
   equipmentIds?: Id<"equipment">[];
-  onSuggestEdit?: (
-    skill: Doc<"skills"> & {
-      musclesData?: Array<Doc<"muscles">>;
-      equipmentData?: Array<Doc<"equipment">>;
-    },
-  ) => void;
+  onSuggestEdit: (skill: Doc<"skills">) => void;
 }
 
 export function SkillsList({

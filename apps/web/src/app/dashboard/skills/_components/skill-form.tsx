@@ -1,24 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { useCallback, useEffect, useState } from "react";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { Plus, X } from "lucide-react";
-import { toast } from "sonner";
 import * as z from "zod";
 
 import {
   Badge,
   Button,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
   Field,
   FieldError,
   FieldGroup,
@@ -52,12 +48,6 @@ interface Equipment {
 interface Skill {
   _id: string;
   title: string;
-}
-
-interface CreateSkillDialogProps {
-  existingSkill?: Doc<"skills"> | undefined;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
 }
 
 // Create form contexts
@@ -99,7 +89,7 @@ function DescriptionField() {
           value={field.state.value}
           onBlur={field.handleBlur}
           onChange={(e) => field.handleChange(e.target.value)}
-          placeholder="Enter skill description..."
+          placeholder="I'm having an issue with the login button on mobile."
           rows={6}
           className="min-h-16 resize-none"
           aria-invalid={isInvalid}
@@ -468,10 +458,10 @@ const { useAppForm } = createFormHook({
     DescriptionField,
     LevelField,
     DifficultyField,
-    SkillSelectionField,
-    ArrayStringField,
     MusclesField,
     EquipmentField,
+    SkillSelectionField,
+    ArrayStringField,
   },
   formComponents: {},
 });
@@ -480,7 +470,9 @@ const musclesSchema = z.array(z.string());
 const equipmentSchema = z.array(z.string());
 const prerequisitesSchema = z.array(z.string());
 const variantsSchema = z.array(z.string());
-const embeddedVideosSchema = z.array(z.url("Each video must be a valid URL"));
+const embeddedVideosSchema = z.array(
+  z.string().url("Each video must be a valid URL"),
+);
 const tipsSchema = z.array(z.string().min(1, "Tip cannot be empty"));
 
 const formSchema = z.object({
@@ -501,101 +493,38 @@ const formSchema = z.object({
   tips: tipsSchema,
 });
 
-export type SkillFormData = z.output<typeof formSchema>;
-
-export function CreateSkillDialog({
-  existingSkill,
-  open,
-  onOpenChange,
-}: CreateSkillDialogProps) {
+export function SkillForm() {
   const muscles = useQuery(api.functions.skills.getMuscles, {});
   const equipment = useQuery(api.functions.skills.getEquipment, {});
   const skills = useQuery(api.functions.skills.getSkills, {});
-  const createSubmission = useMutation(
-    api.functions.submissions.createSubmission,
-  );
-
-  const isEditMode = Boolean(existingSkill);
 
   const form = useAppForm({
     defaultValues: {
-      title: existingSkill?.title ?? "",
-      description: existingSkill?.description ?? "",
-      level: existingSkill?.level ?? "beginner",
-      difficulty: existingSkill?.difficulty ?? 1,
-      muscles: (existingSkill?.muscles as string[]) ?? [],
-      equipment: (existingSkill?.equipment as string[]) ?? [],
-      prerequisites: (existingSkill?.prerequisites as string[]) ?? [],
-      variants: (existingSkill?.variants as string[]) ?? [],
-      embedded_videos: existingSkill?.embedded_videos ?? [],
-      tips: existingSkill?.tips ?? [],
+      title: "",
+      description: "",
+      level: "beginner",
+      difficulty: 1,
+      muscles: [] as string[],
+      equipment: [] as string[],
+      prerequisites: [] as string[],
+      variants: [] as string[],
+      embedded_videos: [] as string[],
+      tips: [] as string[],
     },
     validators: {
       onSubmit: formSchema,
     },
-    onSubmit: async ({ value }) => {
-      await onSubmit(value);
+    onSubmit: (values) => {
+      console.log(values);
     },
   });
 
-  const onSubmit = async (data: SkillFormData) => {
-    try {
-      await createSubmission({
-        title: data.title,
-        description: data.description,
-        level: data.level as
-          | "beginner"
-          | "intermediate"
-          | "advanced"
-          | "expert"
-          | "elite",
-        difficulty: data.difficulty,
-        muscles: data.muscles as Doc<"muscles">["_id"][],
-        equipment: data.equipment as Doc<"equipment">["_id"][],
-        embedded_videos: data.embedded_videos.filter(
-          (v: string) => v.trim() !== "",
-        ),
-        prerequisites: data.prerequisites as Doc<"skills">["_id"][],
-        variants: data.variants as Doc<"skills">["_id"][],
-        tips: data.tips.filter((t: string) => t.trim() !== ""),
-        submissionType: isEditMode ? "edit" : "create",
-        originalSkillId: isEditMode ? existingSkill?._id : undefined,
-      });
-      toast.success(
-        isEditMode
-          ? "Edit suggestion submitted!"
-          : "Skill suggestion submitted!",
-      );
-      onOpenChange(false);
-      form.reset();
-    } catch (error) {
-      console.error("Error submitting suggestion:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to submit suggestion. Please try again.",
-      );
-    }
-  };
-
-  const onCancel = () => {
-    onOpenChange(false);
-    form.reset();
-  };
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {!isEditMode && (
-        <DialogTrigger asChild>
-          <Button>Suggest Skill</Button>
-        </DialogTrigger>
-      )}
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditMode ? "Suggest Skill Edit" : "Suggest New Skill"}
-          </DialogTitle>
-        </DialogHeader>
+    <Card className="w-full sm:max-w-md">
+      <CardHeader>
+        <CardTitle>Create skill</CardTitle>
+      </CardHeader>
+      <CardContent>
         <form
           id="skill-form"
           onSubmit={(e) => {
@@ -625,26 +554,6 @@ export function CreateSkillDialog({
               children={() => <EquipmentField equipment={equipment} />}
             />
             <form.AppField
-              name="embedded_videos"
-              children={() => (
-                <ArrayStringField
-                  label="Video Urls"
-                  placeholder="https://example.com/video"
-                  inputType="url"
-                />
-              )}
-            />
-            <form.AppField
-              name="tips"
-              children={() => (
-                <ArrayStringField
-                  label="Tips"
-                  placeholder="Enter a tip..."
-                  inputType="text"
-                />
-              )}
-            />
-            <form.AppField
               name="prerequisites"
               children={() => (
                 <SkillSelectionField
@@ -666,23 +575,39 @@ export function CreateSkillDialog({
                 />
               )}
             />
+            <form.AppField
+              name="embedded_videos"
+              children={() => (
+                <ArrayStringField
+                  label="Video Urls"
+                  placeholder="https://example.com/video"
+                  inputType="url"
+                />
+              )}
+            />
+            <form.AppField
+              name="tips"
+              children={() => (
+                <ArrayStringField
+                  label="Tips"
+                  placeholder="Enter a tip..."
+                  inputType="text"
+                />
+              )}
+            />
           </FieldGroup>
-          <DialogFooter className="mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                onCancel();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" form="skill-form">
-              {isEditMode ? "Suggest Edit" : "Suggest Skill"}
-            </Button>
-          </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+      <CardFooter>
+        <Field orientation="horizontal">
+          <Button type="button" variant="outline" onClick={() => form.reset()}>
+            Cancel
+          </Button>
+          <Button type="submit" form="skill-form">
+            Submit
+          </Button>
+        </Field>
+      </CardFooter>
+    </Card>
   );
 }

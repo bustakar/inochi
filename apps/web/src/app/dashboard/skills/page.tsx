@@ -78,13 +78,7 @@ export default function SkillsPage() {
   const [filters, dispatch] = useReducer(filtersReducer, initialFiltersState);
   const debouncedSearchQuery = useDebounce(filters.searchInput, 300);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [skillToEdit, setSkillToEdit] = useState<
-    | (Doc<"skills"> & {
-        musclesData?: Array<Doc<"muscles">>;
-        equipmentData?: Array<Doc<"equipment">>;
-      })
-    | null
-  >(null);
+  const [skillToEdit, setSkillToEdit] = useState<Doc<"skills"> | null>(null);
 
   const handleLevelChange = (newLevel: string | undefined) => {
     if (!newLevel) {
@@ -128,15 +122,9 @@ export default function SkillsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-foreground text-3xl font-bold">Skills</h1>
-        <CreateSkillDialog />
-      </div>
-
-      {/* Edit Dialog */}
-      {skillToEdit && (
         <CreateSkillDialog
-          key={skillToEdit._id}
-          mode="edit"
-          existingSkill={skillToEdit}
+          key={skillToEdit?._id}
+          existingSkill={skillToEdit ?? undefined}
           open={editDialogOpen}
           onOpenChange={(open) => {
             setEditDialogOpen(open);
@@ -145,7 +133,7 @@ export default function SkillsPage() {
             }
           }}
         />
-      )}
+      </div>
 
       {/* Search and Filters Row */}
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
