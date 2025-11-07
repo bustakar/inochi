@@ -15,7 +15,10 @@ export default defineSchema({
         slug: v.string(),
       }),
     ),
-  }).index("by_slug", ["slug"]),
+    muscleGroup: v.optional(v.string()),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_muscle_group", ["muscleGroup"]),
 
   equipment: defineTable({
     name: v.string(),

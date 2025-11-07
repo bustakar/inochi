@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as functions_migrations from "../functions/migrations.js";
 import type * as functions_openai from "../functions/openai.js";
 import type * as functions_skills from "../functions/skills.js";
 import type * as functions_submissions from "../functions/submissions.js";
@@ -29,6 +30,7 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "functions/migrations": typeof functions_migrations;
   "functions/openai": typeof functions_openai;
   "functions/skills": typeof functions_skills;
   "functions/submissions": typeof functions_submissions;

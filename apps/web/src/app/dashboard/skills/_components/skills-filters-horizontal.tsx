@@ -1,20 +1,262 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { ChevronDown, Dumbbell, Gauge, Target, TrendingUp } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Dumbbell,
+  Gauge,
+  Target,
+  TrendingUp,
+} from "lucide-react";
 
 import {
   Button,
+  Checkbox,
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Label,
 } from "@inochi/ui";
+
+interface Muscle {
+  _id: Id<"muscles">;
+  name: string;
+  muscleGroup?: string;
+}
+
+interface MusclesFilterDropdownProps {
+  muscles: Muscle[];
+  muscleIds: Id<"muscles">[];
+  onMusclesChange: (muscleIds: Id<"muscles">[]) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+function MusclesFilterDropdown({
+  muscles,
+  muscleIds,
+  onMusclesChange,
+  open,
+  onOpenChange,
+}: MusclesFilterDropdownProps) {
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  // Group muscles by muscleGroup
+  const groupedMuscles = useMemo(() => {
+    if (!muscles) return new Map<string, Muscle[]>();
+
+    const groups = new Map<string, Muscle[]>();
+    for (const muscle of muscles) {
+      const group = muscle.muscleGroup || "Other";
+      if (!groups.has(group)) {
+        groups.set(group, []);
+      }
+      groups.get(group)!.push(muscle);
+    }
+
+    // Sort groups and muscles within groups
+    const sortedGroups = new Map(
+      Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b)),
+    );
+    for (const [group, groupMuscles] of sortedGroups.entries()) {
+      sortedGroups.set(
+        group,
+        groupMuscles.sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    }
+
+    return sortedGroups;
+  }, [muscles]);
+
+  const handleToggleMuscle = (muscleId: Id<"muscles">) => {
+    if (muscleIds.includes(muscleId)) {
+      onMusclesChange(muscleIds.filter((id) => id !== muscleId));
+    } else {
+      onMusclesChange([...muscleIds, muscleId]);
+    }
+  };
+
+  const handleToggleGroup = (group: string, groupMuscles: Muscle[]) => {
+    const groupMuscleIds = groupMuscles.map((m) => m._id);
+    const allSelected = groupMuscleIds.every((id) => muscleIds.includes(id));
+
+    if (allSelected) {
+      // Deselect all muscles in the group
+      onMusclesChange(muscleIds.filter((id) => !groupMuscleIds.includes(id)));
+    } else {
+      // Select all muscles in the group
+      const newSelection = [...muscleIds];
+      for (const id of groupMuscleIds) {
+        if (!newSelection.includes(id)) {
+          newSelection.push(id);
+        }
+      }
+      onMusclesChange(newSelection);
+    }
+  };
+
+  const getGroupSelectionState = (groupMuscles: Muscle[]) => {
+    const groupMuscleIds = groupMuscles.map((m) => m._id);
+    const selectedCount = groupMuscleIds.filter((id) =>
+      muscleIds.includes(id),
+    ).length;
+
+    if (selectedCount === 0) return "none";
+    if (selectedCount === groupMuscleIds.length) return "all";
+    return "some";
+  };
+
+  const toggleGroupExpansion = (group: string) => {
+    setExpandedGroups((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(group)) {
+        newSet.delete(group);
+      } else {
+        newSet.add(group);
+      }
+      return newSet;
+    });
+  };
+
+  // Expand groups that have selected muscles
+  useEffect(() => {
+    if (open && muscleIds.length > 0) {
+      const groupsWithSelections = new Set<string>();
+      for (const [group, groupMuscles] of groupedMuscles.entries()) {
+        const hasSelected = groupMuscles.some((m) => muscleIds.includes(m._id));
+        if (hasSelected) {
+          groupsWithSelections.add(group);
+        }
+      }
+      setExpandedGroups(groupsWithSelections);
+    } else if (open) {
+      // If no selections, keep all collapsed
+      setExpandedGroups(new Set());
+    }
+  }, [open, groupedMuscles, muscleIds]);
+
+  const musclesLabel =
+    muscleIds.length > 0 ? `Muscles (${muscleIds.length})` : "Muscles";
+
+  return (
+    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant={muscleIds.length > 0 ? "default" : "outline"}
+          size="sm"
+          className="h-9"
+        >
+          <Target className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">{musclesLabel}</span>
+          <ChevronDown className="ml-2 h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="max-h-96 w-80 overflow-y-auto"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        <div className="flex items-center justify-between px-2 py-1.5">
+          <DropdownMenuLabel className="py-0">Muscles</DropdownMenuLabel>
+          {muscleIds.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => {
+                onMusclesChange([]);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </div>
+        <DropdownMenuSeparator />
+        <div className="space-y-1 p-1">
+          {Array.from(groupedMuscles.entries()).map(([group, groupMuscles]) => {
+            const isExpanded = expandedGroups.has(group);
+            const selectionState = getGroupSelectionState(groupMuscles);
+            const isGroupChecked = selectionState === "all";
+            const isGroupIndeterminate = selectionState === "some";
+
+            return (
+              <div key={group} className="space-y-1">
+                <div className="flex items-center gap-1.5 px-1 py-0.5">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroupExpansion(group)}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={`${isExpanded ? "Collapse" : "Expand"} ${group}`}
+                  >
+                    {isExpanded ? (
+                      <ChevronDown className="size-3.5" />
+                    ) : (
+                      <ChevronRight className="size-3.5" />
+                    )}
+                  </button>
+                  <Checkbox
+                    id={`group-${group}`}
+                    checked={
+                      isGroupIndeterminate ? "indeterminate" : isGroupChecked
+                    }
+                    onCheckedChange={() =>
+                      handleToggleGroup(group, groupMuscles)
+                    }
+                    className="h-4 w-4"
+                  />
+                  <Label
+                    htmlFor={`group-${group}`}
+                    className="flex-1 cursor-pointer text-sm font-medium"
+                  >
+                    {group.charAt(0).toUpperCase() + group.slice(1)}
+                  </Label>
+                  <span className="text-muted-foreground text-xs">
+                    ({groupMuscles.length})
+                  </span>
+                </div>
+                {isExpanded && (
+                  <div className="ml-6 space-y-0.5">
+                    {groupMuscles.map((muscle) => {
+                      const isSelected = muscleIds.includes(muscle._id);
+                      return (
+                        <div
+                          key={muscle._id}
+                          className="flex items-center gap-2 px-1 py-0.5"
+                        >
+                          <Checkbox
+                            id={muscle._id}
+                            checked={isSelected}
+                            onCheckedChange={() =>
+                              handleToggleMuscle(muscle._id)
+                            }
+                            className="h-4 w-4"
+                          />
+                          <Label
+                            htmlFor={muscle._id}
+                            className="flex-1 cursor-pointer text-sm"
+                          >
+                            {muscle.name}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 interface SkillsFiltersHorizontalProps {
   level?: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
@@ -195,68 +437,13 @@ export function SkillsFiltersHorizontal({
 
       {/* Muscles Filter */}
       {muscles && (
-        <DropdownMenu
+        <MusclesFilterDropdown
+          muscles={muscles as Muscle[]}
+          muscleIds={muscleIds}
+          onMusclesChange={onMusclesChange}
           open={musclesOpen}
           onOpenChange={setMusclesOpen}
-          modal={false}
-        >
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant={muscleIds.length > 0 ? "default" : "outline"}
-              size="sm"
-              className="h-9"
-            >
-              <Target className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">{musclesLabel}</span>
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="max-h-96 w-64 overflow-y-auto"
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            <DropdownMenuLabel>Muscles</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {muscles.map((muscle: { _id: Id<"muscles">; name: string }) => (
-              <DropdownMenuCheckboxItem
-                key={muscle._id}
-                checked={muscleIds.includes(muscle._id)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    onMusclesChange([...muscleIds, muscle._id]);
-                  } else {
-                    onMusclesChange(
-                      muscleIds.filter((id) => id !== muscle._id),
-                    );
-                  }
-                }}
-                onSelect={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                {muscle.name}
-              </DropdownMenuCheckboxItem>
-            ))}
-            {muscleIds.length > 0 && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="p-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      onMusclesChange([]);
-                    }}
-                  >
-                    Clear Selection
-                  </Button>
-                </div>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        />
       )}
 
       {/* Equipment Filter */}

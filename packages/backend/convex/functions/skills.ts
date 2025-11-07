@@ -53,6 +53,7 @@ export const getSkills = query({
               slug: v.string(),
             }),
           ),
+          muscleGroup: v.optional(v.string()),
         }),
       ),
       equipmentData: v.array(
@@ -212,6 +213,7 @@ export const searchSkills = query({
               slug: v.string(),
             }),
           ),
+          muscleGroup: v.optional(v.string()),
         }),
       ),
       equipmentData: v.array(
@@ -527,6 +529,7 @@ export const getMuscles = query({
           slug: v.string(),
         }),
       ),
+      muscleGroup: v.optional(v.string()),
     }),
   ),
   handler: async (ctx) => {
@@ -594,6 +597,7 @@ export const getAllSkills = query({
                 slug: v.string(),
               }),
             ),
+            muscleGroup: v.optional(v.string()),
           }),
         ),
         equipmentData: v.array(
@@ -636,6 +640,7 @@ export const getAllSkills = query({
                 slug: v.string(),
               }),
             ),
+            muscleGroup: v.optional(v.string()),
           }),
         ),
         equipmentData: v.array(
@@ -889,6 +894,7 @@ export const getPrivateSkills = query({
               slug: v.string(),
             }),
           ),
+          muscleGroup: v.optional(v.string()),
         }),
       ),
       equipmentData: v.array(
@@ -1118,6 +1124,7 @@ export const searchPrivateSkills = query({
               slug: v.string(),
             }),
           ),
+          muscleGroup: v.optional(v.string()),
         }),
       ),
       equipmentData: v.array(
