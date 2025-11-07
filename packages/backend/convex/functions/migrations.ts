@@ -1,5 +1,6 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { Id } from "../_generated/dataModel";
 
 /**
  * Migration: Add muscleGroup and expand muscles from parts
@@ -17,7 +18,7 @@ export const addMuscleGroupAndExpandMuscles = mutation({
     const existingMuscles = await ctx.db.query("muscles").collect();
     
     // Map: old muscle ID -> array of all muscle IDs (existing + newly created)
-    const muscleIdMapping = new Map<string, string[]>();
+    const muscleIdMapping = new Map<Id<"muscles">, Id<"muscles">[]>();
     const stats = {
       musclesUpdated: 0,
       musclesCreated: 0,
@@ -90,7 +91,7 @@ export const addMuscleGroupAndExpandMuscles = mutation({
     
     // Step 1: Process each existing muscle
     for (const muscle of existingMuscles) {
-      const allMuscleIds: string[] = [];
+      const allMuscleIds: Id<"muscles">[] = [];
       
       // Determine muscleGroup
       const muscleGroup = slugToGroup[muscle.slug] || muscle.slug;
@@ -107,6 +108,7 @@ export const addMuscleGroupAndExpandMuscles = mutation({
         // Check if parts already exist as separate muscles (by slug)
         for (let i = 1; i < muscle.parts.length; i++) {
           const part = muscle.parts[i];
+          if (!part) continue;
           
           // Check if a muscle with this slug already exists
           const existingPartMuscle = await ctx.db
@@ -138,7 +140,7 @@ export const addMuscleGroupAndExpandMuscles = mutation({
     // Step 2: Update all skills
     const skills = await ctx.db.query("skills").collect();
     for (const skill of skills) {
-      const newMuscleIds: string[] = [];
+      const newMuscleIds: Id<"muscles">[] = [];
       let updated = false;
       
       for (const oldMuscleId of skill.muscles) {
@@ -155,7 +157,7 @@ export const addMuscleGroupAndExpandMuscles = mutation({
       
       if (updated) {
         // Remove duplicates and update
-        const uniqueMuscleIds = Array.from(new Set(newMuscleIds));
+        const uniqueMuscleIds = Array.from(new Set(newMuscleIds)) as Id<"muscles">[];
         await ctx.db.patch(skill._id, {
           muscles: uniqueMuscleIds,
         });
@@ -166,7 +168,7 @@ export const addMuscleGroupAndExpandMuscles = mutation({
     // Step 3: Update all private_skills
     const privateSkills = await ctx.db.query("private_skills").collect();
     for (const skill of privateSkills) {
-      const newMuscleIds: string[] = [];
+      const newMuscleIds: Id<"muscles">[] = [];
       let updated = false;
       
       for (const oldMuscleId of skill.muscles) {
@@ -180,7 +182,7 @@ export const addMuscleGroupAndExpandMuscles = mutation({
       }
       
       if (updated) {
-        const uniqueMuscleIds = Array.from(new Set(newMuscleIds));
+        const uniqueMuscleIds = Array.from(new Set(newMuscleIds)) as Id<"muscles">[];
         await ctx.db.patch(skill._id, {
           muscles: uniqueMuscleIds,
         });
@@ -191,7 +193,7 @@ export const addMuscleGroupAndExpandMuscles = mutation({
     // Step 4: Update all user_submissions
     const submissions = await ctx.db.query("user_submissions").collect();
     for (const submission of submissions) {
-      const newMuscleIds: string[] = [];
+      const newMuscleIds: Id<"muscles">[] = [];
       let updated = false;
       
       for (const oldMuscleId of submission.muscles) {
@@ -205,7 +207,7 @@ export const addMuscleGroupAndExpandMuscles = mutation({
       }
       
       if (updated) {
-        const uniqueMuscleIds = Array.from(new Set(newMuscleIds));
+        const uniqueMuscleIds = Array.from(new Set(newMuscleIds)) as Id<"muscles">[];
         await ctx.db.patch(submission._id, {
           muscles: uniqueMuscleIds,
         });
