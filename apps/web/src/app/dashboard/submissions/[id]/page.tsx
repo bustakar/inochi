@@ -66,8 +66,17 @@ export default function SubmissionDetailPage() {
   const router = useRouter();
   const submissionId = params.id as Id<"user_submissions">;
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const { sessionClaims } = useAuth();
-  const { user } = useUser();
+  const { sessionClaims, isLoaded: isAuthLoaded } = useAuth();
+  const { user, isLoaded: isUserLoaded } = useUser();
+  
+  if (!isAuthLoaded || !isUserLoaded) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+  
   const userRole = getClientRole(sessionClaims);
   const isAdminOrModeratorResult = isClientAdminOrModerator(sessionClaims);
 
