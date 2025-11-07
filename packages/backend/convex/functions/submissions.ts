@@ -84,6 +84,7 @@ export const getUserSubmissions = query({
               slug: v.string(),
             }),
           ),
+          muscleGroup: v.optional(v.string()),
         }),
       ),
       equipmentData: v.array(
@@ -234,6 +235,7 @@ export const getSubmission = query({
               slug: v.string(),
             }),
           ),
+          muscleGroup: v.optional(v.string()),
         }),
       ),
       equipmentData: v.array(
