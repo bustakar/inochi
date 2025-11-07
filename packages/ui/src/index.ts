@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge";
 export const cn = (...inputs: Parameters<typeof cx>) => twMerge(cx(inputs));
 
 // Core components
+export * from "./components/alert-dialog";
 export { AnimatedGroup } from "./components/animated-group";
 export * from "./components/badge";
 export * from "./components/button";

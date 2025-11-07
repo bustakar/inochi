@@ -3,9 +3,9 @@ import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
 import {
+  createPrivateSkillValidator,
   levelValidator,
   partialSkillDataValidator,
-  skillDataValidator,
   validateDifficulty,
   validateUrlArray,
 } from "../validators/validators";
@@ -1031,6 +1031,53 @@ export const getPrivateSkill = query({
   },
 });
 
+// Get a specific private skill by ID (alias)
+export const getPrivateSkillById = query({
+  args: {
+    private_skill_id: v.id("private_skills"),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("private_skills"),
+      _creationTime: v.number(),
+      title: v.string(),
+      description: v.string(),
+      level: levelValidator,
+      difficulty: v.number(),
+      muscles: v.array(v.id("muscles")),
+      equipment: v.array(v.id("equipment")),
+      embedded_videos: v.array(v.string()),
+      prerequisites: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      variants: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      tips: v.array(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      userId: v.string(),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const skill = await ctx.db.get(args.private_skill_id);
+    if (!skill) {
+      return null;
+    }
+
+    // Verify ownership
+    if (skill.userId !== userId) {
+      throw new Error(
+        "Unauthorized: You can only view your own private skills",
+      );
+    }
+
+    return skill;
+  },
+});
+
 // Search user's private skills by title or description
 export const searchPrivateSkills = query({
   args: {
@@ -1179,85 +1226,62 @@ export const searchPrivateSkills = query({
 });
 
 // Create a new private skill
+export const createPrivateSkillMutation = mutation({
+  args: {
+    data: createPrivateSkillValidator,
+  },
+  returns: v.id("private_skills"),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) throw new Error("User not found");
+    validateDifficulty(args.data.difficulty);
+
+    const now = Date.now();
+    const skillId = await ctx.db.insert("private_skills", {
+      title: args.data.title,
+      description: args.data.description,
+      level: args.data.level,
+      difficulty: args.data.difficulty,
+      muscles: [],
+      equipment: [],
+      embedded_videos: [],
+      prerequisites: [],
+      variants: [],
+      tips: [],
+      createdAt: now,
+      updatedAt: now,
+      userId: userId,
+    });
+
+    return skillId;
+  },
+});
+
+// Create a private skill with only title, description, level, and difficulty
+// All arrays are set to empty
 export const createPrivateSkill = mutation({
   args: {
-    skillData: skillDataValidator,
+    data: createPrivateSkillValidator,
   },
   returns: v.id("private_skills"),
   handler: async (ctx, args) => {
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
 
-    // Validate difficulty
-    validateDifficulty(args.skillData.difficulty);
-
-    // Validate URLs
-    validateUrlArray(args.skillData.embedded_videos);
-
-    // Validate that prerequisites and variants exist and user has access
-    for (const prereqId of args.skillData.prerequisites) {
-      // Check if it's a public skill or private skill
-      const prereqPublic = await ctx.db.get(prereqId as Id<"skills">);
-      const prereqPrivate = prereqPublic
-        ? null
-        : await ctx.db.get(prereqId as Id<"private_skills">);
-
-      if (!prereqPublic && !prereqPrivate) {
-        throw new Error(`Prerequisite skill not found: ${prereqId}`);
-      }
-
-      // If private, verify ownership
-      if (prereqPrivate && prereqPrivate.userId !== userId) {
-        throw new Error(
-          `Unauthorized: You can only reference your own private skills`,
-        );
-      }
-    }
-
-    for (const variantId of args.skillData.variants) {
-      const variantPublic = await ctx.db.get(variantId as Id<"skills">);
-      const variantPrivate = variantPublic
-        ? null
-        : await ctx.db.get(variantId as Id<"private_skills">);
-
-      if (!variantPublic && !variantPrivate) {
-        throw new Error(`Variant skill not found: ${variantId}`);
-      }
-
-      if (variantPrivate && variantPrivate.userId !== userId) {
-        throw new Error(
-          `Unauthorized: You can only reference your own private skills`,
-        );
-      }
-    }
-
-    // Validate that muscles and equipment exist
-    for (const muscleId of args.skillData.muscles) {
-      const muscle = await ctx.db.get(muscleId);
-      if (!muscle) {
-        throw new Error(`Muscle not found: ${muscleId}`);
-      }
-    }
-
-    for (const equipmentId of args.skillData.equipment) {
-      const equipment = await ctx.db.get(equipmentId);
-      if (!equipment) {
-        throw new Error(`Equipment not found: ${equipmentId}`);
-      }
-    }
+    validateDifficulty(args.data.difficulty);
 
     const now = Date.now();
     const skillId = await ctx.db.insert("private_skills", {
-      title: args.skillData.title,
-      description: args.skillData.description,
-      level: args.skillData.level,
-      difficulty: args.skillData.difficulty,
-      muscles: args.skillData.muscles,
-      equipment: args.skillData.equipment,
-      embedded_videos: args.skillData.embedded_videos,
-      prerequisites: args.skillData.prerequisites,
-      variants: args.skillData.variants,
-      tips: args.skillData.tips,
+      title: args.data.title,
+      description: args.data.description,
+      level: args.data.level,
+      difficulty: args.data.difficulty,
+      muscles: [],
+      equipment: [],
+      embedded_videos: [],
+      prerequisites: [],
+      variants: [],
+      tips: [],
       createdAt: now,
       updatedAt: now,
       userId: userId,

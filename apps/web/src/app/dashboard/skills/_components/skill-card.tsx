@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
@@ -49,11 +50,29 @@ function SkillCardComponent({
   onSuggestEdit,
   onEditPrivateSkill,
 }: SkillCardProps) {
+  const router = useRouter();
   const createSubmission = useMutation(
     api.functions.submissions.createSubmission,
   );
   const publicSkills = useQuery(api.functions.skills.getSkills, {});
   const [isSuggesting, setIsSuggesting] = useState(false);
+
+  const detailUrl = isPrivate
+    ? `/dashboard/skills/private/${skill._id}`
+    : `/dashboard/skills/${skill._id}`;
+
+  const handleCardClick = () => {
+    router.push(detailUrl);
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isPrivate) {
+      router.push(`/dashboard/skills/private/${skill._id}/edit`);
+    } else if (onSuggestEdit) {
+      onSuggestEdit(skill as Doc<"skills">);
+    }
+  };
 
   const handleSuggestToPublic = async () => {
     if (!isPrivate || !("userId" in skill)) return;
@@ -133,13 +152,16 @@ function SkillCardComponent({
   }, [skill.description]);
 
   return (
-    <div className="bg-card relative rounded-lg border p-4 transition-shadow hover:shadow-md">
+    <div
+      className="bg-card relative cursor-pointer rounded-lg border p-4 transition-shadow hover:shadow-md"
+      onClick={handleCardClick}
+    >
       {/* Header with title and more button */}
       <div className="mb-2 flex items-start justify-between">
         <h3 className="text-card-foreground flex-1 pr-8 text-lg font-semibold">
           {skill.title}
         </h3>
-        {(onSuggestEdit || onEditPrivateSkill) && (
+        {(onSuggestEdit || isPrivate) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -152,24 +174,26 @@ function SkillCardComponent({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {isPrivate && onEditPrivateSkill ? (
-                <DropdownMenuItem
-                  onClick={() =>
-                    onEditPrivateSkill(skill as Doc<"private_skills">)
-                  }
-                >
+              {isPrivate ? (
+                <DropdownMenuItem onClick={handleEditClick}>
                   Edit
                 </DropdownMenuItem>
               ) : onSuggestEdit ? (
                 <DropdownMenuItem
-                  onClick={() => onSuggestEdit(skill as Doc<"skills">)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSuggestEdit(skill as Doc<"skills">);
+                  }}
                 >
                   Suggest Edit
                 </DropdownMenuItem>
               ) : null}
               {isPrivate && (
                 <DropdownMenuItem
-                  onClick={handleSuggestToPublic}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSuggestToPublic();
+                  }}
                   disabled={isSuggesting}
                 >
                   {isSuggesting ? "Suggesting..." : "Suggest to Public"}
