@@ -46,9 +46,7 @@ function MusclesFilterDropdown({
   open,
   onOpenChange,
 }: MusclesFilterDropdownProps) {
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    new Set(),
-  );
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   // Group muscles by muscleGroup
   const groupedMuscles = useMemo(() => {
@@ -132,9 +130,7 @@ function MusclesFilterDropdown({
     if (open && muscleIds.length > 0) {
       const groupsWithSelections = new Set<string>();
       for (const [group, groupMuscles] of groupedMuscles.entries()) {
-        const hasSelected = groupMuscles.some((m) =>
-          muscleIds.includes(m._id),
-        );
+        const hasSelected = groupMuscles.some((m) => muscleIds.includes(m._id));
         if (hasSelected) {
           groupsWithSelections.add(group);
         }
@@ -147,9 +143,7 @@ function MusclesFilterDropdown({
   }, [open, groupedMuscles, muscleIds]);
 
   const musclesLabel =
-    muscleIds.length > 0
-      ? `Muscles (${muscleIds.length})`
-      : "Muscles";
+    muscleIds.length > 0 ? `Muscles (${muscleIds.length})` : "Muscles";
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
@@ -186,82 +180,78 @@ function MusclesFilterDropdown({
         </div>
         <DropdownMenuSeparator />
         <div className="space-y-1 p-1">
-          {Array.from(groupedMuscles.entries()).map(
-            ([group, groupMuscles]) => {
-              const isExpanded = expandedGroups.has(group);
-              const selectionState = getGroupSelectionState(groupMuscles);
-              const isGroupChecked = selectionState === "all";
-              const isGroupIndeterminate = selectionState === "some";
+          {Array.from(groupedMuscles.entries()).map(([group, groupMuscles]) => {
+            const isExpanded = expandedGroups.has(group);
+            const selectionState = getGroupSelectionState(groupMuscles);
+            const isGroupChecked = selectionState === "all";
+            const isGroupIndeterminate = selectionState === "some";
 
-              return (
-                <div key={group} className="space-y-1">
-                  <div className="flex items-center gap-1.5 px-1 py-0.5">
-                    <button
-                      type="button"
-                      onClick={() => toggleGroupExpansion(group)}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={`${isExpanded ? "Collapse" : "Expand"} ${group}`}
-                    >
-                      {isExpanded ? (
-                        <ChevronDown className="size-3.5" />
-                      ) : (
-                        <ChevronRight className="size-3.5" />
-                      )}
-                    </button>
-                    <Checkbox
-                      id={`group-${group}`}
-                      checked={
-                        isGroupIndeterminate
-                          ? "indeterminate"
-                          : isGroupChecked
-                      }
-                      onCheckedChange={() =>
-                        handleToggleGroup(group, groupMuscles)
-                      }
-                      className="h-4 w-4"
-                    />
-                    <Label
-                      htmlFor={`group-${group}`}
-                      className="text-sm font-medium cursor-pointer flex-1"
-                    >
-                      {group.charAt(0).toUpperCase() + group.slice(1)}
-                    </Label>
-                    <span className="text-muted-foreground text-xs">
-                      ({groupMuscles.length})
-                    </span>
-                  </div>
-                  {isExpanded && (
-                    <div className="ml-6 space-y-0.5">
-                      {groupMuscles.map((muscle) => {
-                        const isSelected = muscleIds.includes(muscle._id);
-                        return (
-                          <div
-                            key={muscle._id}
-                            className="flex items-center gap-2 px-1 py-0.5"
-                          >
-                            <Checkbox
-                              id={muscle._id}
-                              checked={isSelected}
-                              onCheckedChange={() =>
-                                handleToggleMuscle(muscle._id)
-                              }
-                              className="h-4 w-4"
-                            />
-                            <Label
-                              htmlFor={muscle._id}
-                              className="text-sm cursor-pointer flex-1"
-                            >
-                              {muscle.name}
-                            </Label>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+            return (
+              <div key={group} className="space-y-1">
+                <div className="flex items-center gap-1.5 px-1 py-0.5">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroupExpansion(group)}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={`${isExpanded ? "Collapse" : "Expand"} ${group}`}
+                  >
+                    {isExpanded ? (
+                      <ChevronDown className="size-3.5" />
+                    ) : (
+                      <ChevronRight className="size-3.5" />
+                    )}
+                  </button>
+                  <Checkbox
+                    id={`group-${group}`}
+                    checked={
+                      isGroupIndeterminate ? "indeterminate" : isGroupChecked
+                    }
+                    onCheckedChange={() =>
+                      handleToggleGroup(group, groupMuscles)
+                    }
+                    className="h-4 w-4"
+                  />
+                  <Label
+                    htmlFor={`group-${group}`}
+                    className="flex-1 cursor-pointer text-sm font-medium"
+                  >
+                    {group.charAt(0).toUpperCase() + group.slice(1)}
+                  </Label>
+                  <span className="text-muted-foreground text-xs">
+                    ({groupMuscles.length})
+                  </span>
                 </div>
-              );
-            },
-          )}
+                {isExpanded && (
+                  <div className="ml-6 space-y-0.5">
+                    {groupMuscles.map((muscle) => {
+                      const isSelected = muscleIds.includes(muscle._id);
+                      return (
+                        <div
+                          key={muscle._id}
+                          className="flex items-center gap-2 px-1 py-0.5"
+                        >
+                          <Checkbox
+                            id={muscle._id}
+                            checked={isSelected}
+                            onCheckedChange={() =>
+                              handleToggleMuscle(muscle._id)
+                            }
+                            className="h-4 w-4"
+                          />
+                          <Label
+                            htmlFor={muscle._id}
+                            className="flex-1 cursor-pointer text-sm"
+                          >
+                            {muscle.name}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

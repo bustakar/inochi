@@ -40,9 +40,7 @@ export function MuscleSelectionDialog({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMuscleIds, setSelectedMuscleIds] =
     useState<string[]>(initialMuscleIds);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    new Set(),
-  );
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   // Group muscles by muscleGroup
   const groupedMuscles = React.useMemo(() => {
@@ -169,7 +167,7 @@ export function MuscleSelectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="flex max-h-[80vh] max-w-2xl flex-col">
         <DialogHeader>
           <DialogTitle>Select Muscles</DialogTitle>
         </DialogHeader>
@@ -183,7 +181,7 @@ export function MuscleSelectionDialog({
             className="pl-9"
           />
         </div>
-        <div className="flex-1 overflow-y-auto rounded-md border p-4 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto rounded-md border p-4">
           {filteredGroupedMuscles.size === 0 ? (
             <p className="text-muted-foreground py-4 text-center text-sm">
               {searchQuery ? "No muscles found" : "No muscles available"}
@@ -214,7 +212,9 @@ export function MuscleSelectionDialog({
                       <Checkbox
                         id={`group-${group}`}
                         checked={
-                          isGroupIndeterminate ? "indeterminate" : isGroupChecked
+                          isGroupIndeterminate
+                            ? "indeterminate"
+                            : isGroupChecked
                         }
                         onCheckedChange={() =>
                           handleToggleGroup(group, groupMuscles)
@@ -222,7 +222,7 @@ export function MuscleSelectionDialog({
                       />
                       <Label
                         htmlFor={`group-${group}`}
-                        className="font-medium cursor-pointer"
+                        className="cursor-pointer font-medium"
                       >
                         {group.charAt(0).toUpperCase() + group.slice(1)}
                       </Label>
