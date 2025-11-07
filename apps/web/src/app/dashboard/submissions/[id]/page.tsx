@@ -68,7 +68,7 @@ export default function SubmissionDetailPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { sessionClaims, isLoaded: isAuthLoaded } = useAuth();
   const { user, isLoaded: isUserLoaded } = useUser();
-  
+
   if (!isAuthLoaded || !isUserLoaded) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -76,7 +76,7 @@ export default function SubmissionDetailPage() {
       </div>
     );
   }
-  
+
   const userRole = getClientRole(sessionClaims);
   const isAdminOrModeratorResult = isClientAdminOrModerator(sessionClaims);
 

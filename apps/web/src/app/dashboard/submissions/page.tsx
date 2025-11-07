@@ -11,7 +11,7 @@ type SubmissionStatus = "pending" | "approved" | "rejected" | undefined;
 export default function SubmissionsPage() {
   const [statusFilter, setStatusFilter] = useState<SubmissionStatus>(undefined);
   const { sessionClaims, isLoaded } = useAuth();
-  
+
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -19,7 +19,7 @@ export default function SubmissionsPage() {
       </div>
     );
   }
-  
+
   const userRole = getClientRole(sessionClaims);
   const isAdminOrModeratorResult = isClientAdminOrModerator(sessionClaims);
 
