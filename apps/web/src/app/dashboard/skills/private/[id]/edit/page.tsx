@@ -405,9 +405,19 @@ function ArrayStringField({
   const field = useFieldContext<string[]>();
   const items = field.state.value;
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
 
   const handleAdd = () => {
     field.handleChange([...items, ""]);
+  };
+
+  const handleAddAndFocus = (currentIndex: number) => {
+    field.handleChange([...items, ""]);
+    // Focus the newly added input after state update
+    setTimeout(() => {
+      const newIndex = currentIndex + 1;
+      inputRefs.current[newIndex]?.focus();
+    }, 0);
   };
 
   const handleChange = (index: number, value: string) => {
@@ -418,6 +428,16 @@ function ArrayStringField({
 
   const handleRemove = (index: number) => {
     field.handleChange(items.filter((_, i) => i !== index));
+  };
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddAndFocus(index);
+    }
   };
 
   return (
@@ -433,9 +453,13 @@ function ArrayStringField({
         {items.map((item, index) => (
           <div key={index} className="flex items-center gap-2">
             <Input
+              ref={(el) => {
+                inputRefs.current[index] = el;
+              }}
               type={inputType}
               value={item}
               onChange={(e) => handleChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
               onBlur={field.handleBlur}
               placeholder={placeholder}
               className="flex-1"
@@ -478,9 +502,9 @@ const equipmentSchema = z.array(z.string());
 const prerequisitesSchema = z.array(z.string());
 const variantsSchema = z.array(z.string());
 const embeddedVideosSchema = z.array(
-  z.string().url("Each video must be a valid URL"),
+  z.union([z.string().url("Each video must be a valid URL"), z.literal("")]),
 );
-const tipsSchema = z.array(z.string().min(1, "Tip cannot be empty"));
+const tipsSchema = z.array(z.string());
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -551,7 +575,23 @@ export default function EditPrivateSkillPage() {
       tips: skill?.tips && skill.tips.length > 0 ? skill.tips : [""],
     },
     validators: {
-      onSubmit: formSchema,
+      onSubmit: ({ value }) => {
+        const result = formSchema.safeParse(value);
+        if (!result.success) {
+          console.error("Validation errors:", result.error);
+          // Convert Zod errors to field errors format
+          const fieldErrors: Record<string, string[]> = {};
+          result.error.issues.forEach((err) => {
+            const path = err.path.join(".");
+            if (!fieldErrors[path]) {
+              fieldErrors[path] = [];
+            }
+            fieldErrors[path].push(err.message);
+          });
+          return fieldErrors;
+        }
+        return undefined;
+      },
     },
     onSubmit: async ({ value }) => {
       await onSubmit(value);
@@ -637,6 +677,20 @@ export default function EditPrivateSkillPage() {
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
+        }}
+        onKeyDown={(e) => {
+          // Prevent form submission on Enter key
+          // ArrayStringField inputs handle Enter to add new fields
+          if (e.key === "Enter") {
+            const target = e.target as HTMLElement;
+            if (
+              target.tagName === "INPUT" &&
+              (target as HTMLInputElement).type !== "submit" &&
+              (target as HTMLInputElement).type !== "button"
+            ) {
+              e.preventDefault();
+            }
+          }
         }}
         className="space-y-6"
       >

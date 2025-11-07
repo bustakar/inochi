@@ -40,7 +40,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader></SidebarHeader>
       <SidebarContent>
         <NavMain items={platformData.navMain} />
-        <NavMain items={userData.navMain} groupLabel="User" />
+        {/* <NavMain items={userData.navMain} groupLabel="User" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

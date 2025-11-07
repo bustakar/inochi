@@ -130,18 +130,20 @@ function MusclesSection({
 }) {
   const muscleData = muscles?.filter((m) => muscleIds.includes(m._id)) || [];
 
-  if (muscleData.length === 0) return null;
-
   return (
     <div>
       <h2 className="text-foreground mb-2 text-lg font-semibold">Muscles</h2>
-      <div className="flex flex-wrap gap-2">
-        {muscleData.map((muscle) => (
-          <Badge key={muscle._id} variant="outline">
-            {muscle.name}
-          </Badge>
-        ))}
-      </div>
+      {muscleData.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No muscles selected</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {muscleData.map((muscle) => (
+            <Badge key={muscle._id} variant="outline">
+              {muscle.name}
+            </Badge>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -156,18 +158,20 @@ function EquipmentSection({
   const equipmentData =
     equipment?.filter((e) => equipmentIds.includes(e._id)) || [];
 
-  if (equipmentData.length === 0) return null;
-
   return (
     <div>
       <h2 className="text-foreground mb-2 text-lg font-semibold">Equipment</h2>
-      <div className="flex flex-wrap gap-2">
-        {equipmentData.map((item) => (
-          <Badge key={item._id} variant="outline">
-            {item.name}
-          </Badge>
-        ))}
-      </div>
+      {equipmentData.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No equipment selected</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {equipmentData.map((item) => (
+            <Badge key={item._id} variant="outline">
+              {item.name}
+            </Badge>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -187,20 +191,22 @@ function PrerequisitesSection({
   const prerequisiteSkills =
     allSkills?.filter((s) => prerequisiteIds.includes(s._id)) || [];
 
-  if (prerequisiteSkills.length === 0) return null;
-
   return (
     <div>
       <h2 className="text-foreground mb-2 text-lg font-semibold">
         Prerequisites
       </h2>
-      <div className="flex flex-wrap gap-2">
-        {prerequisiteSkills.map((prereq) => (
-          <Badge key={prereq._id} variant="secondary">
-            {prereq.title}
-          </Badge>
-        ))}
-      </div>
+      {prerequisiteSkills.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No prerequisites</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {prerequisiteSkills.map((prereq) => (
+            <Badge key={prereq._id} variant="secondary">
+              {prereq.title}
+            </Badge>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -220,58 +226,64 @@ function VariantsSection({
   const variantSkills =
     allSkills?.filter((s) => variantIds.includes(s._id)) || [];
 
-  if (variantSkills.length === 0) return null;
-
   return (
     <div>
       <h2 className="text-foreground mb-2 text-lg font-semibold">Variants</h2>
-      <div className="flex flex-wrap gap-2">
-        {variantSkills.map((variant) => (
-          <Badge key={variant._id} variant="secondary">
-            {variant.title}
-          </Badge>
-        ))}
-      </div>
+      {variantSkills.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No variants</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {variantSkills.map((variant) => (
+            <Badge key={variant._id} variant="secondary">
+              {variant.title}
+            </Badge>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 function VideosSection({ videos }: { videos: string[] }) {
-  if (videos.length === 0) return null;
-
   return (
     <div>
       <h2 className="text-foreground mb-2 text-lg font-semibold">Videos</h2>
-      <div className="space-y-2">
-        {videos.map((url, index) => (
-          <a
-            key={index}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary block hover:underline"
-          >
-            {url}
-          </a>
-        ))}
-      </div>
+      {videos.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No videos added</p>
+      ) : (
+        <div className="space-y-2">
+          {videos.map((url, index) => (
+            <a
+              key={index}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary block hover:underline"
+            >
+              {url}
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 function TipsSection({ tips }: { tips: string[] }) {
-  if (tips.length === 0) return null;
-
   return (
     <div>
       <h2 className="text-foreground mb-2 text-lg font-semibold">Tips</h2>
-      <ul className="list-inside list-disc space-y-1">
-        {tips.map((tip, index) => (
-          <li key={index} className="text-muted-foreground">
-            {tip}
-          </li>
-        ))}
-      </ul>
+      {tips.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No tips added</p>
+      ) : (
+        <ul className="list-inside list-disc space-y-1">
+          {tips.map((tip, index) => (
+            <li key={index} className="text-muted-foreground">
+              {tip}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -378,18 +390,24 @@ export default function PrivateSkillDetailPage() {
       <div className="space-y-6">
         <DescriptionSection description={skill.description} />
         <DifficultySection difficulty={skill.difficulty} />
-        <MusclesSection muscleIds={skill.muscles} muscles={muscles} />
-        <EquipmentSection
-          equipmentIds={skill.equipment}
-          equipment={equipment}
-        />
-        <PrerequisitesSection
-          prerequisiteIds={skill.prerequisites}
-          allSkills={allSkills}
-        />
-        <VariantsSection variantIds={skill.variants} allSkills={allSkills} />
-        <VideosSection videos={skill.embedded_videos} />
-        <TipsSection tips={skill.tips} />
+        <div className="grid gap-6 md:grid-cols-2">
+          <MusclesSection muscleIds={skill.muscles} muscles={muscles} />
+          <EquipmentSection
+            equipmentIds={skill.equipment}
+            equipment={equipment}
+          />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <VideosSection videos={skill.embedded_videos} />
+          <TipsSection tips={skill.tips} />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <PrerequisitesSection
+            prerequisiteIds={skill.prerequisites}
+            allSkills={allSkills}
+          />
+          <VariantsSection variantIds={skill.variants} allSkills={allSkills} />
+        </div>
       </div>
 
       <DeleteDialog
