@@ -23,6 +23,13 @@ export const skillDataValidator = v.object({
   tips: v.array(v.string()),
 });
 
+export const createPrivateSkillValidator = v.object({
+  title: v.string(),
+  description: v.string(),
+  level: levelValidator,
+  difficulty: v.number(),
+});
+
 // Partial skill data validator for updates
 export const partialSkillDataValidator = v.object({
   title: v.optional(v.string()),
