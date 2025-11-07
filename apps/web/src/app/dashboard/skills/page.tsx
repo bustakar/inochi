@@ -83,10 +83,7 @@ function isValidLevel(level: string): level is SkillLevel {
 export default function SkillsPage() {
   const [filters, dispatch] = useReducer(filtersReducer, initialFiltersState);
   const debouncedSearchQuery = useDebounce(filters.searchInput, 300);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [skillToEdit, setSkillToEdit] = useState<
-    Doc<"skills"> | Doc<"private_skills"> | null
-  >(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const handleLevelChange = (newLevel: string | undefined) => {
     if (!newLevel) {
@@ -104,8 +101,8 @@ export default function SkillsPage() {
       equipmentData?: Array<Doc<"equipment">>;
     },
   ) => {
-    setSkillToEdit(skill);
-    setEditDialogOpen(true);
+    // TODO: Navigate to edit page when implemented
+    console.log("Suggest edit for:", skill);
   };
 
   const handleEditPrivateSkill = (
@@ -114,8 +111,8 @@ export default function SkillsPage() {
       equipmentData?: Array<Doc<"equipment">>;
     },
   ) => {
-    setSkillToEdit(skill as any);
-    setEditDialogOpen(true);
+    // TODO: Navigate to edit page when implemented
+    console.log("Edit private skill:", skill);
   };
 
   const hasActiveFilters =
@@ -141,15 +138,8 @@ export default function SkillsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-foreground text-3xl font-bold">Skills</h1>
         <CreateSkillDialog
-          key={skillToEdit?._id}
-          existingSkill={skillToEdit ?? undefined}
-          open={editDialogOpen}
-          onOpenChange={(open) => {
-            setEditDialogOpen(open);
-            if (!open) {
-              setSkillToEdit(null);
-            }
-          }}
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
         />
       </div>
 

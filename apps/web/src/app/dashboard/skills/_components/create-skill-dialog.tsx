@@ -1,17 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useMutation, useQuery } from "convex/react";
-import { Plus, X } from "lucide-react";
+import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import * as z from "zod";
 
 import {
-  Badge,
   Button,
   Dialog,
   DialogContent,
@@ -35,36 +32,14 @@ import {
   SelectValue,
 } from "@inochi/ui";
 
-import { EquipmentSelectionDialog } from "./equipment-selection-dialog";
-import { MuscleSelectionDialog } from "./muscle-selection-dialog";
-import { SkillSelectionDialog } from "./skill-selection-dialog";
-
-interface Muscle {
-  _id: string;
-  name: string;
-}
-
-interface Equipment {
-  _id: string;
-  name: string;
-}
-
-interface Skill {
-  _id: string;
-  title: string;
-}
-
 interface CreateSkillDialogProps {
-  existingSkill?: Doc<"skills"> | Doc<"private_skills"> | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-// Create form contexts
 const { fieldContext, formContext, useFieldContext, useFormContext } =
   createFormHookContexts();
 
-// Field Components using useFieldContext
 function TitleField() {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -177,289 +152,6 @@ function DifficultyField() {
   );
 }
 
-function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
-  const field = useFieldContext<string[]>();
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const muscleIds = field.state.value;
-  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-
-  const selectedMuscles =
-    muscles?.filter((m) => muscleIds.includes(m._id)) || [];
-
-  const handleConfirm = (selectedIds: string[]) => {
-    field.handleChange(selectedIds);
-  };
-
-  const handleRemoveMuscle = (muscleId: string) => {
-    field.handleChange(muscleIds.filter((id) => id !== muscleId));
-  };
-
-  return (
-    <>
-      <Field data-invalid={isInvalid}>
-        <div className="flex items-center justify-between gap-2">
-          <FieldLabel htmlFor={field.name}>Muscles</FieldLabel>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => setDialogOpen(true)}
-          >
-            Select
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {selectedMuscles.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {selectedMuscles.map((muscle) => (
-                <Badge
-                  key={muscle._id}
-                  variant="secondary"
-                  className="flex items-center gap-1 pr-1"
-                >
-                  <span>{muscle.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveMuscle(muscle._id)}
-                    className="hover:bg-destructive/20 rounded-full p-0.5 transition-colors"
-                    aria-label={`Remove ${muscle.name}`}
-                  >
-                    <X className="size-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
-        {isInvalid && <FieldError errors={field.state.meta.errors} />}
-      </Field>
-      {muscles && (
-        <MuscleSelectionDialog
-          open={dialogOpen}
-          muscles={muscles}
-          initialMuscleIds={muscleIds}
-          onOpenChange={setDialogOpen}
-          onConfirm={handleConfirm}
-        />
-      )}
-    </>
-  );
-}
-
-function EquipmentField({ equipment }: { equipment: Equipment[] | undefined }) {
-  const field = useFieldContext<string[]>();
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const equipmentIds = field.state.value;
-  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-
-  const selectedEquipment =
-    equipment?.filter((e) => equipmentIds.includes(e._id)) || [];
-
-  const handleConfirm = (selectedIds: string[]) => {
-    field.handleChange(selectedIds);
-  };
-
-  const handleRemoveEquipment = (equipmentId: string) => {
-    field.handleChange(equipmentIds.filter((id) => id !== equipmentId));
-  };
-
-  return (
-    <>
-      <Field data-invalid={isInvalid}>
-        <div className="flex items-center justify-between gap-2">
-          <FieldLabel htmlFor={field.name}>Equipment</FieldLabel>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => setDialogOpen(true)}
-          >
-            Select
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {selectedEquipment.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {selectedEquipment.map((item) => (
-                <Badge
-                  key={item._id}
-                  variant="secondary"
-                  className="flex items-center gap-1 pr-1"
-                >
-                  <span>{item.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveEquipment(item._id)}
-                    className="hover:bg-destructive/20 rounded-full p-0.5 transition-colors"
-                    aria-label={`Remove ${item.name}`}
-                  >
-                    <X className="size-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
-        {isInvalid && <FieldError errors={field.state.meta.errors} />}
-      </Field>
-      {equipment && (
-        <EquipmentSelectionDialog
-          open={dialogOpen}
-          equipment={equipment}
-          initialEquipmentIds={equipmentIds}
-          onOpenChange={setDialogOpen}
-          onConfirm={handleConfirm}
-        />
-      )}
-    </>
-  );
-}
-
-function SkillSelectionField({
-  skills,
-  excludeIds,
-  label,
-  dialogTitle,
-}: {
-  skills: Skill[] | undefined;
-  excludeIds?: string[];
-  label: string;
-  dialogTitle: string;
-}) {
-  const field = useFieldContext<string[]>();
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const skillIds = field.state.value;
-  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-
-  const selectedSkills = skills?.filter((s) => skillIds.includes(s._id)) || [];
-
-  const handleConfirm = (selectedIds: string[]) => {
-    field.handleChange(selectedIds);
-  };
-
-  const handleRemoveSkill = (skillId: string) => {
-    field.handleChange(skillIds.filter((id) => id !== skillId));
-  };
-
-  return (
-    <>
-      <Field data-invalid={isInvalid}>
-        <div className="flex items-center justify-between gap-2">
-          <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => setDialogOpen(true)}
-          >
-            Select
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {selectedSkills.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {selectedSkills.map((skill) => (
-                <Badge
-                  key={skill._id}
-                  variant="secondary"
-                  className="flex items-center gap-1 pr-1"
-                >
-                  <span>{skill.title}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSkill(skill._id)}
-                    className="hover:bg-destructive/20 rounded-full p-0.5 transition-colors"
-                    aria-label={`Remove ${skill.title}`}
-                  >
-                    <X className="size-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
-        {isInvalid && <FieldError errors={field.state.meta.errors} />}
-      </Field>
-      {skills && (
-        <SkillSelectionDialog
-          open={dialogOpen}
-          skills={skills}
-          initialSkillIds={skillIds}
-          title={dialogTitle}
-          excludeIds={excludeIds}
-          onOpenChange={setDialogOpen}
-          onConfirm={handleConfirm}
-        />
-      )}
-    </>
-  );
-}
-
-function ArrayStringField({
-  label,
-  placeholder,
-  inputType = "text",
-}: {
-  label: string;
-  placeholder: string;
-  inputType?: "text" | "url";
-}) {
-  const field = useFieldContext<string[]>();
-  const items = field.state.value;
-  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-
-  const handleAdd = () => {
-    field.handleChange([...items, ""]);
-  };
-
-  const handleChange = (index: number, value: string) => {
-    const newItems = [...items];
-    newItems[index] = value;
-    field.handleChange(newItems);
-  };
-
-  const handleRemove = (index: number) => {
-    field.handleChange(items.filter((_, i) => i !== index));
-  };
-
-  return (
-    <Field data-invalid={isInvalid}>
-      <div className="flex items-center justify-between gap-2">
-        <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
-        <Button type="button" size="sm" variant="outline" onClick={handleAdd}>
-          <Plus className="size-4" />
-          New
-        </Button>
-      </div>
-      <div className="space-y-2">
-        {items.map((item, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <Input
-              type={inputType}
-              value={item}
-              onChange={(e) => handleChange(index, e.target.value)}
-              onBlur={field.handleBlur}
-              placeholder={placeholder}
-              className="flex-1"
-              aria-invalid={isInvalid}
-            />
-            <button
-              type="button"
-              onClick={() => handleRemove(index)}
-              className="text-muted-foreground hover:text-destructive rounded-full p-1 transition-colors"
-              aria-label={`Remove ${label} ${index + 1}`}
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-        ))}
-      </div>
-      {isInvalid && <FieldError errors={field.state.meta.errors} />}
-    </Field>
-  );
-}
-
-// Create custom form hook with registered field components
 const { useAppForm } = createFormHook({
   fieldContext,
   formContext,
@@ -468,20 +160,9 @@ const { useAppForm } = createFormHook({
     DescriptionField,
     LevelField,
     DifficultyField,
-    SkillSelectionField,
-    ArrayStringField,
-    MusclesField,
-    EquipmentField,
   },
   formComponents: {},
 });
-
-const musclesSchema = z.array(z.string());
-const equipmentSchema = z.array(z.string());
-const prerequisitesSchema = z.array(z.string());
-const variantsSchema = z.array(z.string());
-const embeddedVideosSchema = z.array(z.url("Each video must be a valid URL"));
-const tipsSchema = z.array(z.string().min(1, "Tip cannot be empty"));
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -493,62 +174,30 @@ const formSchema = z.object({
     .number()
     .min(1, "Difficulty must be at least 1")
     .max(10, "Difficulty must be at most 10"),
-  muscles: musclesSchema,
-  equipment: equipmentSchema,
-  prerequisites: prerequisitesSchema,
-  variants: variantsSchema,
-  embedded_videos: embeddedVideosSchema,
-  tips: tipsSchema,
 });
 
 export type SkillFormData = z.output<typeof formSchema>;
 
 export function CreateSkillDialog({
-  existingSkill,
   open,
   onOpenChange,
 }: CreateSkillDialogProps) {
-  const muscles = useQuery(api.functions.skills.getMuscles, {});
-  const equipment = useQuery(api.functions.skills.getEquipment, {});
-  const skills = useQuery(api.functions.skills.getSkills, {});
-  const privateSkills = useQuery(api.functions.skills.getPrivateSkills, {});
+  const router = useRouter();
   const createPrivateSkill = useMutation(
     api.functions.skills.createPrivateSkill,
   );
-  const updatePrivateSkill = useMutation(
-    api.functions.skills.updatePrivateSkill,
-  );
-  const createSubmission = useMutation(
-    api.functions.submissions.createSubmission,
-  );
-
-  // Check if existing skill is private
-  const isPrivateSkill =
-    existingSkill && "_id" in existingSkill && "userId" in existingSkill;
-  const isEditMode = Boolean(existingSkill);
-  const isEditPrivateSkill = isEditMode && isPrivateSkill;
-
-  // Combine public and private skills for selection
-  const allSkillsForSelection = React.useMemo(() => {
-    const publicSkills =
-      skills?.map((s) => ({ _id: s._id, title: s.title })) || [];
-    const privateSkillsList =
-      privateSkills?.map((s) => ({ _id: s._id, title: s.title })) || [];
-    return [...publicSkills, ...privateSkillsList];
-  }, [skills, privateSkills]);
 
   const form = useAppForm({
     defaultValues: {
-      title: existingSkill?.title ?? "",
-      description: existingSkill?.description ?? "",
-      level: existingSkill?.level ?? "beginner",
-      difficulty: existingSkill?.difficulty ?? 1,
-      muscles: (existingSkill?.muscles as string[]) ?? [],
-      equipment: (existingSkill?.equipment as string[]) ?? [],
-      prerequisites: (existingSkill?.prerequisites as string[]) ?? [],
-      variants: (existingSkill?.variants as string[]) ?? [],
-      embedded_videos: existingSkill?.embedded_videos ?? [],
-      tips: existingSkill?.tips ?? [],
+      title: "",
+      description: "",
+      level: "beginner" as
+        | "beginner"
+        | "intermediate"
+        | "advanced"
+        | "expert"
+        | "elite",
+      difficulty: 1,
     },
     validators: {
       onSubmit: formSchema,
@@ -560,76 +209,19 @@ export function CreateSkillDialog({
 
   const onSubmit = async (data: SkillFormData) => {
     try {
-      const skillData = {
-        title: data.title,
-        description: data.description,
-        level: data.level as
-          | "beginner"
-          | "intermediate"
-          | "advanced"
-          | "expert"
-          | "elite",
-        difficulty: data.difficulty,
-        muscles: data.muscles as Doc<"muscles">["_id"][],
-        equipment: data.equipment as Doc<"equipment">["_id"][],
-        embedded_videos: data.embedded_videos.filter(
-          (v: string) => v.trim() !== "",
-        ),
-        prerequisites: data.prerequisites as Array<
-          Doc<"skills">["_id"] | Doc<"private_skills">["_id"]
-        >,
-        variants: data.variants as Array<
-          Doc<"skills">["_id"] | Doc<"private_skills">["_id"]
-        >,
-        tips: data.tips.filter((t: string) => t.trim() !== ""),
-      };
-
-      if (isEditPrivateSkill) {
-        // Direct edit of private skill
-        await updatePrivateSkill({
-          id: existingSkill!._id as Doc<"private_skills">["_id"],
-          skillData,
-        });
-        toast.success("Private skill updated!");
-      } else if (isEditMode) {
-        // Suggest edit for public skill
-        await createSubmission({
-          title: data.title,
-          description: data.description,
-          level: data.level as
-            | "beginner"
-            | "intermediate"
-            | "advanced"
-            | "expert"
-            | "elite",
-          difficulty: data.difficulty,
-          muscles: data.muscles as Doc<"muscles">["_id"][],
-          equipment: data.equipment as Doc<"equipment">["_id"][],
-          embedded_videos: data.embedded_videos.filter(
-            (v: string) => v.trim() !== "",
-          ),
-          prerequisites: data.prerequisites as Doc<"skills">["_id"][],
-          variants: data.variants as Doc<"skills">["_id"][],
-          tips: data.tips.filter((t: string) => t.trim() !== ""),
-          submissionType: "edit",
-          originalSkillId: existingSkill?._id as Doc<"skills">["_id"],
-        });
-        toast.success("Edit suggestion submitted!");
-      } else {
-        // Create new private skill
-        await createPrivateSkill({
-          skillData,
-        });
-        toast.success("Private skill created!");
-      }
+      const skillId = await createPrivateSkill({
+        data: data,
+      });
+      toast.success("Private skill created!");
       onOpenChange(false);
       form.reset();
+      router.push(`/dashboard/skills/private/${skillId}`);
     } catch (error) {
-      console.error("Error saving skill:", error);
+      console.error("Error creating skill:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to save skill. Please try again.",
+          : "Failed to create skill. Please try again.",
       );
     }
   };
@@ -641,20 +233,12 @@ export function CreateSkillDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {!isEditMode && (
-        <DialogTrigger asChild>
-          <Button>Create Skill</Button>
-        </DialogTrigger>
-      )}
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+      <DialogTrigger asChild>
+        <Button>Create Skill</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>
-            {isEditPrivateSkill
-              ? "Edit Private Skill"
-              : isEditMode
-                ? "Suggest Skill Edit"
-                : "Create Private Skill"}
-          </DialogTitle>
+          <DialogTitle>Create Skill</DialogTitle>
         </DialogHeader>
         <form
           id="skill-form"
@@ -676,56 +260,6 @@ export function CreateSkillDialog({
                 children={() => <DifficultyField />}
               />
             </div>
-            <form.AppField
-              name="muscles"
-              children={() => <MusclesField muscles={muscles} />}
-            />
-            <form.AppField
-              name="equipment"
-              children={() => <EquipmentField equipment={equipment} />}
-            />
-            <form.AppField
-              name="embedded_videos"
-              children={() => (
-                <ArrayStringField
-                  label="Video Urls"
-                  placeholder="https://example.com/video"
-                  inputType="url"
-                />
-              )}
-            />
-            <form.AppField
-              name="tips"
-              children={() => (
-                <ArrayStringField
-                  label="Tips"
-                  placeholder="Enter a tip..."
-                  inputType="text"
-                />
-              )}
-            />
-            <form.AppField
-              name="prerequisites"
-              children={() => (
-                <SkillSelectionField
-                  skills={allSkillsForSelection}
-                  excludeIds={form.state.values.variants}
-                  label="Prerequisites"
-                  dialogTitle="Select Prerequisites"
-                />
-              )}
-            />
-            <form.AppField
-              name="variants"
-              children={() => (
-                <SkillSelectionField
-                  skills={allSkillsForSelection}
-                  excludeIds={form.state.values.prerequisites}
-                  label="Variants"
-                  dialogTitle="Select Variants"
-                />
-              )}
-            />
           </FieldGroup>
           <DialogFooter className="mt-4">
             <Button
@@ -738,11 +272,7 @@ export function CreateSkillDialog({
               Cancel
             </Button>
             <Button type="submit" form="skill-form">
-              {isEditPrivateSkill
-                ? "Update Skill"
-                : isEditMode
-                  ? "Suggest Edit"
-                  : "Create Skill"}
+              Create Skill
             </Button>
           </DialogFooter>
         </form>
