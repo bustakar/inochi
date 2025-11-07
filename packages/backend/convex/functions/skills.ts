@@ -1031,6 +1031,53 @@ export const getPrivateSkill = query({
   },
 });
 
+// Get a specific private skill by ID (alias)
+export const getPrivateSkillById = query({
+  args: {
+    private_skill_id: v.id("private_skills"),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("private_skills"),
+      _creationTime: v.number(),
+      title: v.string(),
+      description: v.string(),
+      level: levelValidator,
+      difficulty: v.number(),
+      muscles: v.array(v.id("muscles")),
+      equipment: v.array(v.id("equipment")),
+      embedded_videos: v.array(v.string()),
+      prerequisites: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      variants: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+      tips: v.array(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      userId: v.string(),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const skill = await ctx.db.get(args.private_skill_id);
+    if (!skill) {
+      return null;
+    }
+
+    // Verify ownership
+    if (skill.userId !== userId) {
+      throw new Error(
+        "Unauthorized: You can only view your own private skills",
+      );
+    }
+
+    return skill;
+  },
+});
+
 // Search user's private skills by title or description
 export const searchPrivateSkills = query({
   args: {
@@ -1214,21 +1261,21 @@ export const createPrivateSkillMutation = mutation({
 // All arrays are set to empty
 export const createPrivateSkill = mutation({
   args: {
-    skillData: createPrivateSkillValidator,
+    data: createPrivateSkillValidator,
   },
   returns: v.id("private_skills"),
   handler: async (ctx, args) => {
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
 
-    validateDifficulty(args.skillData.difficulty);
+    validateDifficulty(args.data.difficulty);
 
     const now = Date.now();
     const skillId = await ctx.db.insert("private_skills", {
-      title: args.skillData.title,
-      description: args.skillData.description,
-      level: args.skillData.level,
-      difficulty: args.skillData.difficulty,
+      title: args.data.title,
+      description: args.data.description,
+      level: args.data.level,
+      difficulty: args.data.difficulty,
       muscles: [],
       equipment: [],
       embedded_videos: [],
