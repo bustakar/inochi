@@ -127,12 +127,24 @@ function MusclesFilterDropdown({
     });
   };
 
-  // Expand all groups when dropdown opens
+  // Expand groups that have selected muscles
   useEffect(() => {
-    if (open) {
-      setExpandedGroups(new Set(groupedMuscles.keys()));
+    if (open && muscleIds.length > 0) {
+      const groupsWithSelections = new Set<string>();
+      for (const [group, groupMuscles] of groupedMuscles.entries()) {
+        const hasSelected = groupMuscles.some((m) =>
+          muscleIds.includes(m._id),
+        );
+        if (hasSelected) {
+          groupsWithSelections.add(group);
+        }
+      }
+      setExpandedGroups(groupsWithSelections);
+    } else if (open) {
+      // If no selections, keep all collapsed
+      setExpandedGroups(new Set());
     }
-  }, [open, groupedMuscles]);
+  }, [open, groupedMuscles, muscleIds]);
 
   const musclesLabel =
     muscleIds.length > 0
@@ -157,7 +169,21 @@ function MusclesFilterDropdown({
         className="max-h-96 w-80 overflow-y-auto"
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
-        <DropdownMenuLabel>Muscles</DropdownMenuLabel>
+        <div className="flex items-center justify-between px-2 py-1.5">
+          <DropdownMenuLabel className="py-0">Muscles</DropdownMenuLabel>
+          {muscleIds.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => {
+                onMusclesChange([]);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </div>
         <DropdownMenuSeparator />
         <div className="space-y-1 p-1">
           {Array.from(groupedMuscles.entries()).map(
@@ -237,23 +263,6 @@ function MusclesFilterDropdown({
             },
           )}
         </div>
-        {muscleIds.length > 0 && (
-          <>
-            <DropdownMenuSeparator />
-            <div className="p-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => {
-                  onMusclesChange([]);
-                }}
-              >
-                Clear Selection
-              </Button>
-            </div>
-          </>
-        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
