@@ -38,6 +38,7 @@ import { SkillSelectionDialog } from "./skill-selection-dialog";
 interface Muscle {
   _id: string;
   name: string;
+  muscleGroup?: string;
 }
 
 interface Equipment {
