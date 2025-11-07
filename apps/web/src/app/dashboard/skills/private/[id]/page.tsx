@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useUser } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
@@ -315,10 +316,12 @@ export default function PrivateSkillDetailPage() {
   const router = useRouter();
   const skillId = params.id as Id<"private_skills">;
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { isLoaded: isUserLoaded } = useUser();
 
-  const skill = useQuery(api.functions.skills.getPrivateSkillById, {
-    private_skill_id: skillId,
-  });
+  const skill = useQuery(
+    api.functions.skills.getPrivateSkillById,
+    isUserLoaded ? { private_skill_id: skillId } : "skip",
+  );
   const muscles = useQuery(api.functions.skills.getMuscles, {});
   const equipment = useQuery(api.functions.skills.getEquipment, {});
   const allSkills = useQuery(api.functions.skills.getAllSkills, {
@@ -345,7 +348,7 @@ export default function PrivateSkillDetailPage() {
     }
   };
 
-  if (skill === undefined) {
+  if (!isUserLoaded || skill === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading skill...</p>
