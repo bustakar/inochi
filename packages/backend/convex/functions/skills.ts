@@ -597,6 +597,7 @@ export const getAllSkills = query({
                 slug: v.string(),
               }),
             ),
+            muscleGroup: v.optional(v.string()),
           }),
         ),
         equipmentData: v.array(
@@ -639,6 +640,7 @@ export const getAllSkills = query({
                 slug: v.string(),
               }),
             ),
+            muscleGroup: v.optional(v.string()),
           }),
         ),
         equipmentData: v.array(
