@@ -222,3 +222,150 @@ export const addMuscleGroupAndExpandMuscles = mutation({
   },
 });
 
+/**
+ * Migration: Fix muscles that have the same name as their muscleGroup
+ * 
+ * This migration:
+ * 1. Finds muscles where name matches muscleGroup (e.g., "Chest" with muscleGroup "chest")
+ * 2. Checks if there's a corresponding first-part muscle (e.g., "Upper Chest")
+ * 3. If found, replaces references to the group-named muscle with the first-part muscle
+ * 4. Deletes the group-named muscle if it's redundant
+ * 
+ * Run via: npx convex run migrations:fixMusclesWithGroupNames
+ */
+export const fixMusclesWithGroupNames = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const allMuscles = await ctx.db.query("muscles").collect();
+    
+    // Map muscleGroup -> first part name based on seed data
+    const groupToFirstPart: Record<string, string> = {
+      chest: "Upper Chest",
+      back: "Lats",
+      shoulders: "Front Deltoid",
+      biceps: "Biceps Long Head",
+      triceps: "Triceps Long Head",
+      forearms: "Brachioradialis",
+      core: "Rectus Abdominis",
+      glutes: "Gluteus Maximus",
+      quadriceps: "Rectus Femoris",
+      hamstrings: "Biceps Femoris",
+      calves: "Gastrocnemius",
+    };
+    
+    const stats = {
+      musclesFound: 0,
+      musclesRenamed: 0,
+      musclesDeleted: 0,
+      skillsUpdated: 0,
+      privateSkillsUpdated: 0,
+      submissionsUpdated: 0,
+    };
+    
+    // Find muscles that match their muscleGroup name
+    const problematicMuscles = allMuscles.filter((muscle) => {
+      if (!muscle.muscleGroup) return false;
+      return (
+        muscle.name.toLowerCase() === muscle.muscleGroup.toLowerCase() ||
+        muscle.name.toLowerCase() ===
+          muscle.muscleGroup.charAt(0).toUpperCase() +
+            muscle.muscleGroup.slice(1).toLowerCase()
+      );
+    });
+    
+    stats.musclesFound = problematicMuscles.length;
+    
+    for (const problematicMuscle of problematicMuscles) {
+      const group = problematicMuscle.muscleGroup!;
+      const firstPartName = groupToFirstPart[group];
+      
+      if (!firstPartName) {
+        // No mapping found, skip
+        continue;
+      }
+      
+      // Find the first-part muscle
+      const firstPartMuscle = allMuscles.find(
+        (m) =>
+          m.muscleGroup === group &&
+          m.name === firstPartName &&
+          m._id !== problematicMuscle._id,
+      );
+      
+      if (!firstPartMuscle) {
+        // First part doesn't exist, rename this muscle to be the first part
+        await ctx.db.patch(problematicMuscle._id, {
+          name: firstPartName,
+        });
+        stats.musclesRenamed++;
+        continue;
+      }
+      
+      // First part exists, replace references and delete the problematic muscle
+      const replacementId = firstPartMuscle._id;
+      const problematicId = problematicMuscle._id;
+      
+      // Update skills
+      const allSkills = await ctx.db.query("skills").collect();
+      const skills = allSkills.filter((skill) =>
+        skill.muscles.includes(problematicId),
+      );
+      
+      for (const skill of skills) {
+        const updatedMuscles = skill.muscles.map((id) =>
+          id === problematicId ? replacementId : id,
+        );
+        // Remove duplicates
+        const uniqueMuscles = Array.from(new Set(updatedMuscles));
+        await ctx.db.patch(skill._id, {
+          muscles: uniqueMuscles,
+        });
+        stats.skillsUpdated++;
+      }
+      
+      // Update private_skills
+      const allPrivateSkills = await ctx.db.query("private_skills").collect();
+      const privateSkills = allPrivateSkills.filter((skill) =>
+        skill.muscles.includes(problematicId),
+      );
+      
+      for (const skill of privateSkills) {
+        const updatedMuscles = skill.muscles.map((id) =>
+          id === problematicId ? replacementId : id,
+        );
+        const uniqueMuscles = Array.from(new Set(updatedMuscles));
+        await ctx.db.patch(skill._id, {
+          muscles: uniqueMuscles,
+        });
+        stats.privateSkillsUpdated++;
+      }
+      
+      // Update user_submissions
+      const allSubmissions = await ctx.db.query("user_submissions").collect();
+      const submissions = allSubmissions.filter((submission) =>
+        submission.muscles.includes(problematicId),
+      );
+      
+      for (const submission of submissions) {
+        const updatedMuscles = submission.muscles.map((id) =>
+          id === problematicId ? replacementId : id,
+        );
+        const uniqueMuscles = Array.from(new Set(updatedMuscles));
+        await ctx.db.patch(submission._id, {
+          muscles: uniqueMuscles,
+        });
+        stats.submissionsUpdated++;
+      }
+      
+      // Delete the problematic muscle
+      await ctx.db.delete(problematicMuscle._id);
+      stats.musclesDeleted++;
+    }
+    
+    return {
+      success: true,
+      ...stats,
+    };
+  },
+});
+
