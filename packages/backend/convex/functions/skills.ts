@@ -1,7 +1,7 @@
 import { Auth } from "convex/server";
 import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
-import { mutation, query } from "../_generated/server";
+import { internalQuery, mutation, query } from "../_generated/server";
 import {
   createPrivateSkillValidator,
   levelValidator,
@@ -1461,5 +1461,29 @@ export const deletePrivateSkill = mutation({
 
     await ctx.db.delete(args.id);
     return null;
+  },
+});
+
+// Internal query for AI - returns simplified muscle data
+export const getAllMusclesForAI = internalQuery({
+  handler: async (ctx) => {
+    const muscles = await ctx.db.query("muscles").collect();
+    return muscles.map((m) => ({ _id: m._id, name: m.name }));
+  },
+});
+
+// Internal query for AI - returns simplified equipment data
+export const getAllEquipmentForAI = internalQuery({
+  handler: async (ctx) => {
+    const equipment = await ctx.db.query("equipment").collect();
+    return equipment.map((e) => ({ _id: e._id, name: e.name }));
+  },
+});
+
+// Internal query for AI - returns simplified skill data
+export const getAllSkillsForAI = internalQuery({
+  handler: async (ctx) => {
+    const skills = await ctx.db.query("skills").collect();
+    return skills.map((s) => ({ _id: s._id, title: s.title }));
   },
 });
