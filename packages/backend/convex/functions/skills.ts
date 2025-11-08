@@ -1241,14 +1241,13 @@ export const createPrivateSkillMutation = mutation({
   handler: async (ctx, args) => {
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
-    validateDifficulty(args.data.difficulty);
 
     const now = Date.now();
     const skillId = await ctx.db.insert("private_skills", {
       title: args.data.title,
-      description: args.data.description,
-      level: args.data.level,
-      difficulty: args.data.difficulty,
+      description: "",
+      level: "beginner",
+      difficulty: 1,
       muscles: [],
       equipment: [],
       embedded_videos: [],
@@ -1264,8 +1263,6 @@ export const createPrivateSkillMutation = mutation({
   },
 });
 
-// Create a private skill with only title, description, level, and difficulty
-// All arrays are set to empty
 export const createPrivateSkill = mutation({
   args: {
     data: createPrivateSkillValidator,
@@ -1275,14 +1272,12 @@ export const createPrivateSkill = mutation({
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
 
-    validateDifficulty(args.data.difficulty);
-
     const now = Date.now();
     const skillId = await ctx.db.insert("private_skills", {
       title: args.data.title,
-      description: args.data.description,
-      level: args.data.level,
-      difficulty: args.data.difficulty,
+      description: "",
+      level: "beginner",
+      difficulty: 1,
       muscles: [],
       equipment: [],
       embedded_videos: [],
@@ -1484,6 +1479,32 @@ export const getAllEquipmentForAI = internalQuery({
 export const getAllSkillsForAI = internalQuery({
   handler: async (ctx) => {
     const skills = await ctx.db.query("skills").collect();
-    return skills.map((s) => ({ _id: s._id, title: s.title }));
+    return skills.map((s) => ({
+      _id: s._id,
+      title: s.title,
+      level: s.level,
+      difficulty: s.difficulty,
+      isPrivate: false as const,
+    }));
+  },
+});
+
+// Internal query for AI - returns user's private skills
+export const getPrivateSkillsForAI = internalQuery({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const privateSkills = await ctx.db
+      .query("private_skills")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+    return privateSkills.map((s) => ({
+      _id: s._id,
+      title: s.title,
+      level: s.level,
+      difficulty: s.difficulty,
+      isPrivate: true as const,
+    }));
   },
 });
