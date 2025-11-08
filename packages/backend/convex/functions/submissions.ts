@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
 import {
-  levelValidator,
+  exerciseLevelValidator,
   validateDifficulty,
   validateUrlArray,
 } from "../validators/validators";
@@ -51,7 +51,7 @@ export const getUserSubmissions = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      level: levelValidator,
+      level: exerciseLevelValidator,
       difficulty: v.number(),
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
@@ -101,7 +101,7 @@ export const getUserSubmissions = query({
           _creationTime: v.number(),
           title: v.string(),
           description: v.string(),
-          level: levelValidator,
+          level: exerciseLevelValidator,
           difficulty: v.number(),
         }),
       ),
@@ -202,7 +202,7 @@ export const getSubmission = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      level: levelValidator,
+      level: exerciseLevelValidator,
       difficulty: v.number(),
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
@@ -252,7 +252,7 @@ export const getSubmission = query({
           _creationTime: v.number(),
           title: v.string(),
           description: v.string(),
-          level: levelValidator,
+          level: exerciseLevelValidator,
           difficulty: v.number(),
         }),
       ),
@@ -330,7 +330,7 @@ export const createSubmission = mutation({
   args: {
     title: v.string(),
     description: v.string(),
-    level: levelValidator,
+    level: exerciseLevelValidator,
     difficulty: v.number(),
     muscles: v.array(v.id("muscles")),
     equipment: v.array(v.id("equipment")),
@@ -344,120 +344,121 @@ export const createSubmission = mutation({
   },
   returns: v.id("user_submissions"),
   handler: async (ctx, args) => {
-    const userId = await getUserId(ctx);
-    if (!userId) {
-      throw new Error("User not authenticated");
-    }
+    throw new Error("Not implemented");
+    // const userId = await getUserId(ctx);
+    // if (!userId) {
+    //   throw new Error("User not authenticated");
+    // }
 
-    // Validate difficulty
-    validateDifficulty(args.difficulty);
+    // // Validate difficulty
+    // validateDifficulty(args.difficulty);
 
-    // Validate URLs
-    validateUrlArray(args.embedded_videos);
+    // // Validate URLs
+    // validateUrlArray(args.embedded_videos);
 
-    // Validate privateSkillId if provided
-    if (args.privateSkillId) {
-      const privateSkill = await ctx.db.get(args.privateSkillId);
-      if (!privateSkill) {
-        throw new Error(`Private skill not found: ${args.privateSkillId}`);
-      }
-      if (privateSkill.userId !== userId) {
-        throw new Error(
-          "Unauthorized: You can only suggest your own private skills",
-        );
-      }
+    // // Validate privateSkillId if provided
+    // if (args.privateSkillId) {
+    //   const privateSkill = await ctx.db.get(args.privateSkillId);
+    //   if (!privateSkill) {
+    //     throw new Error(`Private skill not found: ${args.privateSkillId}`);
+    //   }
+    //   if (privateSkill.userId !== userId) {
+    //     throw new Error(
+    //       "Unauthorized: You can only suggest your own private skills",
+    //     );
+    //   }
 
-      // Validate that all prerequisites and variants are public skills
-      // Since args.prerequisites/variants are typed as Id<"skills">[], they should be public
-      // We verify they exist in the public skills table
-      for (const prereqId of args.prerequisites) {
-        const prereq = await ctx.db.get(prereqId);
-        if (!prereq) {
-          throw new Error(`Prerequisite skill not found: ${prereqId}`);
-        }
-        // If we successfully got it from the skills table, it's a public skill
-        // (Convex IDs are table-specific, so it can't be a private skill)
-      }
+    //   // Validate that all prerequisites and variants are public skills
+    //   // Since args.prerequisites/variants are typed as Id<"skills">[], they should be public
+    //   // We verify they exist in the public skills table
+    //   for (const prereqId of args.prerequisites) {
+    //     const prereq = await ctx.db.get(prereqId);
+    //     if (!prereq) {
+    //       throw new Error(`Prerequisite skill not found: ${prereqId}`);
+    //     }
+    //     // If we successfully got it from the skills table, it's a public skill
+    //     // (Convex IDs are table-specific, so it can't be a private skill)
+    //   }
 
-      for (const variantId of args.variants) {
-        const variant = await ctx.db.get(variantId);
-        if (!variant) {
-          throw new Error(`Variant skill not found: ${variantId}`);
-        }
-        // If we successfully got it from the skills table, it's a public skill
-      }
-    }
+    //   for (const variantId of args.variants) {
+    //     const variant = await ctx.db.get(variantId);
+    //     if (!variant) {
+    //       throw new Error(`Variant skill not found: ${variantId}`);
+    //     }
+    //     // If we successfully got it from the skills table, it's a public skill
+    //   }
+    // }
 
-    // Validate submission type and originalSkillId
-    if (args.submissionType === "edit") {
-      if (!args.originalSkillId) {
-        throw new Error("originalSkillId is required for edit submissions");
-      }
-      const originalSkill = await ctx.db.get(args.originalSkillId);
-      if (!originalSkill) {
-        throw new Error(`Original skill not found: ${args.originalSkillId}`);
-      }
-    } else {
-      if (args.originalSkillId) {
-        throw new Error(
-          "originalSkillId should not be provided for create submissions",
-        );
-      }
-    }
+    // // Validate submission type and originalSkillId
+    // if (args.submissionType === "edit") {
+    //   if (!args.originalSkillId) {
+    //     throw new Error("originalSkillId is required for edit submissions");
+    //   }
+    //   const originalSkill = await ctx.db.get(args.originalSkillId);
+    //   if (!originalSkill) {
+    //     throw new Error(`Original skill not found: ${args.originalSkillId}`);
+    //   }
+    // } else {
+    //   if (args.originalSkillId) {
+    //     throw new Error(
+    //       "originalSkillId should not be provided for create submissions",
+    //     );
+    //   }
+    // }
 
-    // Validate that prerequisites and variants exist (if not already validated above)
-    if (!args.privateSkillId) {
-      for (const prereqId of args.prerequisites) {
-        const prereq = await ctx.db.get(prereqId);
-        if (!prereq) {
-          throw new Error(`Prerequisite skill not found: ${prereqId}`);
-        }
-      }
+    // // Validate that prerequisites and variants exist (if not already validated above)
+    // if (!args.privateSkillId) {
+    //   for (const prereqId of args.prerequisites) {
+    //     const prereq = await ctx.db.get(prereqId);
+    //     if (!prereq) {
+    //       throw new Error(`Prerequisite skill not found: ${prereqId}`);
+    //     }
+    //   }
 
-      for (const variantId of args.variants) {
-        const variant = await ctx.db.get(variantId);
-        if (!variant) {
-          throw new Error(`Variant skill not found: ${variantId}`);
-        }
-      }
-    }
+    //   for (const variantId of args.variants) {
+    //     const variant = await ctx.db.get(variantId);
+    //     if (!variant) {
+    //       throw new Error(`Variant skill not found: ${variantId}`);
+    //     }
+    //   }
+    // }
 
-    // Validate that muscles and equipment exist
-    for (const muscleId of args.muscles) {
-      const muscle = await ctx.db.get(muscleId);
-      if (!muscle) {
-        throw new Error(`Muscle not found: ${muscleId}`);
-      }
-    }
+    // // Validate that muscles and equipment exist
+    // for (const muscleId of args.muscles) {
+    //   const muscle = await ctx.db.get(muscleId);
+    //   if (!muscle) {
+    //     throw new Error(`Muscle not found: ${muscleId}`);
+    //   }
+    // }
 
-    for (const equipmentId of args.equipment) {
-      const equipment = await ctx.db.get(equipmentId);
-      if (!equipment) {
-        throw new Error(`Equipment not found: ${equipmentId}`);
-      }
-    }
+    // for (const equipmentId of args.equipment) {
+    //   const equipment = await ctx.db.get(equipmentId);
+    //   if (!equipment) {
+    //     throw new Error(`Equipment not found: ${equipmentId}`);
+    //   }
+    // }
 
-    const now = Date.now();
-    const submissionId = await ctx.db.insert("user_submissions", {
-      title: args.title,
-      description: args.description,
-      level: args.level,
-      difficulty: args.difficulty,
-      muscles: args.muscles,
-      equipment: args.equipment,
-      embedded_videos: args.embedded_videos,
-      prerequisites: args.prerequisites,
-      variants: args.variants,
-      tips: args.tips,
-      submissionType: args.submissionType,
-      status: "pending",
-      originalSkillId: args.originalSkillId,
-      privateSkillId: args.privateSkillId,
-      submittedBy: userId,
-      submittedAt: now,
-    });
+    // const now = Date.now();
+    // const submissionId = await ctx.db.insert("user_submissions", {
+    //   title: args.title,
+    //   description: args.description,
+    //   level: args.level,
+    //   difficulty: args.difficulty,
+    //   muscles: args.muscles,
+    //   equipment: args.equipment,
+    //   embedded_videos: args.embedded_videos,
+    //   prerequisites: args.prerequisites,
+    //   variants: args.variants,
+    //   tips: args.tips,
+    //   submissionType: args.submissionType,
+    //   status: "pending",
+    //   originalSkillId: args.originalSkillId,
+    //   privateSkillId: args.privateSkillId,
+    //   submittedBy: userId,
+    //   submittedAt: now,
+    // });
 
-    return submissionId;
+    // return submissionId;
   },
 });
 
@@ -467,7 +468,7 @@ export const updateSubmission = mutation({
     id: v.id("user_submissions"),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
-    level: v.optional(levelValidator),
+    level: v.optional(exerciseLevelValidator),
     difficulty: v.optional(v.number()),
     muscles: v.optional(v.array(v.id("muscles"))),
     equipment: v.optional(v.array(v.id("equipment"))),
@@ -478,105 +479,106 @@ export const updateSubmission = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await getUserId(ctx);
-    if (!userId) {
-      throw new Error("User not authenticated");
-    }
-
-    const submission = await ctx.db.get(args.id);
-    if (!submission) {
-      throw new Error("Submission not found");
-    }
-
-    // Verify user owns this submission
-    if (submission.submittedBy !== userId) {
-      throw new Error("Unauthorized: You can only update your own submissions");
-    }
-
-    // Only allow updates if status is pending
-    if (submission.status !== "pending") {
-      throw new Error("You can only update pending submissions");
-    }
-
-    // Validate difficulty if provided
-    if (args.difficulty !== undefined) {
-      validateDifficulty(args.difficulty);
-    }
-
-    // Validate URLs if provided
-    if (args.embedded_videos !== undefined) {
-      validateUrlArray(args.embedded_videos);
-    }
-
-    // Validate that prerequisites exist if provided
-    if (args.prerequisites !== undefined) {
-      for (const prereqId of args.prerequisites) {
-        const prereq = await ctx.db.get(prereqId);
-        if (!prereq) {
-          throw new Error(`Prerequisite skill not found: ${prereqId}`);
-        }
-      }
-    }
-
-    // Validate that variants exist if provided
-    if (args.variants !== undefined) {
-      for (const variantId of args.variants) {
-        const variant = await ctx.db.get(variantId);
-        if (!variant) {
-          throw new Error(`Variant skill not found: ${variantId}`);
-        }
-      }
-    }
-
-    // Validate that muscles exist if provided
-    if (args.muscles !== undefined) {
-      for (const muscleId of args.muscles) {
-        const muscle = await ctx.db.get(muscleId);
-        if (!muscle) {
-          throw new Error(`Muscle not found: ${muscleId}`);
-        }
-      }
-    }
-
-    // Validate that equipment exists if provided
-    if (args.equipment !== undefined) {
-      for (const equipmentId of args.equipment) {
-        const equipment = await ctx.db.get(equipmentId);
-        if (!equipment) {
-          throw new Error(`Equipment not found: ${equipmentId}`);
-        }
-      }
-    }
-
-    // Build update object
-    const updates: {
-      title?: string;
-      description?: string;
-      level?: Doc<"user_submissions">["level"];
-      difficulty?: number;
-      muscles?: Id<"muscles">[];
-      equipment?: Id<"equipment">[];
-      embedded_videos?: string[];
-      prerequisites?: Id<"skills">[];
-      variants?: Id<"skills">[];
-      tips?: string[];
-    } = {};
-
-    if (args.title !== undefined) updates.title = args.title;
-    if (args.description !== undefined) updates.description = args.description;
-    if (args.level !== undefined) updates.level = args.level;
-    if (args.difficulty !== undefined) updates.difficulty = args.difficulty;
-    if (args.muscles !== undefined) updates.muscles = args.muscles;
-    if (args.equipment !== undefined) updates.equipment = args.equipment;
-    if (args.embedded_videos !== undefined)
-      updates.embedded_videos = args.embedded_videos;
-    if (args.prerequisites !== undefined)
-      updates.prerequisites = args.prerequisites;
-    if (args.variants !== undefined) updates.variants = args.variants;
-    if (args.tips !== undefined) updates.tips = args.tips;
-
-    await ctx.db.patch(args.id, updates);
     return null;
+    //   const userId = await getUserId(ctx);
+    //   if (!userId) {
+    //     throw new Error("User not authenticated");
+    //   }
+
+    //   const submission = await ctx.db.get(args.id);
+    //   if (!submission) {
+    //     throw new Error("Submission not found");
+    //   }
+
+    //   // Verify user owns this submission
+    //   if (submission.submittedBy !== userId) {
+    //     throw new Error("Unauthorized: You can only update your own submissions");
+    //   }
+
+    //   // Only allow updates if status is pending
+    //   if (submission.status !== "pending") {
+    //     throw new Error("You can only update pending submissions");
+    //   }
+
+    //   // Validate difficulty if provided
+    //   if (args.difficulty !== undefined) {
+    //     validateDifficulty(args.difficulty);
+    //   }
+
+    //   // Validate URLs if provided
+    //   if (args.embedded_videos !== undefined) {
+    //     validateUrlArray(args.embedded_videos);
+    //   }
+
+    //   // Validate that prerequisites exist if provided
+    //   if (args.prerequisites !== undefined) {
+    //     for (const prereqId of args.prerequisites) {
+    //       const prereq = await ctx.db.get(prereqId);
+    //       if (!prereq) {
+    //         throw new Error(`Prerequisite skill not found: ${prereqId}`);
+    //       }
+    //     }
+    //   }
+
+    //   // Validate that variants exist if provided
+    //   if (args.variants !== undefined) {
+    //     for (const variantId of args.variants) {
+    //       const variant = await ctx.db.get(variantId);
+    //       if (!variant) {
+    //         throw new Error(`Variant skill not found: ${variantId}`);
+    //       }
+    //     }
+    //   }
+
+    //   // Validate that muscles exist if provided
+    //   if (args.muscles !== undefined) {
+    //     for (const muscleId of args.muscles) {
+    //       const muscle = await ctx.db.get(muscleId);
+    //       if (!muscle) {
+    //         throw new Error(`Muscle not found: ${muscleId}`);
+    //       }
+    //     }
+    //   }
+
+    //   // Validate that equipment exists if provided
+    //   if (args.equipment !== undefined) {
+    //     for (const equipmentId of args.equipment) {
+    //       const equipment = await ctx.db.get(equipmentId);
+    //       if (!equipment) {
+    //         throw new Error(`Equipment not found: ${equipmentId}`);
+    //       }
+    //     }
+    //   }
+
+    //   // Build update object
+    //   const updates: {
+    //     title?: string;
+    //     description?: string;
+    //     level?: Doc<"user_submissions">["level"];
+    //     difficulty?: number;
+    //     muscles?: Id<"muscles">[];
+    //     equipment?: Id<"equipment">[];
+    //     embedded_videos?: string[];
+    //     prerequisites?: Id<"skills">[];
+    //     variants?: Id<"skills">[];
+    //     tips?: string[];
+    //   } = {};
+
+    //   if (args.title !== undefined) updates.title = args.title;
+    //   if (args.description !== undefined) updates.description = args.description;
+    //   if (args.level !== undefined) updates.level = args.level;
+    //   if (args.difficulty !== undefined) updates.difficulty = args.difficulty;
+    //   if (args.muscles !== undefined) updates.muscles = args.muscles;
+    //   if (args.equipment !== undefined) updates.equipment = args.equipment;
+    //   if (args.embedded_videos !== undefined)
+    //     updates.embedded_videos = args.embedded_videos;
+    //   if (args.prerequisites !== undefined)
+    //     updates.prerequisites = args.prerequisites;
+    //   if (args.variants !== undefined) updates.variants = args.variants;
+    //   if (args.tips !== undefined) updates.tips = args.tips;
+
+    //   await ctx.db.patch(args.id, updates);
+    //   return null;
   },
 });
 

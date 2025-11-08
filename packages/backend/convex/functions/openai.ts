@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { internal } from "../_generated/api";
 import { action, query } from "../_generated/server";
 import { missingEnvVariableUrl } from "../utils";
-import { levelValidator } from "../validators/validators";
+import { exerciseLevelValidator } from "../validators/validators";
 
 export const openaiKeySet = query({
   args: {},
@@ -19,7 +19,7 @@ export const generateSkillData = action({
   },
   returns: v.object({
     description: v.string(),
-    level: levelValidator,
+    level: exerciseLevelValidator,
     difficulty: v.number(),
     tips: v.array(v.string()),
     muscles: v.array(v.id("muscles")),
