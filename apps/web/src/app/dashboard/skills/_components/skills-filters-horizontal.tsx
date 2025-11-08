@@ -31,6 +31,148 @@ interface Muscle {
   muscleGroup?: string;
 }
 
+interface LevelFilterProps {
+  level?: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+  onLevelChange: (level?: string) => void;
+}
+
+function LevelFilter({ level, onLevelChange }: LevelFilterProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant={level ? "default" : "outline"}
+          size="sm"
+          className="h-9"
+        >
+          <TrendingUp className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Level</span>
+          <ChevronDown className="ml-2 h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-48">
+        <DropdownMenuLabel>Level</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuCheckboxItem
+          checked={!level}
+          onCheckedChange={(checked) => {
+            if (checked) onLevelChange(undefined);
+          }}
+        >
+          All Levels
+        </DropdownMenuCheckboxItem>
+        {["beginner", "intermediate", "advanced", "expert", "elite"].map(
+          (lvl) => (
+            <DropdownMenuCheckboxItem
+              key={lvl}
+              checked={level === lvl}
+              onCheckedChange={(checked) => {
+                onLevelChange(checked ? lvl : undefined);
+              }}
+            >
+              {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
+            </DropdownMenuCheckboxItem>
+          ),
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+interface DifficultyFilterProps {
+  minDifficulty?: number;
+  maxDifficulty?: number;
+  onDifficultyChange: (min?: number, max?: number) => void;
+}
+
+function DifficultyFilter({
+  minDifficulty,
+  maxDifficulty,
+  onDifficultyChange,
+}: DifficultyFilterProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant={
+            minDifficulty !== undefined || maxDifficulty !== undefined
+              ? "default"
+              : "outline"
+          }
+          size="sm"
+          className="h-9"
+        >
+          <Gauge className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Difficulty</span>
+          <ChevronDown className="ml-2 h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuLabel>Difficulty Range</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <div className="space-y-2 p-2">
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min="1"
+              max="10"
+              placeholder="Min"
+              value={minDifficulty || ""}
+              onChange={(e) => {
+                if (!e.target.value) {
+                  onDifficultyChange(undefined, maxDifficulty);
+                  return;
+                }
+                const val = parseInt(e.target.value);
+                if (isNaN(val) || val < 1 || val > 10) {
+                  return;
+                }
+                const currentMax = maxDifficulty;
+                if (currentMax !== undefined && val > currentMax) {
+                  return;
+                }
+                onDifficultyChange(val, currentMax);
+              }}
+              className="border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-md border px-2 py-1 text-sm"
+            />
+            <input
+              type="number"
+              min="1"
+              max="10"
+              placeholder="Max"
+              value={maxDifficulty || ""}
+              onChange={(e) => {
+                if (!e.target.value) {
+                  onDifficultyChange(minDifficulty, undefined);
+                  return;
+                }
+                const val = parseInt(e.target.value);
+                if (isNaN(val) || val < 1 || val > 10) {
+                  return;
+                }
+                const currentMin = minDifficulty;
+                if (currentMin !== undefined && val < currentMin) {
+                  return;
+                }
+                onDifficultyChange(currentMin, val);
+              }}
+              className="border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-md border px-2 py-1 text-sm"
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full"
+            onClick={() => onDifficultyChange(undefined, undefined)}
+          >
+            Clear
+          </Button>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 interface MusclesFilterDropdownProps {
   muscles: Muscle[];
   muscleIds: Id<"muscles">[];
@@ -125,25 +267,28 @@ function MusclesFilterDropdown({
     });
   };
 
-  // Expand groups that have selected muscles
+  // Expand groups that have some (but not all) muscles selected
   useEffect(() => {
     if (open && muscleIds.length > 0) {
-      const groupsWithSelections = new Set<string>();
+      const groupsWithPartialSelections = new Set<string>();
       for (const [group, groupMuscles] of groupedMuscles.entries()) {
-        const hasSelected = groupMuscles.some((m) => muscleIds.includes(m._id));
-        if (hasSelected) {
-          groupsWithSelections.add(group);
+        const groupMuscleIds = groupMuscles.map((m) => m._id);
+        const selectedCount = groupMuscleIds.filter((id) =>
+          muscleIds.includes(id),
+        ).length;
+        const allSelected = selectedCount === groupMuscleIds.length;
+        const someSelected = selectedCount > 0 && !allSelected;
+
+        if (someSelected) {
+          groupsWithPartialSelections.add(group);
         }
       }
-      setExpandedGroups(groupsWithSelections);
+      setExpandedGroups(groupsWithPartialSelections);
     } else if (open) {
       // If no selections, keep all collapsed
       setExpandedGroups(new Set());
     }
   }, [open, groupedMuscles, muscleIds]);
-
-  const musclesLabel =
-    muscleIds.length > 0 ? `Muscles (${muscleIds.length})` : "Muscles";
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
@@ -154,7 +299,7 @@ function MusclesFilterDropdown({
           className="h-9"
         >
           <Target className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">{musclesLabel}</span>
+          <span className="hidden sm:inline">Muscles</span>
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -258,6 +403,83 @@ function MusclesFilterDropdown({
   );
 }
 
+interface EquipmentFilterProps {
+  equipment: Array<{ _id: Id<"equipment">; name: string }>;
+  equipmentIds: Id<"equipment">[];
+  onEquipmentChange: (equipmentIds: Id<"equipment">[]) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+function EquipmentFilter({
+  equipment,
+  equipmentIds,
+  onEquipmentChange,
+  open,
+  onOpenChange,
+}: EquipmentFilterProps) {
+  return (
+    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant={equipmentIds.length > 0 ? "default" : "outline"}
+          size="sm"
+          className="h-9"
+        >
+          <Dumbbell className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Equipment</span>
+          <ChevronDown className="ml-2 h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="max-h-96 w-64 overflow-y-auto"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        <DropdownMenuLabel>Equipment</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {equipment.map((equip) => (
+          <DropdownMenuCheckboxItem
+            key={equip._id}
+            checked={equipmentIds.includes(equip._id)}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                onEquipmentChange([...equipmentIds, equip._id]);
+              } else {
+                onEquipmentChange(
+                  equipmentIds.filter((id) => id !== equip._id),
+                );
+              }
+            }}
+            onSelect={(e) => {
+              e.preventDefault();
+            }}
+          >
+            {equip.name}
+          </DropdownMenuCheckboxItem>
+        ))}
+        {equipmentIds.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <div className="p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => {
+                  onEquipmentChange([]);
+                }}
+              >
+                Clear Selection
+              </Button>
+            </div>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 interface SkillsFiltersHorizontalProps {
   level?: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
   minDifficulty?: number;
@@ -286,156 +508,14 @@ export function SkillsFiltersHorizontal({
   const [musclesOpen, setMusclesOpen] = useState(false);
   const [equipmentOpen, setEquipmentOpen] = useState(false);
 
-  const levelLabel = level
-    ? level.charAt(0).toUpperCase() + level.slice(1)
-    : "All Levels";
-
-  const difficultyLabel = (() => {
-    if (minDifficulty !== undefined && maxDifficulty !== undefined) {
-      return `${minDifficulty}-${maxDifficulty}`;
-    }
-    if (minDifficulty !== undefined) {
-      return `${minDifficulty}+`;
-    }
-    if (maxDifficulty !== undefined) {
-      return `≤${maxDifficulty}`;
-    }
-    return "All";
-  })();
-
-  const musclesLabel = "Muscles";
-  const equipmentLabel = "Equipment";
-
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Level Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant={level ? "default" : "outline"}
-            size="sm"
-            className="h-9"
-          >
-            <TrendingUp className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">{levelLabel}</span>
-            <ChevronDown className="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48">
-          <DropdownMenuLabel>Level</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem
-            checked={!level}
-            onCheckedChange={(checked) => {
-              if (checked) onLevelChange(undefined);
-            }}
-          >
-            All Levels
-          </DropdownMenuCheckboxItem>
-          {["beginner", "intermediate", "advanced", "expert", "elite"].map(
-            (lvl) => (
-              <DropdownMenuCheckboxItem
-                key={lvl}
-                checked={level === lvl}
-                onCheckedChange={(checked) => {
-                  onLevelChange(checked ? lvl : undefined);
-                }}
-              >
-                {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
-              </DropdownMenuCheckboxItem>
-            ),
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Difficulty Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant={
-              minDifficulty !== undefined || maxDifficulty !== undefined
-                ? "default"
-                : "outline"
-            }
-            size="sm"
-            className="h-9"
-          >
-            <Gauge className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">{difficultyLabel}</span>
-            <ChevronDown className="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64">
-          <DropdownMenuLabel>Difficulty Range</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <div className="space-y-2 p-2">
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min="1"
-                max="10"
-                placeholder="Min"
-                value={minDifficulty || ""}
-                onChange={(e) => {
-                  if (!e.target.value) {
-                    // Allow clearing the value
-                    onDifficultyChange(undefined, maxDifficulty);
-                    return;
-                  }
-                  const val = parseInt(e.target.value);
-                  if (isNaN(val) || val < 1 || val > 10) {
-                    return;
-                  }
-                  // Ensure min doesn't exceed max if max is set
-                  const currentMax = maxDifficulty;
-                  if (currentMax !== undefined && val > currentMax) {
-                    // Don't update if min would be greater than max
-                    return;
-                  }
-                  onDifficultyChange(val, currentMax);
-                }}
-                className="border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-md border px-2 py-1 text-sm"
-              />
-              <input
-                type="number"
-                min="1"
-                max="10"
-                placeholder="Max"
-                value={maxDifficulty || ""}
-                onChange={(e) => {
-                  if (!e.target.value) {
-                    // Allow clearing the value
-                    onDifficultyChange(minDifficulty, undefined);
-                    return;
-                  }
-                  const val = parseInt(e.target.value);
-                  if (isNaN(val) || val < 1 || val > 10) {
-                    return;
-                  }
-                  // Ensure max isn't less than min if min is set
-                  const currentMin = minDifficulty;
-                  if (currentMin !== undefined && val < currentMin) {
-                    // Don't update if max would be less than min
-                    return;
-                  }
-                  onDifficultyChange(currentMin, val);
-                }}
-                className="border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-md border px-2 py-1 text-sm"
-              />
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full"
-              onClick={() => onDifficultyChange(undefined, undefined)}
-            >
-              Clear
-            </Button>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Muscles Filter */}
+      <LevelFilter level={level} onLevelChange={onLevelChange} />
+      <DifficultyFilter
+        minDifficulty={minDifficulty}
+        maxDifficulty={maxDifficulty}
+        onDifficultyChange={onDifficultyChange}
+      />
       {muscles && (
         <MusclesFilterDropdown
           muscles={muscles as Muscle[]}
@@ -445,71 +525,14 @@ export function SkillsFiltersHorizontal({
           onOpenChange={setMusclesOpen}
         />
       )}
-
-      {/* Equipment Filter */}
       {equipment && (
-        <DropdownMenu
+        <EquipmentFilter
+          equipment={equipment as Array<{ _id: Id<"equipment">; name: string }>}
+          equipmentIds={equipmentIds}
+          onEquipmentChange={onEquipmentChange}
           open={equipmentOpen}
           onOpenChange={setEquipmentOpen}
-          modal={false}
-        >
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant={equipmentIds.length > 0 ? "default" : "outline"}
-              size="sm"
-              className="h-9"
-            >
-              <Dumbbell className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">{equipmentLabel}</span>
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="max-h-96 w-64 overflow-y-auto"
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            <DropdownMenuLabel>Equipment</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {equipment.map((equip: { _id: Id<"equipment">; name: string }) => (
-              <DropdownMenuCheckboxItem
-                key={equip._id}
-                checked={equipmentIds.includes(equip._id)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    onEquipmentChange([...equipmentIds, equip._id]);
-                  } else {
-                    onEquipmentChange(
-                      equipmentIds.filter((id) => id !== equip._id),
-                    );
-                  }
-                }}
-                onSelect={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                {equip.name}
-              </DropdownMenuCheckboxItem>
-            ))}
-            {equipmentIds.length > 0 && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="p-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      onEquipmentChange([]);
-                    }}
-                  >
-                    Clear Selection
-                  </Button>
-                </div>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        />
       )}
     </div>
   );
