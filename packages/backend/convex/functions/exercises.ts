@@ -254,7 +254,8 @@ export const getPrivateExercises = query({
   handler: async (ctx, args) => {
     const userId = await getUserId(ctx);
     if (!userId) {
-      throw new Error("User not authenticated");
+      // Return empty array instead of throwing - allows UI to handle gracefully
+      return [];
     }
 
     // Step 1: Fetch exercises using the most efficient index
