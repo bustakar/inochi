@@ -24,8 +24,8 @@ export const generateSkillData = action({
     tips: v.array(v.string()),
     muscles: v.array(v.id("muscles")),
     equipment: v.array(v.id("equipment")),
-    prerequisites: v.array(v.id("skills")),
-    variants: v.array(v.id("skills")),
+    prerequisites: v.array(v.union(v.id("skills"), v.id("private_skills"))),
+    variants: v.array(v.union(v.id("skills"), v.id("private_skills"))),
   }),
   handler: async (ctx, { skillName }) => {
     const apiKey = process.env.OPENROUTER_API_KEY;
@@ -38,6 +38,9 @@ export const generateSkillData = action({
       );
     }
 
+    // Get user ID for private skills
+    const userId = (await ctx.auth.getUserIdentity())?.subject;
+
     // Fetch all available options from database
     const muscles = await ctx.runQuery(
       internal.functions.skills.getAllMusclesForAI,
@@ -45,19 +48,33 @@ export const generateSkillData = action({
     const equipment = await ctx.runQuery(
       internal.functions.skills.getAllEquipmentForAI,
     );
-    const skills = await ctx.runQuery(
+    const publicSkills = await ctx.runQuery(
       internal.functions.skills.getAllSkillsForAI,
     );
 
+    // Fetch user's private skills if authenticated
+    const privateSkills = userId
+      ? await ctx.runQuery(internal.functions.skills.getPrivateSkillsForAI, {
+          userId,
+        })
+      : [];
+
+    // Combine public and private skills
+    const skills = [...publicSkills, ...privateSkills];
+
     const musclesList = muscles.map((m) => m.name).join(", ");
     const equipmentList = equipment.map((e) => e.name).join(", ");
-    const skillsList = skills.map((s) => s.title).join(", ");
+    const skillsList = skills
+      .map(
+        (s) => `${s.title} (level: ${s.level}, difficulty: ${s.difficulty}/10)`,
+      )
+      .join(", ");
 
     const prompt = `You are an expert fitness and calisthenics coach. Generate comprehensive data for a skill called "${skillName}".
 
 Available muscles (use exact names): ${musclesList}
 Available equipment (use exact names): ${equipmentList}
-Available skills for prerequisites/variants (use exact titles): ${skillsList}
+Available skills for prerequisites/variants (use exact titles with level and difficulty shown): ${skillsList}
 
 Return a JSON object with this exact structure:
 {
@@ -73,10 +90,11 @@ Return a JSON object with this exact structure:
 
 Important:
 - Description must be maximum 100 characters
-- Use EXACT names/titles from the lists above
+- Use EXACT names/titles from the lists above (without the level/difficulty info in parentheses)
 - If a muscle/equipment/skill doesn't exist in the lists, don't include it
-- Prerequisites should be skills that are easier or foundational to this skill
-- Variants should be similar or related skills
+- Prerequisites should be skills that are easier or foundational to this skill (choose skills with lower difficulty/level)
+- Variants should be similar or related skills (can be similar difficulty or level)
+- Consider the difficulty and level of existing skills when determining appropriate prerequisites
 - Tips should be practical and actionable`;
 
     // Initialize OpenRouter client
@@ -148,13 +166,20 @@ Important:
         )
         .filter(
           (
-            s: { _id: string; title: string } | undefined,
+            s:
+              | {
+                  _id: string;
+                  title: string;
+                  isPrivate: boolean;
+                }
+              | undefined,
           ): s is {
             _id: string;
             title: string;
+            isPrivate: boolean;
           } => s !== undefined,
         )
-        .map((s: { _id: string; title: string }) => s._id) || [];
+        .map((s: { _id: string }) => s._id) || [];
 
     const matchedVariants =
       aiData.variants
@@ -163,13 +188,20 @@ Important:
         )
         .filter(
           (
-            s: { _id: string; title: string } | undefined,
+            s:
+              | {
+                  _id: string;
+                  title: string;
+                  isPrivate: boolean;
+                }
+              | undefined,
           ): s is {
             _id: string;
             title: string;
+            isPrivate: boolean;
           } => s !== undefined,
         )
-        .map((s: { _id: string; title: string }) => s._id) || [];
+        .map((s: { _id: string }) => s._id) || [];
 
     return {
       description: aiData.description || "",

@@ -25,9 +25,6 @@ export const skillDataValidator = v.object({
 
 export const createPrivateSkillValidator = v.object({
   title: v.string(),
-  description: v.string(),
-  level: levelValidator,
-  difficulty: v.number(),
 });
 
 // Partial skill data validator for updates
