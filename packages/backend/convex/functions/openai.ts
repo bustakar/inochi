@@ -1,79 +1,185 @@
 import { v } from "convex/values";
 import OpenAI from "openai";
 import { internal } from "../_generated/api";
-import { internalAction, internalMutation, query } from "../_generated/server";
+import { action, query } from "../_generated/server";
 import { missingEnvVariableUrl } from "../utils";
+import { levelValidator } from "../validators/validators";
 
 export const openaiKeySet = query({
   args: {},
   handler: async () => {
-    return !!process.env.OPENAI_API_KEY;
+    return !!process.env.OPENROUTER_API_KEY;
   },
 });
 
-// Commented out - these functions reference the notes table which has been removed
-// Uncomment and update if needed for future features
-/*
-export const summary = internalAction({
+// Generate skill data using AI
+export const generateSkillData = action({
   args: {
-    id: v.id("notes"),
-    title: v.string(),
-    content: v.string(),
+    skillName: v.string(),
   },
-  handler: async (ctx, { id, title, content }) => {
-    const prompt = `Take in the following note and return a summary: Title: ${title}, Note content: ${content}`;
-
-    const apiKey = process.env.OPENAI_API_KEY;
+  returns: v.object({
+    description: v.string(),
+    level: levelValidator,
+    difficulty: v.number(),
+    tips: v.array(v.string()),
+    muscles: v.array(v.id("muscles")),
+    equipment: v.array(v.id("equipment")),
+    prerequisites: v.array(v.id("skills")),
+    variants: v.array(v.id("skills")),
+  }),
+  handler: async (ctx, { skillName }) => {
+    const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      const error = missingEnvVariableUrl(
-        "OPENAI_API_KEY",
-        "https://platform.openai.com/account/api-keys",
+      throw new Error(
+        missingEnvVariableUrl(
+          "OPENROUTER_API_KEY",
+          "https://openrouter.ai/keys",
+        ),
       );
-      console.error(error);
-      await ctx.runMutation(internal.openai.saveSummary, {
-        id: id,
-        summary: error,
-      });
-      return;
     }
-    const openai = new OpenAI({ apiKey });
+
+    // Fetch all available options from database
+    const muscles = await ctx.runQuery(
+      internal.functions.skills.getAllMusclesForAI,
+    );
+    const equipment = await ctx.runQuery(
+      internal.functions.skills.getAllEquipmentForAI,
+    );
+    const skills = await ctx.runQuery(
+      internal.functions.skills.getAllSkillsForAI,
+    );
+
+    const musclesList = muscles.map((m) => m.name).join(", ");
+    const equipmentList = equipment.map((e) => e.name).join(", ");
+    const skillsList = skills.map((s) => s.title).join(", ");
+
+    const prompt = `You are an expert fitness and calisthenics coach. Generate comprehensive data for a skill called "${skillName}".
+
+Available muscles (use exact names): ${musclesList}
+Available equipment (use exact names): ${equipmentList}
+Available skills for prerequisites/variants (use exact titles): ${skillsList}
+
+Return a JSON object with this exact structure:
+{
+  "description": "A detailed description of the skill (maximum 100 characters)",
+  "level": "beginner" | "intermediate" | "advanced" | "expert" | "elite",
+  "difficulty": number between 1-10,
+  "tips": ["tip 1", "tip 2", "tip 3"],
+  "muscles": ["exact muscle name 1", "exact muscle name 2"],
+  "equipment": ["exact equipment name 1"] or [],
+  "prerequisites": ["exact skill title 1", "exact skill title 2"] or [],
+  "variants": ["exact skill title 1"] or []
+}
+
+Important:
+- Description must be maximum 100 characters
+- Use EXACT names/titles from the lists above
+- If a muscle/equipment/skill doesn't exist in the lists, don't include it
+- Prerequisites should be skills that are easier or foundational to this skill
+- Variants should be similar or related skills
+- Tips should be practical and actionable`;
+
+    // Initialize OpenRouter client
+    const openai = new OpenAI({
+      apiKey,
+      baseURL: "https://openrouter.ai/api/v1",
+      defaultHeaders: {
+        "HTTP-Referer": "https://inochi.app",
+        "X-Title": "Inochi Skill Generator",
+      },
+    });
+
     const output = await openai.chat.completions.create({
       messages: [
         {
           role: "system",
           content:
-            "You are a helpful assistant designed to output JSON in this format: {summary: string}",
+            "You are a helpful assistant designed to output JSON. Always return valid JSON matching the exact structure requested.",
         },
         { role: "user", content: prompt },
       ],
-      model: "gpt-4-1106-preview",
+      model: "google/gemini-2.0-flash-exp:free",
       response_format: { type: "json_object" },
+      temperature: 0.7,
     });
 
-    // Pull the message content out of the response
     const messageContent = output.choices[0]?.message.content;
+    if (!messageContent) {
+      throw new Error("No response from AI");
+    }
 
-    console.log({ messageContent });
+    const aiData = JSON.parse(messageContent);
 
-    const parsedOutput = JSON.parse(messageContent!);
-    console.log({ parsedOutput });
+    // Match names to IDs (case-insensitive)
+    const matchedMuscles =
+      aiData.muscles
+        ?.map((name: string) =>
+          muscles.find((m) => m.name.toLowerCase() === name.toLowerCase()),
+        )
+        .filter(
+          (
+            m: { _id: string; name: string } | undefined,
+          ): m is {
+            _id: string;
+            name: string;
+          } => m !== undefined,
+        )
+        .map((m: { _id: string; name: string }) => m._id) || [];
 
-    await ctx.runMutation(internal.openai.saveSummary, {
-      id: id,
-      summary: parsedOutput.summary,
-    });
+    const matchedEquipment =
+      aiData.equipment
+        ?.map((name: string) =>
+          equipment.find((e) => e.name.toLowerCase() === name.toLowerCase()),
+        )
+        .filter(
+          (
+            e: { _id: string; name: string } | undefined,
+          ): e is {
+            _id: string;
+            name: string;
+          } => e !== undefined,
+        )
+        .map((e: { _id: string; name: string }) => e._id) || [];
+
+    const matchedPrerequisites =
+      aiData.prerequisites
+        ?.map((title: string) =>
+          skills.find((s) => s.title.toLowerCase() === title.toLowerCase()),
+        )
+        .filter(
+          (
+            s: { _id: string; title: string } | undefined,
+          ): s is {
+            _id: string;
+            title: string;
+          } => s !== undefined,
+        )
+        .map((s: { _id: string; title: string }) => s._id) || [];
+
+    const matchedVariants =
+      aiData.variants
+        ?.map((title: string) =>
+          skills.find((s) => s.title.toLowerCase() === title.toLowerCase()),
+        )
+        .filter(
+          (
+            s: { _id: string; title: string } | undefined,
+          ): s is {
+            _id: string;
+            title: string;
+          } => s !== undefined,
+        )
+        .map((s: { _id: string; title: string }) => s._id) || [];
+
+    return {
+      description: aiData.description || "",
+      level: aiData.level || "beginner",
+      difficulty: aiData.difficulty || 1,
+      tips: aiData.tips || [],
+      muscles: matchedMuscles,
+      equipment: matchedEquipment,
+      prerequisites: matchedPrerequisites,
+      variants: matchedVariants,
+    };
   },
 });
-
-export const saveSummary = internalMutation({
-  args: {
-    id: v.id("notes"),
-    summary: v.string(),
-  },
-  handler: async (ctx, { id, summary }) => {
-    await ctx.db.patch(id, {
-      summary: summary,
-    });
-  },
-});
-*/

@@ -7,8 +7,8 @@ import { useUser } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useMutation, useQuery } from "convex/react";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { ArrowLeft, Plus, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -544,6 +544,8 @@ export default function EditPrivateSkillPage() {
   const updatePrivateSkill = useMutation(
     api.functions.skills.updatePrivateSkill,
   );
+  const generateSkillData = useAction(api.functions.openai.generateSkillData);
+  const [isGenerating, setIsGenerating] = React.useState(false);
 
   // Combine public and private skills for selection
   const allSkillsForSelection = React.useMemo(() => {
@@ -643,6 +645,42 @@ export default function EditPrivateSkillPage() {
     router.push(`/dashboard/skills/private/${skillId}`);
   };
 
+  const handleFillWithAI = async () => {
+    const skillName = form.state.values.title || skill?.title;
+    if (!skillName || skillName.trim() === "") {
+      toast.error("Please enter a skill name first");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const aiData = await generateSkillData({
+        skillName: skillName.trim(),
+      });
+
+      // Update form fields with AI data
+      form.setFieldValue("description", aiData.description);
+      form.setFieldValue("level", aiData.level);
+      form.setFieldValue("difficulty", aiData.difficulty);
+      form.setFieldValue("muscles", aiData.muscles);
+      form.setFieldValue("equipment", aiData.equipment);
+      form.setFieldValue("prerequisites", aiData.prerequisites);
+      form.setFieldValue("variants", aiData.variants);
+      form.setFieldValue("tips", aiData.tips);
+
+      toast.success("Skill data filled with AI!");
+    } catch (error) {
+      console.error("Error generating skill data:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate skill data. Please try again.",
+      );
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   if (!isUserLoaded || skill === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -664,13 +702,24 @@ export default function EditPrivateSkillPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href={`/dashboard/skills/private/${skillId}`}>
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h1 className="text-foreground text-3xl font-bold">Edit Skill</h1>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href={`/dashboard/skills/private/${skillId}`}>
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <h1 className="text-foreground text-3xl font-bold">Edit Skill</h1>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleFillWithAI}
+          disabled={isGenerating || (!form.state.values.title && !skill?.title)}
+        >
+          <Sparkles className="mr-2 size-4" />
+          {isGenerating ? "Generating..." : "Fill with AI"}
+        </Button>
       </div>
 
       <form
