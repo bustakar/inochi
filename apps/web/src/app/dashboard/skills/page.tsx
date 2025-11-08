@@ -157,39 +157,6 @@ export default function SkillsPage() {
             className="pl-10"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-sm">Filter:</span>
-          <div className="flex gap-1 rounded-md border p-1">
-            <Button
-              variant={filters.filter === "all" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => dispatch({ type: "SET_FILTER", payload: "all" })}
-              className="h-7"
-            >
-              All
-            </Button>
-            <Button
-              variant={filters.filter === "public" ? "default" : "ghost"}
-              size="sm"
-              onClick={() =>
-                dispatch({ type: "SET_FILTER", payload: "public" })
-              }
-              className="h-7"
-            >
-              Public
-            </Button>
-            <Button
-              variant={filters.filter === "private" ? "default" : "ghost"}
-              size="sm"
-              onClick={() =>
-                dispatch({ type: "SET_FILTER", payload: "private" })
-              }
-              className="h-7"
-            >
-              Private
-            </Button>
-          </div>
-        </div>
         {hasActiveFilters && (
           <Button
             variant="ghost"
