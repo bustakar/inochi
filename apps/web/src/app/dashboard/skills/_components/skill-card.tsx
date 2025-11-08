@@ -188,7 +188,7 @@ function SkillCardComponent({
                   Suggest Edit
                 </DropdownMenuItem>
               ) : null}
-              {isPrivate && (
+              {/* {isPrivate && (
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
@@ -198,7 +198,7 @@ function SkillCardComponent({
                 >
                   {isSuggesting ? "Suggesting..." : "Suggest to Public"}
                 </DropdownMenuItem>
-              )}
+              )} */}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
