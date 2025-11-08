@@ -1,10 +1,13 @@
 import { Auth } from "convex/server";
 import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
-import { query, QueryCtx } from "../_generated/server";
+import { mutation, query, QueryCtx } from "../_generated/server";
 import {
+  createPrivateExerciseValidator,
   exerciseCategoryValidator,
   exerciseLevelValidator,
+  updatePrivateExerciseValidator,
+  validateDifficulty,
 } from "../validators/validators";
 
 export const getUserId = async (ctx: { auth: Auth }) => {
@@ -315,5 +318,137 @@ export const getPrivateExercises = query({
         enrichExercise(ctx, exercise, musclesDataMap, equipmentDataMap),
       ),
     );
+  },
+});
+
+// Create a new private exercise
+export const createPrivateExercise = mutation({
+  args: {
+    data: createPrivateExerciseValidator,
+  },
+  returns: v.id("private_exercises"),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    // Validate difficulty if provided
+    if (args.data.difficulty !== undefined) {
+      validateDifficulty(args.data.difficulty);
+    }
+
+    const now = Date.now();
+    const exerciseId = await ctx.db.insert("private_exercises", {
+      userId: userId,
+      title: args.data.title,
+      description: args.data.description ?? "",
+      category: args.data.category ?? "calisthenics",
+      level: args.data.level ?? "beginner",
+      difficulty: args.data.difficulty ?? 1,
+      prerequisites: [],
+      progressionFrom: [],
+      progressionTo: [],
+      createdAt: now,
+      updatedAt: now,
+      createdBy: userId,
+    });
+
+    return exerciseId;
+  },
+});
+
+// Update an existing private exercise
+export const updatePrivateExercise = mutation({
+  args: {
+    id: v.id("private_exercises"),
+    exerciseData: updatePrivateExerciseValidator,
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const exercise = await ctx.db.get(args.id);
+    if (!exercise) {
+      throw new Error("Private exercise not found");
+    }
+
+    // Verify ownership
+    if (exercise.createdBy !== userId) {
+      throw new Error(
+        "Unauthorized: You can only update your own private exercises",
+      );
+    }
+
+    // Validate difficulty if provided
+    if (args.exerciseData.difficulty !== undefined) {
+      validateDifficulty(args.exerciseData.difficulty);
+    }
+
+    // Validate that prerequisites exist if provided
+    if (args.exerciseData.prerequisites !== undefined) {
+      for (const prereqId of args.exerciseData.prerequisites) {
+        const prereq = await ctx.db.get(prereqId);
+        if (!prereq) {
+          throw new Error(`Prerequisite exercise not found: ${prereqId}`);
+        }
+      }
+    }
+
+    // Validate that progressionFrom exercises exist if provided
+    if (args.exerciseData.progressionFrom !== undefined) {
+      for (const progId of args.exerciseData.progressionFrom) {
+        const prog = await ctx.db.get(progId);
+        if (!prog) {
+          throw new Error(`Progression exercise not found: ${progId}`);
+        }
+      }
+    }
+
+    // Validate that progressionTo exercises exist if provided
+    if (args.exerciseData.progressionTo !== undefined) {
+      for (const progId of args.exerciseData.progressionTo) {
+        const prog = await ctx.db.get(progId);
+        if (!prog) {
+          throw new Error(`Progression exercise not found: ${progId}`);
+        }
+      }
+    }
+
+    // Build update object with only provided fields
+    const updateData: Partial<Doc<"private_exercises">> = {
+      updatedAt: Date.now(),
+    };
+
+    if (args.exerciseData.title !== undefined) {
+      updateData.title = args.exerciseData.title;
+    }
+    if (args.exerciseData.description !== undefined) {
+      updateData.description = args.exerciseData.description;
+    }
+    if (args.exerciseData.category !== undefined) {
+      updateData.category = args.exerciseData.category;
+    }
+    if (args.exerciseData.level !== undefined) {
+      updateData.level = args.exerciseData.level;
+    }
+    if (args.exerciseData.difficulty !== undefined) {
+      updateData.difficulty = args.exerciseData.difficulty;
+    }
+    if (args.exerciseData.prerequisites !== undefined) {
+      updateData.prerequisites = args.exerciseData.prerequisites;
+    }
+    if (args.exerciseData.progressionFrom !== undefined) {
+      updateData.progressionFrom = args.exerciseData.progressionFrom;
+    }
+    if (args.exerciseData.progressionTo !== undefined) {
+      updateData.progressionTo = args.exerciseData.progressionTo;
+    }
+
+    await ctx.db.patch(args.id, updateData);
+    return null;
   },
 });

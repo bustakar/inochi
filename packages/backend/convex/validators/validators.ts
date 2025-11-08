@@ -42,6 +42,15 @@ export const createPrivateSkillValidator = v.object({
   title: v.string(),
 });
 
+// Validator for creating private exercises
+export const createPrivateExerciseValidator = v.object({
+  title: v.string(),
+  description: v.optional(v.string()),
+  level: v.optional(exerciseLevelValidator),
+  difficulty: v.optional(v.number()),
+  category: v.optional(exerciseCategoryValidator),
+});
+
 // Partial skill data validator for updates
 export const partialSkillDataValidator = v.object({
   title: v.optional(v.string()),
@@ -58,6 +67,18 @@ export const partialSkillDataValidator = v.object({
     v.array(v.union(v.id("skills"), v.id("private_skills"))),
   ),
   tips: v.optional(v.array(v.string())),
+});
+
+// Exercise data validator for updates
+export const updatePrivateExerciseValidator = v.object({
+  title: v.optional(v.string()),
+  description: v.optional(v.string()),
+  category: v.optional(exerciseCategoryValidator),
+  level: v.optional(exerciseLevelValidator),
+  difficulty: v.optional(v.number()),
+  prerequisites: v.optional(v.array(v.id("exercises"))),
+  progressionFrom: v.optional(v.array(v.id("exercises"))),
+  progressionTo: v.optional(v.array(v.id("exercises"))),
 });
 
 /**
