@@ -85,7 +85,7 @@ export default defineSchema({
     }),
 
   exercise_variants: defineTable({
-    exercise: v.id("exercises"),
+    exercise: v.union(v.id("exercises"), v.id("private_exercises")),
     equipment: v.array(v.id("equipment")),
     tips: v.array(v.string()),
     embedded_videos: v.array(urlValidator),
@@ -100,7 +100,7 @@ export default defineSchema({
     .index("by_equipment", ["equipment"]),
 
   exercises_muscles: defineTable({
-    exercise: v.id("exercises"),
+    exercise: v.union(v.id("exercises"), v.id("private_exercises")),
     muscle: v.id("muscles"),
     role: muscleRoleValidator,
   })
