@@ -3,7 +3,7 @@
 import * as React from "react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
 
 import {
@@ -49,6 +49,10 @@ export function UpdateExerciseDialog({
   const exercise = useQuery(api.functions.exercises.getPrivateExerciseById, {
     exerciseId,
   });
+  const generateExerciseData = useAction(
+    api.functions.openai.generateExerciseData,
+  );
+  const [isGenerating, setIsGenerating] = React.useState(false);
 
   const form = useAppForm({
     defaultValues: {
@@ -67,6 +71,40 @@ export function UpdateExerciseDialog({
       await onSubmit(value);
     },
   });
+
+  const handleFillWithAI = async () => {
+    const exerciseName = form.state.values.title || exercise?.title;
+    if (!exerciseName || exerciseName.trim() === "") {
+      toast.error("Please enter an exercise name first");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const aiData = await generateExerciseData({
+        exerciseName: exerciseName.trim(),
+      });
+
+      // Update form fields with AI data
+      form.setFieldValue("description", aiData.description);
+      form.setFieldValue("level", aiData.level);
+      form.setFieldValue("difficulty", aiData.difficulty);
+      form.setFieldValue("category", aiData.category);
+      form.setFieldValue("muscles", aiData.muscles);
+      form.setFieldValue("prerequisites", aiData.prerequisites);
+
+      toast.success("Exercise data filled with AI!");
+    } catch (error) {
+      console.error("Error generating exercise data:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate exercise data. Please try again.",
+      );
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const onSubmit = async (data: ExerciseFormData) => {
     try {
@@ -107,19 +145,8 @@ export function UpdateExerciseDialog({
         >
           <ExerciseForm
             form={form as any}
-            muscles={
-              muscles as
-                | { _id: Id<"muscles">; name: string; muscleGroup?: string }[]
-                | undefined
-            }
-            exercises={
-              privateExercises?.map((ex) => ({
-                _id: ex._id,
-                title: ex.title,
-              })) as
-                | { _id: Id<"private_exercises">; title: string }[]
-                | undefined
-            }
+            onFillWithAI={handleFillWithAI}
+            isGenerating={isGenerating}
           />
 
           <DialogFooter className="flex w-full flex-row justify-between gap-2 sm:justify-between">
