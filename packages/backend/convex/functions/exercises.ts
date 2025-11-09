@@ -748,6 +748,71 @@ export const getPrivateExerciseById = query({
   },
 });
 
+export const getExerciseVariants = query({
+  args: {
+    exerciseId: v.union(v.id("exercises"), v.id("private_exercises")),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("exercise_variants"),
+      _creationTime: v.number(),
+      exercise: v.union(v.id("exercises"), v.id("private_exercises")),
+      equipment: v.array(
+        v.object({
+          _id: v.id("equipment"),
+          name: v.string(),
+          category: v.string(),
+        }),
+      ),
+      tips: v.array(v.string()),
+      embedded_videos: v.array(v.string()),
+      overriddenTitle: v.optional(v.string()),
+      overriddenDescription: v.optional(v.string()),
+      overriddenDifficulty: v.optional(v.number()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    // Fetch all variants for this exercise
+    const variants = await ctx.db
+      .query("exercise_variants")
+      .withIndex("by_exercise", (q) => q.eq("exercise", args.exerciseId))
+      .collect();
+
+    // Fetch all equipment for enrichment
+    const allEquipment = await ctx.db.query("equipment").collect();
+    const equipmentMap = new Map<Id<"equipment">, Doc<"equipment">>();
+    allEquipment.forEach((eq) => equipmentMap.set(eq._id, eq));
+
+    // Enrich variants with equipment data
+    return variants.map((variant) => {
+      const equipmentData = variant.equipment
+        .map((eqId) => equipmentMap.get(eqId))
+        .filter((e): e is Doc<"equipment"> => e !== undefined)
+        .map((equipment) => ({
+          _id: equipment._id,
+          name: equipment.name,
+          category: equipment.category,
+        }));
+
+      return {
+        _id: variant._id,
+        _creationTime: variant._creationTime,
+        exercise: variant.exercise,
+        equipment: equipmentData,
+        tips: variant.tips,
+        embedded_videos: variant.embedded_videos,
+        overriddenTitle: variant.overriddenTitle,
+        overriddenDescription: variant.overriddenDescription,
+        overriddenDifficulty: variant.overriddenDifficulty,
+        createdAt: variant.createdAt,
+        updatedAt: variant.updatedAt,
+      };
+    });
+  },
+});
+
 export const deletePrivateExercise = mutation({
   args: {
     id: v.id("private_exercises"),

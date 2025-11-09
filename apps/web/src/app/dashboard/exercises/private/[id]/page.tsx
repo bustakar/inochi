@@ -10,6 +10,8 @@ import { ArrowLeft, Edit } from "lucide-react";
 
 import { Badge, Button } from "@inochi/ui";
 
+import { ExerciseVariantsSection } from "./_components/exercise-variants-section";
+
 // ============================================================================
 // Constants
 // ============================================================================
@@ -224,6 +226,7 @@ export default function PrivateExerciseDetailPage() {
           exercises={exercise.progressions}
           title="Progressions"
         />
+        <ExerciseVariantsSection exerciseId={exerciseId} />
       </div>
     </div>
   );
