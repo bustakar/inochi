@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, Edit, Plus } from "lucide-react";
 import {
   Badge,
   Button,
+  ButtonGroup,
   Card,
   CardContent,
   CardHeader,
@@ -122,35 +123,36 @@ export function ExerciseVariantsSection({
         <div className="flex items-center gap-2">
           {hasMultipleVariants && (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrevious}
-                disabled={variants.length === 0}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-muted-foreground text-sm">
-                {currentIndex + 1} / {variants.length}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleNext}
-                disabled={variants.length === 0}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+              <ButtonGroup>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label="Previous"
+                  onClick={handlePrevious}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label="Next"
+                  onClick={handleNext}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </ButtonGroup>
             </>
           )}
-          <Button variant="outline" size="sm" onClick={handleEdit}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create
-          </Button>
+          <ButtonGroup>
+            <Button variant="outline" size="sm" onClick={handleEdit}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create
+            </Button>
+          </ButtonGroup>
         </div>
       </div>
 

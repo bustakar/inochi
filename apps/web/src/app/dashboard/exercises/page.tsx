@@ -26,8 +26,17 @@ interface ExerciseCardProps {
     category: "calisthenics" | "gym" | "stretch" | "mobility";
     level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
     difficulty: number;
-    musclesData: Array<Doc<"muscles"> & { role?: string }>;
-    equipmentData: Array<Doc<"equipment">>;
+    musclesData: Array<{
+      _id: Doc<"muscles">["_id"];
+      name: string;
+      muscleGroup?: string;
+      role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+    }>;
+    equipmentData: Array<{
+      _id: Doc<"equipment">["_id"];
+      name: string;
+      category: string;
+    }>;
   };
 }
 

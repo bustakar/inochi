@@ -41,9 +41,9 @@ const variantFormSchema = z.object({
   equipment: z.array(z.string()),
   tips: z.array(z.string()),
   embedded_videos: z.array(z.string()),
-  overriddenTitle: z.string().optional(),
-  overriddenDescription: z.string().optional(),
-  overriddenDifficulty: z.number().optional(),
+  overriddenTitle: z.union([z.string(), z.undefined()]),
+  overriddenDescription: z.union([z.string(), z.undefined()]),
+  overriddenDifficulty: z.union([z.number(), z.undefined()]),
 });
 
 type VariantFormData = z.infer<typeof variantFormSchema>;
@@ -443,46 +443,10 @@ export function CreateVariantDialog({
 
   const resetFormEffect = React.useEffect(() => {
     if (open) {
-      if (isEditing && variant !== undefined) {
-        const foundVariant = variant.find((v) => v._id === variantId);
-        if (foundVariant) {
-          form.setFieldValue(
-            "equipment",
-            foundVariant.equipment.map((eq) => eq._id as string),
-          );
-          form.setFieldValue(
-            "tips",
-            foundVariant.tips.length ? foundVariant.tips : [""],
-          );
-          form.setFieldValue(
-            "embedded_videos",
-            foundVariant.embedded_videos.length
-              ? foundVariant.embedded_videos
-              : [""],
-          );
-          form.setFieldValue("overriddenTitle", foundVariant.overriddenTitle);
-          form.setFieldValue(
-            "overriddenDescription",
-            foundVariant.overriddenDescription,
-          );
-          form.setFieldValue(
-            "overriddenDifficulty",
-            foundVariant.overriddenDifficulty,
-          );
-          setOverridesOpen(
-            !!(
-              foundVariant.overriddenTitle ||
-              foundVariant.overriddenDescription ||
-              foundVariant.overriddenDifficulty !== undefined
-            ),
-          );
-        }
-      } else if (!isEditing) {
-        form.reset();
-        setOverridesOpen(false);
-      }
+      form.reset();
+      setOverridesOpen(false);
     }
-  }, [open, isEditing, variant, variantId]);
+  }, [open]);
 
   const onSubmit = async (data: VariantFormData) => {
     try {
@@ -502,7 +466,7 @@ export function CreateVariantDialog({
             embedded_videos,
             overriddenTitle: data.overriddenTitle || undefined,
             overriddenDescription: data.overriddenDescription || undefined,
-            overriddenDifficulty: data.overriddenDifficulty,
+            overriddenDifficulty: data.overriddenDifficulty ?? undefined,
           },
         });
         toast.success("Variant updated!");
@@ -515,7 +479,7 @@ export function CreateVariantDialog({
             embedded_videos,
             overriddenTitle: data.overriddenTitle || undefined,
             overriddenDescription: data.overriddenDescription || undefined,
-            overriddenDifficulty: data.overriddenDifficulty,
+            overriddenDifficulty: data.overriddenDifficulty ?? undefined,
           },
         });
         toast.success("Variant created!");
