@@ -23,8 +23,8 @@ interface SubmissionCardProps {
   submission: Doc<"user_submissions"> & {
     musclesData?: Array<Doc<"muscles">>;
     equipmentData?: Array<Doc<"equipment">>;
-    originalSkillData?: {
-      _id: Doc<"skills">["_id"];
+    originalExerciseData?: {
+      _id: Doc<"exercises">["_id"] | Doc<"private_exercises">["_id"];
       title: string;
     };
   };
@@ -57,7 +57,7 @@ const typeConfig: Record<
   { label: string; className: string }
 > = {
   create: {
-    label: "New Skill",
+    label: "New Exercise",
     className: "bg-blue-100 text-blue-800",
   },
   edit: {
@@ -96,11 +96,11 @@ export function SubmissionCard({
             </p>
           )}
           {submission.submissionType === "edit" &&
-            submission.originalSkillData && (
+            submission.originalExerciseData && (
               <p className="text-muted-foreground mb-2 text-sm">
                 Edit suggestion for:{" "}
                 <span className="font-medium">
-                  {submission.originalSkillData.title}
+                  {submission.originalExerciseData.title}
                 </span>
               </p>
             )}

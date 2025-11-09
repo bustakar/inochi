@@ -156,7 +156,9 @@ export default function SubmissionDetailPage() {
                 {statusInfo.label}
               </Badge>
               <Badge variant="outline">
-                {submission.submissionType === "create" ? "New Skill" : "Edit"}
+                {submission.submissionType === "create"
+                  ? "New Exercise"
+                  : "Edit"}
               </Badge>
               <span className="text-muted-foreground text-sm">
                 Submitted {formatTimeAgo(submission.submittedAt)}
@@ -196,20 +198,21 @@ export default function SubmissionDetailPage() {
         </div>
       </div>
 
-      {/* Original Skill Link (for edits) */}
-      {submission.submissionType === "edit" && submission.originalSkillData && (
-        <div className="bg-muted rounded-lg p-4">
-          <p className="text-muted-foreground mb-1 text-sm">
-            This is an edit suggestion for:
-          </p>
-          <Link
-            href={`/dashboard/skills?skill=${submission.originalSkillData._id}`}
-            className="text-primary font-medium hover:underline"
-          >
-            {submission.originalSkillData.title}
-          </Link>
-        </div>
-      )}
+      {/* Original Exercise Link (for edits) */}
+      {submission.submissionType === "edit" &&
+        submission.originalExerciseData && (
+          <div className="bg-muted rounded-lg p-4">
+            <p className="text-muted-foreground mb-1 text-sm">
+              This is an edit suggestion for:
+            </p>
+            <Link
+              href={`/dashboard/exercises/private/${submission.originalExerciseData._id}`}
+              className="text-primary font-medium hover:underline"
+            >
+              {submission.originalExerciseData.title}
+            </Link>
+          </div>
+        )}
 
       {/* Review Info */}
       {submission.reviewedAt && (
@@ -241,7 +244,7 @@ export default function SubmissionDetailPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <h3 className="mb-1 text-sm font-medium">Level</h3>
             <Badge>{submission.level}</Badge>
@@ -263,6 +266,10 @@ export default function SubmissionDetailPage() {
                 {submission.difficulty}/10
               </span>
             </div>
+          </div>
+          <div>
+            <h3 className="mb-1 text-sm font-medium">Category</h3>
+            <Badge>{submission.category}</Badge>
           </div>
         </div>
 

@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
 import {
+  exerciseCategoryValidator,
   exerciseLevelValidator,
   validateDifficulty,
   validateUrlArray,
@@ -53,11 +54,13 @@ export const getUserSubmissions = query({
       description: v.string(),
       level: exerciseLevelValidator,
       difficulty: v.number(),
+      category: exerciseCategoryValidator,
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
       embedded_videos: v.array(v.string()),
-      prerequisites: v.array(v.id("skills")),
-      variants: v.array(v.id("skills")),
+      prerequisites: v.array(
+        v.union(v.id("exercises"), v.id("private_exercises")),
+      ),
       tips: v.array(v.string()),
       submissionType: v.union(v.literal("create"), v.literal("edit")),
       status: v.union(
@@ -65,7 +68,7 @@ export const getUserSubmissions = query({
         v.literal("approved"),
         v.literal("rejected"),
       ),
-      originalSkillId: v.optional(v.id("skills")),
+      originalExerciseId: v.optional(v.id("exercises")),
       submittedBy: v.string(),
       submittedAt: v.number(),
       reviewedBy: v.optional(v.string()),
@@ -95,14 +98,15 @@ export const getUserSubmissions = query({
           category: v.string(),
         }),
       ),
-      originalSkillData: v.optional(
+      originalExerciseData: v.optional(
         v.object({
-          _id: v.id("skills"),
+          _id: v.union(v.id("exercises"), v.id("private_exercises")),
           _creationTime: v.number(),
           title: v.string(),
           description: v.string(),
           level: exerciseLevelValidator,
           difficulty: v.number(),
+          category: exerciseCategoryValidator,
         }),
       ),
     }),
@@ -164,19 +168,20 @@ export const getUserSubmissions = query({
             .filter((e): e is Doc<"equipment"> => e !== undefined),
         };
 
-        // Fetch original skill data if it's an edit submission
-        if (submission.originalSkillId) {
-          const originalSkill = await ctx.db.get(submission.originalSkillId);
+        // Fetch original exercise data if it's an edit submission
+        if (submission.originalExerciseId) {
+          const originalExercise = await ctx.db.get(submission.originalExerciseId);
           return {
             ...enriched,
-            originalSkillData: originalSkill
+            originalExerciseData: originalExercise
               ? {
-                  _id: originalSkill._id,
-                  _creationTime: originalSkill._creationTime,
-                  title: originalSkill.title,
-                  description: originalSkill.description,
-                  level: originalSkill.level,
-                  difficulty: originalSkill.difficulty,
+                  _id: originalExercise._id,
+                  _creationTime: originalExercise._creationTime,
+                  title: originalExercise.title,
+                  description: originalExercise.description,
+                  level: originalExercise.level,
+                  difficulty: originalExercise.difficulty,
+                  category: originalExercise.category,
                 }
               : undefined,
           };
@@ -204,11 +209,13 @@ export const getSubmission = query({
       description: v.string(),
       level: exerciseLevelValidator,
       difficulty: v.number(),
+      category: exerciseCategoryValidator,
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
       embedded_videos: v.array(v.string()),
-      prerequisites: v.array(v.id("skills")),
-      variants: v.array(v.id("skills")),
+      prerequisites: v.array(
+        v.union(v.id("exercises"), v.id("private_exercises")),
+      ),
       tips: v.array(v.string()),
       submissionType: v.union(v.literal("create"), v.literal("edit")),
       status: v.union(
@@ -216,7 +223,7 @@ export const getSubmission = query({
         v.literal("approved"),
         v.literal("rejected"),
       ),
-      originalSkillId: v.optional(v.id("skills")),
+      originalExerciseId: v.optional(v.id("exercises")),
       submittedBy: v.string(),
       submittedAt: v.number(),
       reviewedBy: v.optional(v.string()),
@@ -246,14 +253,15 @@ export const getSubmission = query({
           category: v.string(),
         }),
       ),
-      originalSkillData: v.optional(
+      originalExerciseData: v.optional(
         v.object({
-          _id: v.id("skills"),
+          _id: v.union(v.id("exercises"), v.id("private_exercises")),
           _creationTime: v.number(),
           title: v.string(),
           description: v.string(),
           level: exerciseLevelValidator,
           difficulty: v.number(),
+          category: exerciseCategoryValidator,
         }),
       ),
     }),
@@ -292,35 +300,37 @@ export const getSubmission = query({
         .filter((e): e is Doc<"equipment"> => e !== undefined),
     };
 
-    // Fetch original skill data if it's an edit submission
-    let originalSkillData:
+    // Fetch original exercise data if it's an edit submission
+    let originalExerciseData:
       | {
-          _id: Id<"skills">;
+          _id: Id<"exercises"> | Id<"private_exercises">;
           _creationTime: number;
           title: string;
           description: string;
-          level: Doc<"skills">["level"];
+          level: Doc<"exercises">["level"] | Doc<"private_exercises">["level"];
           difficulty: number;
+          category: Doc<"exercises">["category"] | Doc<"private_exercises">["category"];
         }
       | undefined = undefined;
 
-    if (submission.originalSkillId) {
-      const originalSkill = await ctx.db.get(submission.originalSkillId);
-      if (originalSkill) {
-        originalSkillData = {
-          _id: originalSkill._id,
-          _creationTime: originalSkill._creationTime,
-          title: originalSkill.title,
-          description: originalSkill.description,
-          level: originalSkill.level,
-          difficulty: originalSkill.difficulty,
+    if (submission.originalExerciseId) {
+      const originalExercise = await ctx.db.get(submission.originalExerciseId);
+      if (originalExercise) {
+        originalExerciseData = {
+          _id: originalExercise._id,
+          _creationTime: originalExercise._creationTime,
+          title: originalExercise.title,
+          description: originalExercise.description,
+          level: originalExercise.level,
+          difficulty: originalExercise.difficulty,
+          category: originalExercise.category,
         };
       }
     }
 
     return {
       ...enriched,
-      originalSkillData,
+      originalExerciseData,
     };
   },
 });
@@ -332,15 +342,17 @@ export const createSubmission = mutation({
     description: v.string(),
     level: exerciseLevelValidator,
     difficulty: v.number(),
+    category: exerciseCategoryValidator,
     muscles: v.array(v.id("muscles")),
     equipment: v.array(v.id("equipment")),
     embedded_videos: v.array(v.string()),
-    prerequisites: v.array(v.id("skills")),
-    variants: v.array(v.id("skills")),
+    prerequisites: v.array(
+      v.union(v.id("exercises"), v.id("private_exercises")),
+    ),
     tips: v.array(v.string()),
     submissionType: v.union(v.literal("create"), v.literal("edit")),
-    originalSkillId: v.optional(v.id("skills")),
-    privateSkillId: v.optional(v.id("private_skills")),
+    originalExerciseId: v.optional(v.id("exercises")),
+    privateExerciseId: v.optional(v.id("private_exercises")),
   },
   returns: v.id("user_submissions"),
   handler: async (ctx, args) => {
@@ -473,8 +485,10 @@ export const updateSubmission = mutation({
     muscles: v.optional(v.array(v.id("muscles"))),
     equipment: v.optional(v.array(v.id("equipment"))),
     embedded_videos: v.optional(v.array(v.string())),
-    prerequisites: v.optional(v.array(v.id("skills"))),
-    variants: v.optional(v.array(v.id("skills"))),
+    category: v.optional(exerciseCategoryValidator),
+    prerequisites: v.optional(
+      v.array(v.union(v.id("exercises"), v.id("private_exercises"))),
+    ),
     tips: v.optional(v.array(v.string())),
   },
   returns: v.null(),
@@ -613,67 +627,55 @@ export const approveSubmission = mutation({
 
     const now = Date.now();
 
-    // If this is a submission from a private skill, copy it to public skills table
-    if (submission.privateSkillId) {
-      const privateSkill = await ctx.db.get(submission.privateSkillId);
-      if (!privateSkill) {
+    // If this is a submission from a private exercise, copy it to public exercises table
+    if (submission.privateExerciseId) {
+      const privateExercise = await ctx.db.get(submission.privateExerciseId);
+      if (!privateExercise) {
         throw new Error(
-          `Private skill not found: ${submission.privateSkillId}`,
+          `Private exercise not found: ${submission.privateExerciseId}`,
         );
       }
 
-      // Create public skill from submission data
-      await ctx.db.insert("skills", {
+      // Create public exercise from submission data
+      await ctx.db.insert("exercises", {
         title: submission.title,
         description: submission.description,
         level: submission.level,
         difficulty: submission.difficulty,
-        muscles: submission.muscles,
-        equipment: submission.equipment,
-        embedded_videos: submission.embedded_videos,
+        category: submission.category,
         prerequisites: submission.prerequisites,
-        variants: submission.variants,
-        tips: submission.tips,
         createdAt: now,
         updatedAt: now,
         createdBy: submission.submittedBy,
       });
 
-      // Delete the private skill
-      await ctx.db.delete(submission.privateSkillId);
+      // Delete the private exercise
+      await ctx.db.delete(submission.privateExerciseId);
     } else if (submission.submissionType === "create") {
-      // For regular create submissions, also create the skill in public table
-      await ctx.db.insert("skills", {
+      // For regular create submissions, also create the exercise in public table
+      await ctx.db.insert("exercises", {
         title: submission.title,
         description: submission.description,
         level: submission.level,
         difficulty: submission.difficulty,
-        muscles: submission.muscles,
-        equipment: submission.equipment,
-        embedded_videos: submission.embedded_videos,
+        category: submission.category,
         prerequisites: submission.prerequisites,
-        variants: submission.variants,
-        tips: submission.tips,
         createdAt: now,
         updatedAt: now,
         createdBy: submission.submittedBy,
       });
     } else if (
       submission.submissionType === "edit" &&
-      submission.originalSkillId
+      submission.originalExerciseId
     ) {
-      // For edit submissions, update the existing skill
-      await ctx.db.patch(submission.originalSkillId, {
+      // For edit submissions, update the existing exercise
+      await ctx.db.patch(submission.originalExerciseId, {
         title: submission.title,
         description: submission.description,
         level: submission.level,
         difficulty: submission.difficulty,
-        muscles: submission.muscles,
-        equipment: submission.equipment,
-        embedded_videos: submission.embedded_videos,
+        category: submission.category,
         prerequisites: submission.prerequisites,
-        variants: submission.variants,
-        tips: submission.tips,
         updatedAt: now,
       });
     }

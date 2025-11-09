@@ -42,7 +42,7 @@ export function CreateExerciseDialog({
   const createPrivateExercise = useMutation(
     api.functions.exercises.createPrivateExercise,
   );
-  const muscles = useQuery(api.functions.skills.getMuscles, {});
+  const muscles = useQuery(api.functions.exercises.getMuscles, {});
   const privateExercises = useQuery(
     api.functions.exercises.getPrivateExercises,
     {},

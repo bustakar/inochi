@@ -1011,3 +1011,74 @@ export const getPrivateExercisesForAI = internalQuery({
     }));
   },
 });
+
+// Get all muscles
+export const getMuscles = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("muscles"),
+      _creationTime: v.number(),
+      name: v.string(),
+      slug: v.string(),
+      recommendedRestHours: v.number(),
+      parts: v.array(
+        v.object({
+          name: v.string(),
+          slug: v.string(),
+        }),
+      ),
+      muscleGroup: v.optional(v.string()),
+    }),
+  ),
+  handler: async (ctx) => {
+    return await ctx.db.query("muscles").collect();
+  },
+});
+
+// Get all equipment
+export const getEquipment = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("equipment"),
+      _creationTime: v.number(),
+      name: v.string(),
+      slug: v.string(),
+      category: v.string(),
+    }),
+  ),
+  handler: async (ctx) => {
+    return await ctx.db.query("equipment").collect();
+  },
+});
+
+// Internal query for AI - returns simplified muscle data
+export const getAllMusclesForAI = internalQuery({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("muscles"),
+      name: v.string(),
+    }),
+  ),
+  handler: async (ctx) => {
+    const muscles = await ctx.db.query("muscles").collect();
+    return muscles.map((m) => ({ _id: m._id, name: m.name }));
+  },
+});
+
+// Internal query for AI - returns simplified equipment data
+export const getAllEquipmentForAI = internalQuery({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("equipment"),
+      name: v.string(),
+    }),
+  ),
+  handler: async (ctx) => {
+    const equipment = await ctx.db.query("equipment").collect();
+    return equipment.map((e) => ({ _id: e._id, name: e.name }));
+  },
+});
