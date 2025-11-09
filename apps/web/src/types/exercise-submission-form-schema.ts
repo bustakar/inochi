@@ -18,13 +18,10 @@ export const exerciseSubmissionFormSchema = z.object({
   muscles: z.array(z.custom<Id<"muscles">>()),
   equipment: z.array(z.custom<Id<"equipment">>()),
   embedded_videos: z.array(z.url("Each video must be a valid URL")),
-  prerequisites: z.array(
-    z.custom<Id<"exercises"> | Id<"private_exercises">>(),
-  ),
+  prerequisites: z.array(z.custom<Id<"exercises"> | Id<"private_exercises">>()),
   tips: z.array(z.string().min(1, "Tip cannot be empty")),
 });
 
 export type ExerciseSubmissionFormData = z.output<
   typeof exerciseSubmissionFormSchema
 >;
-
