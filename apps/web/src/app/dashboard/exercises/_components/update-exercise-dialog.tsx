@@ -4,7 +4,6 @@ import * as React from "react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { CopyPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -14,8 +13,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  Toggle,
 } from "@inochi/ui";
 
 import {
@@ -27,37 +24,41 @@ import {
 } from "./exercise-form";
 
 // ============================================================================
-// Create Exercise Dialog Component
+// Update Exercise Dialog Component
 // ============================================================================
 
-interface CreateExerciseDialogProps {
+interface UpdateExerciseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  exerciseId: Id<"private_exercises">;
 }
 
-export function CreateExerciseDialog({
+export function UpdateExerciseDialog({
   open,
   onOpenChange,
-}: CreateExerciseDialogProps) {
-  const createPrivateExercise = useMutation(
-    api.functions.exercises.createPrivateExercise,
+  exerciseId,
+}: UpdateExerciseDialogProps) {
+  const updatePrivateExercise = useMutation(
+    api.functions.exercises.updatePrivateExercise,
   );
   const muscles = useQuery(api.functions.skills.getMuscles, {});
   const privateExercises = useQuery(
     api.functions.exercises.getPrivateExercises,
     {},
   );
-  const [createMore, setCreateMore] = React.useState(false);
+  const exercise = useQuery(api.functions.exercises.getPrivateExerciseById, {
+    exerciseId,
+  });
 
   const form = useAppForm({
     defaultValues: {
-      title: "",
-      description: "",
-      level: "beginner",
-      difficulty: 1,
-      category: "calisthenics",
-      muscles: [],
-      prerequisites: [],
+      title: exercise?.title || "",
+      description: exercise?.description || "",
+      level: exercise?.level || "beginner",
+      difficulty: exercise?.difficulty || 1,
+      category: exercise?.category || "calisthenics",
+      muscles: exercise?.muscles.map((m) => m._id as string) || [],
+      prerequisites: exercise?.prerequisites.map((p) => p._id as string) || [],
     },
     validators: {
       onSubmit: exerciseFormSchema,
@@ -67,48 +68,35 @@ export function CreateExerciseDialog({
     },
   });
 
-  const resetFormEffect = React.useEffect(() => {
-    if (open) {
-      form.reset();
-    }
-  }, [open]);
-
   const onSubmit = async (data: ExerciseFormData) => {
     try {
-      await createPrivateExercise({
-        data: {
+      await updatePrivateExercise({
+        id: exerciseId,
+        exerciseData: {
           title: data.title,
           description: data.description,
           level: data.level,
           difficulty: data.difficulty,
           category: data.category,
-          muscles: data.muscles as Id<"muscles">[],
-          prerequisites: data.prerequisites as Id<"private_exercises">[],
         },
       });
-      toast.success("Private exercise created!");
-      form.reset();
-      if (!createMore) {
-        onOpenChange(false);
-      }
+      toast.success("Exercise updated!");
+      onOpenChange(false);
     } catch (error) {
-      console.error("Error creating exercise:", error);
+      console.error("Error updating exercise:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to create exercise. Please try again.",
+          : "Failed to update exercise. Please try again.",
       );
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button>Create Exercise</Button>
-      </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create Exercise</DialogTitle>
+          <DialogTitle>Edit Exercise</DialogTitle>
         </DialogHeader>
         <form
           id="exercise-form"
@@ -152,23 +140,13 @@ export function CreateExerciseDialog({
               }
             />
             <div className="flex flex-row gap-1">
-              <Toggle
-                pressed={createMore}
-                onPressedChange={setCreateMore}
-                aria-label="Create more"
-                size="sm"
-                variant="outline"
-                className="data-[state=on]:bg-primary data-[state=on]:*:[svg]:stroke-white"
-              >
-                <CopyPlus />
-              </Toggle>
               <Button
                 type="submit"
                 form="exercise-form"
                 size="sm"
                 className="shrink-0"
               >
-                Create
+                Update
               </Button>
             </div>
           </DialogFooter>

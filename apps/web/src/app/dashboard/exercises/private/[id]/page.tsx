@@ -2,14 +2,15 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { ArrowLeft, Edit } from "lucide-react";
+import { Edit } from "lucide-react";
 
 import { Badge, Button } from "@inochi/ui";
 
+import { UpdateExerciseDialog } from "../../_components/update-exercise-dialog";
 import { ExerciseVariantsSection } from "./_components/exercise-variants-section";
 
 // ============================================================================
@@ -58,9 +59,10 @@ interface ExerciseHeaderProps {
   exerciseId: Id<"private_exercises">;
 }
 
-function ExerciseHeader({ exercise, exerciseId }: ExerciseHeaderProps) {
-  const router = useRouter();
-
+function ExerciseHeader({
+  exercise,
+  onEditClick,
+}: ExerciseHeaderProps & { onEditClick: () => void }) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -84,12 +86,7 @@ function ExerciseHeader({ exercise, exerciseId }: ExerciseHeaderProps) {
             <Badge variant="outline">Private</Badge> */}
       </div>
       <div className="flex gap-2">
-        <Button
-          variant="outline"
-          onClick={() =>
-            router.push(`/dashboard/exercises/private/${exerciseId}/edit`)
-          }
-        >
+        <Button variant="outline" onClick={onEditClick}>
           <Edit className="mr-2 h-4 w-4" />
           Edit
         </Button>
@@ -187,6 +184,7 @@ function ProgressionSection({ exercises, title }: ProgressionSectionProps) {
 export default function PrivateExerciseDetailPage() {
   const params = useParams();
   const exerciseId = params.id as Id<"private_exercises">;
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
 
   const exercise = useQuery(api.functions.exercises.getPrivateExerciseById, {
     exerciseId,
@@ -212,22 +210,33 @@ export default function PrivateExerciseDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
-      <ExerciseHeader exercise={exercise} exerciseId={exerciseId} />
+    <>
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        <ExerciseHeader
+          exercise={exercise}
+          exerciseId={exerciseId}
+          onEditClick={() => setEditDialogOpen(true)}
+        />
 
-      <div className="space-y-6">
-        <DescriptionSection description={exercise.description} />
-        <MusclesSection muscles={exercise.muscles} />
-        <ProgressionSection
-          exercises={exercise.prerequisites}
-          title="Prerequisites"
-        />
-        <ProgressionSection
-          exercises={exercise.progressions}
-          title="Progressions"
-        />
-        <ExerciseVariantsSection exerciseId={exerciseId} />
+        <div className="space-y-6">
+          <DescriptionSection description={exercise.description} />
+          <MusclesSection muscles={exercise.muscles} />
+          <ProgressionSection
+            exercises={exercise.prerequisites}
+            title="Prerequisites"
+          />
+          <ProgressionSection
+            exercises={exercise.progressions}
+            title="Progressions"
+          />
+          <ExerciseVariantsSection exerciseId={exerciseId} />
+        </div>
       </div>
-    </div>
+      <UpdateExerciseDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        exerciseId={exerciseId}
+      />
+    </>
   );
 }
