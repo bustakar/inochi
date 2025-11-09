@@ -282,8 +282,10 @@ function PrerequisitesField({
                 placeholder="Search exercises..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                }}
                 className="h-8 pl-8"
-                autoFocus
               />
             </div>
           </div>
@@ -443,8 +445,11 @@ function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
                 placeholder="Search muscles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  // Prevent dropdown menu from handling keyboard navigation
+                  e.stopPropagation();
+                }}
                 className="h-8 pl-8"
-                autoFocus
               />
             </div>
           </div>
