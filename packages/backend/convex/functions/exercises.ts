@@ -151,12 +151,17 @@ async function enrichExercise(
   category: "calisthenics" | "gym" | "stretch" | "mobility";
   level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
   difficulty: number;
-  musclesData: Array<
-    Doc<"muscles"> & {
-      role?: "primary" | "secondary" | "tertiary" | "stabilizer";
-    }
-  >;
-  equipmentData: Array<Doc<"equipment">>;
+  musclesData: Array<{
+    _id: Id<"muscles">;
+    name: string;
+    muscleGroup?: string;
+    role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+  }>;
+  equipmentData: Array<{
+    _id: Id<"equipment">;
+    name: string;
+    category: string;
+  }>;
 }> {
   // Query shared exercises_muscles table for this exercise
   const muscleRelations = await ctx.db
@@ -164,17 +169,20 @@ async function enrichExercise(
     .withIndex("by_exercise", (q) => q.eq("exercise", exercise._id))
     .collect();
 
-  const exerciseMuscles: Array<
-    Doc<"muscles"> & {
-      role?: "primary" | "secondary" | "tertiary" | "stabilizer";
-    }
-  > = muscleRelations.map((rel) => {
+  const exerciseMuscles: Array<{
+    _id: Id<"muscles">;
+    name: string;
+    muscleGroup?: string;
+    role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+  }> = muscleRelations.map((rel) => {
     const muscle = musclesMap.get(rel.muscle);
     if (!muscle) {
       throw new Error(`Muscle not found: ${rel.muscle}`);
     }
     return {
-      ...muscle,
+      _id: muscle._id,
+      name: muscle.name,
+      muscleGroup: muscle.muscleGroup,
       role: rel.role,
     };
   });
@@ -190,9 +198,18 @@ async function enrichExercise(
     variant.equipment.forEach((eqId) => equipmentSet.add(eqId));
   });
 
-  const exerciseEquipment: Array<Doc<"equipment">> = Array.from(equipmentSet)
+  const exerciseEquipment: Array<{
+    _id: Id<"equipment">;
+    name: string;
+    category: string;
+  }> = Array.from(equipmentSet)
     .map((eqId) => equipmentMap.get(eqId))
-    .filter((e): e is Doc<"equipment"> => e !== undefined);
+    .filter((e): e is Doc<"equipment"> => e !== undefined)
+    .map((equipment) => ({
+      _id: equipment._id,
+      name: equipment.name,
+      category: equipment.category,
+    }));
 
   return {
     _id: exercise._id,

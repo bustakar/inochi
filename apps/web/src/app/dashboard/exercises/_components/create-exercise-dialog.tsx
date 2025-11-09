@@ -535,7 +535,6 @@ export function CreateExerciseDialog({
   open,
   onOpenChange,
 }: CreateExerciseDialogProps) {
-  const router = useRouter();
   const createPrivateExercise = useMutation(
     api.functions.exercises.createPrivateExercise,
   );
@@ -572,7 +571,7 @@ export function CreateExerciseDialog({
 
   const onSubmit = async (data: ExerciseFormData) => {
     try {
-      const exerciseId = await createPrivateExercise({
+      await createPrivateExercise({
         data: {
           title: data.title,
           description: data.description,
@@ -584,7 +583,6 @@ export function CreateExerciseDialog({
         },
       });
       toast.success("Private exercise created!");
-      onOpenChange(false);
       form.reset();
       if (!createMore) {
         onOpenChange(false);
