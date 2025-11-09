@@ -3,9 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useUser } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
+import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { ArrowLeft, Edit } from "lucide-react";
 
@@ -48,7 +47,12 @@ const categoryColors: Record<
 // ============================================================================
 
 interface ExerciseHeaderProps {
-  exercise: Doc<"private_exercises">;
+  exercise: {
+    title: string;
+    level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+    category: "calisthenics" | "gym" | "stretch" | "mobility";
+    difficulty: number;
+  };
   exerciseId: Id<"private_exercises">;
 }
 
@@ -58,25 +62,16 @@ function ExerciseHeader({ exercise, exerciseId }: ExerciseHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
-        <Link href="/dashboard/exercises">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-foreground text-3xl font-bold">
-            {exercise.title}
-          </h1>
-          <div className="mt-2 flex items-center gap-2">
-            <Badge
-              className={
-                levelColors[exercise.level] ||
-                "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-              }
-            >
-              {exercise.level}
-            </Badge>
-            <Badge
+        <h1 className="text-foreground text-3xl font-bold">{exercise.title}</h1>
+        <div className="flex items-center gap-1">
+          <Badge className={levelColors[exercise.level]}>
+            {exercise.level}
+          </Badge>
+          <Badge className={levelColors[exercise.level]}>
+            {exercise.difficulty}/10
+          </Badge>
+        </div>
+        {/* <Badge
               className={
                 categoryColors[exercise.category] ||
                 "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
@@ -84,9 +79,7 @@ function ExerciseHeader({ exercise, exerciseId }: ExerciseHeaderProps) {
             >
               {exercise.category}
             </Badge>
-            <Badge variant="outline">Private</Badge>
-          </div>
-        </div>
+            <Badge variant="outline">Private</Badge> */}
       </div>
       <div className="flex gap-2">
         <Button
@@ -114,38 +107,41 @@ interface DescriptionSectionProps {
 function DescriptionSection({ description }: DescriptionSectionProps) {
   return (
     <div>
-      <h2 className="text-foreground mb-2 text-lg font-semibold">
-        Description
-      </h2>
       <p className="text-muted-foreground whitespace-pre-wrap">{description}</p>
     </div>
   );
 }
 
 // ============================================================================
-// Difficulty Section Component
+// Muscles Section Component
 // ============================================================================
 
-interface DifficultySectionProps {
-  difficulty: number;
+interface MusclesSectionProps {
+  muscles: Array<{
+    _id: Id<"muscles">;
+    name: string;
+    role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+  }>;
 }
 
-function DifficultySection({ difficulty }: DifficultySectionProps) {
+function MusclesSection({ muscles }: MusclesSectionProps) {
   return (
     <div>
-      <h2 className="text-foreground mb-2 text-lg font-semibold">Difficulty</h2>
-      <div className="flex items-center gap-2">
-        <div className="flex gap-1">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div
-              key={i}
-              className={`h-3 w-3 rounded-full ${
-                i < difficulty ? "bg-primary" : "bg-muted"
-              }`}
-            />
-          ))}
-        </div>
-        <span className="text-muted-foreground text-sm">{difficulty}/10</span>
+      <div>
+        <h2 className="text-foreground mb-2 text-lg font-semibold">Muscles</h2>
+      </div>
+      <div>
+        {muscles.length === 0 ? (
+          <p className="text-muted-foreground text-sm">None</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {muscles.map((muscle) => (
+              <Badge key={muscle._id} variant="secondary">
+                {muscle.name}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -156,50 +152,22 @@ function DifficultySection({ difficulty }: DifficultySectionProps) {
 // ============================================================================
 
 interface ProgressionSectionProps {
-  exerciseIds: Id<"exercises">[];
-  allExercises:
-    | Array<{
-        _id: Id<"private_exercises">;
-        _creationTime: number;
-        userId: string;
-        title: string;
-        description: string;
-        category: "calisthenics" | "gym" | "stretch" | "mobility";
-        level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
-        difficulty: number;
-        musclesData: Array<Doc<"muscles"> & { role?: string }>;
-        equipmentData: Array<Doc<"equipment">>;
-      }>
-    | undefined;
+  exercises: Array<{
+    _id: Id<"exercises"> | Id<"private_exercises">;
+    title: string;
+  }>;
   title: string;
 }
 
-function ProgressionSection({
-  exerciseIds,
-  allExercises,
-  title,
-}: ProgressionSectionProps) {
-  // Note: exerciseIds reference public exercises (Id<"exercises">),
-  // but we're filtering private exercises (Id<"private_exercises">).
-  // Since these are different ID types, we convert the private exercise IDs to strings
-  // for comparison. In practice, these will likely be empty until schema supports
-  // private-to-private references or we change the schema to use union types.
-  const exerciseIdStrings = new Set(
-    exerciseIds.map((id) => id as unknown as string),
-  );
-  const progressionExercises =
-    allExercises?.filter((e) =>
-      exerciseIdStrings.has(e._id as unknown as string),
-    ) || [];
-
+function ProgressionSection({ exercises, title }: ProgressionSectionProps) {
   return (
     <div>
       <h2 className="text-foreground mb-2 text-lg font-semibold">{title}</h2>
-      {progressionExercises.length === 0 ? (
+      {exercises.length === 0 ? (
         <p className="text-muted-foreground text-sm">None</p>
       ) : (
         <div className="flex flex-wrap gap-2">
-          {progressionExercises.map((exercise) => (
+          {exercises.map((exercise) => (
             <Badge key={exercise._id} variant="secondary">
               {exercise.title}
             </Badge>
@@ -221,10 +189,6 @@ export default function PrivateExerciseDetailPage() {
   const exercise = useQuery(api.functions.exercises.getPrivateExerciseById, {
     exerciseId,
   });
-  const allPrivateExercises = useQuery(
-    api.functions.exercises.getPrivateExercises,
-    {},
-  );
 
   if (exercise === undefined) {
     return (
@@ -246,30 +210,19 @@ export default function PrivateExerciseDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       <ExerciseHeader exercise={exercise} exerciseId={exerciseId} />
 
       <div className="space-y-6">
         <DescriptionSection description={exercise.description} />
-        <DifficultySection difficulty={exercise.difficulty} />
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <ProgressionSection
-            exerciseIds={exercise.prerequisites}
-            allExercises={allPrivateExercises}
-            title="Prerequisites"
-          />
-          <ProgressionSection
-            exerciseIds={exercise.progressionFrom}
-            allExercises={allPrivateExercises}
-            title="Progression From"
-          />
-        </div>
-
+        <MusclesSection muscles={exercise.muscles} />
         <ProgressionSection
-          exerciseIds={exercise.progressionTo}
-          allExercises={allPrivateExercises}
-          title="Progression To"
+          exercises={exercise.prerequisites}
+          title="Prerequisites"
+        />
+        <ProgressionSection
+          exercises={exercise.progressions}
+          title="Progressions"
         />
       </div>
     </div>

@@ -24,8 +24,10 @@ export * from "./components/sheet";
 export * from "./components/skeleton";
 export * from "./components/sonner";
 export * from "./components/spinner";
+export * from "./components/switch";
 export * from "./components/text-effect";
 export * from "./components/textarea";
+export * from "./components/toggle";
 export * from "./components/tooltip";
 
 // Sidebar components

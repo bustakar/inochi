@@ -446,6 +446,163 @@ export const updatePrivateExercise = mutation({
   },
 });
 
+// Helper: Fetch exercise title by ID (tries both private and public exercises)
+async function getExerciseTitle(
+  ctx: QueryCtx,
+  exerciseId: Id<"exercises"> | Id<"private_exercises">,
+): Promise<{ _id: typeof exerciseId; title: string } | null> {
+  // Try private_exercises first
+  const privateExercise = await ctx.db.get(
+    exerciseId as Id<"private_exercises">,
+  );
+  if (privateExercise) {
+    return { _id: exerciseId, title: privateExercise.title };
+  }
+
+  // Try public exercises
+  const publicExercise = await ctx.db.get(exerciseId as Id<"exercises">);
+  if (publicExercise) {
+    return { _id: exerciseId, title: publicExercise.title };
+  }
+
+  return null;
+}
+
+// Helper: Fetch prerequisites (exercises that lead to this exercise)
+async function getPrerequisites(
+  ctx: QueryCtx,
+  exerciseId: Id<"private_exercises">,
+): Promise<
+  Array<{ _id: Id<"exercises"> | Id<"private_exercises">; title: string }>
+> {
+  const prerequisitesProgressions = await ctx.db
+    .query("exercise_progressions")
+    .withIndex("by_to_exercise", (q) => q.eq("toExercise", exerciseId))
+    .collect();
+
+  const prerequisites = await Promise.all(
+    prerequisitesProgressions
+      .map((prog) => prog.fromExercise)
+      .map((id) => getExerciseTitle(ctx, id)),
+  );
+
+  return prerequisites.filter(
+    (
+      e,
+    ): e is {
+      _id: Id<"exercises"> | Id<"private_exercises">;
+      title: string;
+    } => e !== null,
+  );
+}
+
+// Helper: Fetch progressions (exercises this leads to and from, sorted)
+async function getProgressions(
+  ctx: QueryCtx,
+  exerciseId: Id<"private_exercises">,
+): Promise<
+  Array<{ _id: Id<"exercises"> | Id<"private_exercises">; title: string }>
+> {
+  // Query progressions where this exercise is the source (leads to)
+  const progressionToProgressions = await ctx.db
+    .query("exercise_progressions")
+    .withIndex("by_from_exercise", (q) => q.eq("fromExercise", exerciseId))
+    .collect();
+
+  // Query progressions where this exercise is the target (leads from)
+  const progressionFromProgressions = await ctx.db
+    .query("exercise_progressions")
+    .withIndex("by_to_exercise", (q) => q.eq("toExercise", exerciseId))
+    .collect();
+
+  // Fetch exercises this leads to
+  const progressionTo = await Promise.all(
+    progressionToProgressions
+      .map((prog) => prog.toExercise)
+      .map((id) => getExerciseTitle(ctx, id)),
+  );
+
+  // Fetch exercises this leads from
+  const progressionFrom = await Promise.all(
+    progressionFromProgressions
+      .map((prog) => prog.fromExercise)
+      .map((id) => getExerciseTitle(ctx, id)),
+  );
+
+  // Combine and sort: from first, then to, then alphabetically by title
+  const allProgressions = [
+    ...progressionFrom.map((ex) => ({ ...ex, type: "from" as const })),
+    ...progressionTo.map((ex) => ({ ...ex, type: "to" as const })),
+  ]
+    .filter(
+      (
+        e,
+      ): e is {
+        _id: Id<"exercises"> | Id<"private_exercises">;
+        title: string;
+        type: "from" | "to";
+      } => e !== null,
+    )
+    .sort((a, b) => {
+      // Sort by type first (from before to), then by title
+      if (a.type !== b.type) {
+        return a.type === "from" ? -1 : 1;
+      }
+      return a.title.localeCompare(b.title);
+    })
+    .map(({ type, ...ex }) => ex);
+
+  return allProgressions;
+}
+
+// Helper: Fetch muscles for an exercise
+async function getExerciseMuscles(
+  ctx: QueryCtx,
+  exerciseId: Id<"private_exercises">,
+): Promise<
+  Array<{
+    _id: Id<"muscles">;
+    name: string;
+    role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+  }>
+> {
+  const muscleRelations = await ctx.db
+    .query("exercises_muscles")
+    .withIndex("by_exercise", (q) => q.eq("exercise", exerciseId))
+    .collect();
+
+  const muscles = await Promise.all(
+    muscleRelations.map(async (rel) => {
+      const muscle = await ctx.db.get(rel.muscle);
+      if (!muscle) {
+        return null;
+      }
+      return {
+        _id: muscle._id,
+        name: muscle.name,
+        muscleGroup: muscle.muscleGroup,
+        role: rel.role,
+      } as {
+        _id: Id<"muscles">;
+        name: string;
+        muscleGroup?: string;
+        role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+      };
+    }),
+  );
+
+  return muscles.filter(
+    (
+      m,
+    ): m is {
+      _id: Id<"muscles">;
+      name: string;
+      muscleGroup?: string;
+      role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+    } => m !== null,
+  );
+}
+
 export const getPrivateExerciseById = query({
   args: {
     exerciseId: v.id("private_exercises"),
@@ -461,7 +618,31 @@ export const getPrivateExerciseById = query({
       level: exerciseLevelValidator,
       difficulty: v.number(),
       prerequisites: v.array(
-        v.union(v.id("exercises"), v.id("private_exercises")),
+        v.object({
+          _id: v.union(v.id("exercises"), v.id("private_exercises")),
+          title: v.string(),
+        }),
+      ),
+      progressions: v.array(
+        v.object({
+          _id: v.union(v.id("exercises"), v.id("private_exercises")),
+          title: v.string(),
+        }),
+      ),
+      muscles: v.array(
+        v.object({
+          _id: v.id("muscles"),
+          name: v.string(),
+          muscleGroup: v.optional(v.string()),
+          role: v.optional(
+            v.union(
+              v.literal("primary"),
+              v.literal("secondary"),
+              v.literal("tertiary"),
+              v.literal("stabilizer"),
+            ),
+          ),
+        }),
       ),
       createdAt: v.number(),
       updatedAt: v.number(),
@@ -484,7 +665,19 @@ export const getPrivateExerciseById = query({
       return null;
     }
 
-    return exercise;
+    // Fetch all related data in parallel
+    const [prerequisites, progressions, muscles] = await Promise.all([
+      getPrerequisites(ctx, args.exerciseId),
+      getProgressions(ctx, args.exerciseId),
+      getExerciseMuscles(ctx, args.exerciseId),
+    ]);
+
+    return {
+      ...exercise,
+      prerequisites,
+      progressions,
+      muscles,
+    };
   },
 });
 
