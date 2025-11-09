@@ -348,8 +348,6 @@ export const createPrivateExercise = mutation({
       level: args.data.level ?? "beginner",
       difficulty: args.data.difficulty ?? 1,
       prerequisites: [],
-      progressionFrom: [],
-      progressionTo: [],
       createdAt: now,
       updatedAt: now,
       createdBy: userId,
@@ -442,14 +440,71 @@ export const updatePrivateExercise = mutation({
     if (args.exerciseData.prerequisites !== undefined) {
       updateData.prerequisites = args.exerciseData.prerequisites;
     }
-    if (args.exerciseData.progressionFrom !== undefined) {
-      updateData.progressionFrom = args.exerciseData.progressionFrom;
-    }
-    if (args.exerciseData.progressionTo !== undefined) {
-      updateData.progressionTo = args.exerciseData.progressionTo;
-    }
 
     await ctx.db.patch(args.id, updateData);
+    return null;
+  },
+});
+
+export const getPrivateExerciseById = query({
+  args: {
+    exerciseId: v.id("private_exercises"),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("private_exercises"),
+      _creationTime: v.number(),
+      userId: v.string(),
+      title: v.string(),
+      description: v.string(),
+      category: exerciseCategoryValidator,
+      level: exerciseLevelValidator,
+      difficulty: v.number(),
+      prerequisites: v.array(
+        v.union(v.id("exercises"), v.id("private_exercises")),
+      ),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      createdBy: v.string(),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+
+    const exercise = await ctx.db.get(args.exerciseId);
+    if (!exercise) {
+      return null;
+    }
+
+    if (exercise.createdBy !== userId) {
+      return null;
+    }
+
+    return exercise;
+  },
+});
+
+export const deletePrivateExercise = mutation({
+  args: {
+    id: v.id("private_exercises"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    const exercise = await ctx.db.get(args.id);
+    if (!exercise) {
+      throw new Error("Private exercise not found");
+    }
+    if (exercise.createdBy !== userId) {
+      throw new Error(
+        "Unauthorized: You can only delete your own private exercises",
+      );
+    }
+    await ctx.db.delete(args.id);
     return null;
   },
 });

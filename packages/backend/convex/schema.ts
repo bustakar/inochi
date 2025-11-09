@@ -38,9 +38,9 @@ export default defineSchema({
     category: exerciseCategoryValidator,
     level: exerciseLevelValidator,
     difficulty: v.number(),
-    prerequisites: v.array(v.id("exercises")),
-    progressionFrom: v.array(v.id("exercises")),
-    progressionTo: v.array(v.id("exercises")),
+    prerequisites: v.array(
+      v.union(v.id("exercises"), v.id("private_exercises")),
+    ),
     createdAt: v.number(),
     updatedAt: v.number(),
     createdBy: v.string(),
@@ -64,9 +64,9 @@ export default defineSchema({
     category: exerciseCategoryValidator,
     level: exerciseLevelValidator,
     difficulty: v.number(),
-    prerequisites: v.array(v.id("exercises")),
-    progressionFrom: v.array(v.id("exercises")),
-    progressionTo: v.array(v.id("exercises")),
+    prerequisites: v.array(
+      v.union(v.id("exercises"), v.id("private_exercises")),
+    ),
     createdAt: v.number(),
     updatedAt: v.number(),
     createdBy: v.string(),
@@ -108,6 +108,14 @@ export default defineSchema({
     .index("by_muscle", ["muscle"])
     .index("by_muscle_and_role", ["muscle", "role"])
     .index("by_exercise_and_role", ["exercise", "role"]),
+
+  exercise_progressions: defineTable({
+    fromExercise: v.union(v.id("exercises"), v.id("private_exercises")),
+    toExercise: v.union(v.id("exercises"), v.id("private_exercises")),
+    createdAt: v.number(),
+  })
+    .index("by_from_exercise", ["fromExercise"])
+    .index("by_to_exercise", ["toExercise"]),
 
   skills: defineTable({
     title: v.string(),
