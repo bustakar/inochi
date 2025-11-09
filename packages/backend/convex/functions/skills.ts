@@ -4,7 +4,7 @@ import { Doc, Id } from "../_generated/dataModel";
 import { internalQuery, mutation, query } from "../_generated/server";
 import {
   createPrivateSkillValidator,
-  levelValidator,
+  exerciseLevelValidator,
   partialSkillDataValidator,
   validateDifficulty,
   validateUrlArray,
@@ -17,7 +17,7 @@ export const getUserId = async (ctx: { auth: Auth }) => {
 // Get all skills with optional filtering
 export const getSkills = query({
   args: {
-    level: v.optional(levelValidator),
+    level: v.optional(exerciseLevelValidator),
     minDifficulty: v.optional(v.number()),
     maxDifficulty: v.optional(v.number()),
     muscleIds: v.optional(v.array(v.id("muscles"))),
@@ -29,7 +29,7 @@ export const getSkills = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      level: levelValidator,
+      level: exerciseLevelValidator,
       difficulty: v.number(),
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
@@ -153,7 +153,7 @@ export const getSkill = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      level: levelValidator,
+      level: exerciseLevelValidator,
       difficulty: v.number(),
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
@@ -177,7 +177,7 @@ export const getSkill = query({
 export const searchSkills = query({
   args: {
     searchQuery: v.string(),
-    level: v.optional(levelValidator),
+    level: v.optional(exerciseLevelValidator),
     minDifficulty: v.optional(v.number()),
     maxDifficulty: v.optional(v.number()),
     muscleIds: v.optional(v.array(v.id("muscles"))),
@@ -189,7 +189,7 @@ export const searchSkills = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      level: levelValidator,
+      level: exerciseLevelValidator,
       difficulty: v.number(),
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
@@ -319,7 +319,7 @@ export const createSkill = mutation({
   args: {
     title: v.string(),
     description: v.string(),
-    level: levelValidator,
+    level: exerciseLevelValidator,
     difficulty: v.number(),
     muscles: v.array(v.id("muscles")),
     equipment: v.array(v.id("equipment")),
@@ -396,7 +396,7 @@ export const updateSkill = mutation({
     id: v.id("skills"),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
-    level: v.optional(levelValidator),
+    level: v.optional(exerciseLevelValidator),
     difficulty: v.optional(v.number()),
     muscles: v.optional(v.array(v.id("muscles"))),
     equipment: v.optional(v.array(v.id("equipment"))),
@@ -558,7 +558,7 @@ export const getEquipment = query({
 export const getAllSkills = query({
   args: {
     type: v.union(v.literal("all"), v.literal("public"), v.literal("private")),
-    level: v.optional(levelValidator),
+    level: v.optional(exerciseLevelValidator),
     minDifficulty: v.optional(v.number()),
     maxDifficulty: v.optional(v.number()),
     muscleIds: v.optional(v.array(v.id("muscles"))),
@@ -572,7 +572,7 @@ export const getAllSkills = query({
         _creationTime: v.number(),
         title: v.string(),
         description: v.string(),
-        level: levelValidator,
+        level: exerciseLevelValidator,
         difficulty: v.number(),
         muscles: v.array(v.id("muscles")),
         equipment: v.array(v.id("equipment")),
@@ -615,7 +615,7 @@ export const getAllSkills = query({
         _creationTime: v.number(),
         title: v.string(),
         description: v.string(),
-        level: levelValidator,
+        level: exerciseLevelValidator,
         difficulty: v.number(),
         muscles: v.array(v.id("muscles")),
         equipment: v.array(v.id("equipment")),
@@ -858,7 +858,7 @@ export const getAllSkills = query({
 // Get user's private skills with optional filtering
 export const getPrivateSkills = query({
   args: {
-    level: v.optional(levelValidator),
+    level: v.optional(exerciseLevelValidator),
     minDifficulty: v.optional(v.number()),
     maxDifficulty: v.optional(v.number()),
     muscleIds: v.optional(v.array(v.id("muscles"))),
@@ -870,7 +870,7 @@ export const getPrivateSkills = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      level: levelValidator,
+      level: exerciseLevelValidator,
       difficulty: v.number(),
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
@@ -1001,7 +1001,7 @@ export const getPrivateSkill = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      level: levelValidator,
+      level: exerciseLevelValidator,
       difficulty: v.number(),
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
@@ -1048,7 +1048,7 @@ export const getPrivateSkillById = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      level: levelValidator,
+      level: exerciseLevelValidator,
       difficulty: v.number(),
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),
@@ -1088,7 +1088,7 @@ export const getPrivateSkillById = query({
 export const searchPrivateSkills = query({
   args: {
     searchQuery: v.string(),
-    level: v.optional(levelValidator),
+    level: v.optional(exerciseLevelValidator),
     minDifficulty: v.optional(v.number()),
     maxDifficulty: v.optional(v.number()),
     muscleIds: v.optional(v.array(v.id("muscles"))),
@@ -1100,7 +1100,7 @@ export const searchPrivateSkills = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      level: levelValidator,
+      level: exerciseLevelValidator,
       difficulty: v.number(),
       muscles: v.array(v.id("muscles")),
       equipment: v.array(v.id("equipment")),

@@ -8,6 +8,7 @@ export * from "./components/alert-dialog";
 export { AnimatedGroup } from "./components/animated-group";
 export * from "./components/badge";
 export * from "./components/button";
+export * from "./components/button-group";
 export * from "./components/card";
 export * from "./components/checkbox";
 export * from "./components/collapsible";
@@ -24,8 +25,10 @@ export * from "./components/sheet";
 export * from "./components/skeleton";
 export * from "./components/sonner";
 export * from "./components/spinner";
+export * from "./components/switch";
 export * from "./components/text-effect";
 export * from "./components/textarea";
+export * from "./components/toggle";
 export * from "./components/tooltip";
 
 // Sidebar components

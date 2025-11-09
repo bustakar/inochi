@@ -1,6 +1,10 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { levelValidator } from "./validators/validators.js";
+import {
+  exerciseCategoryValidator,
+  exerciseLevelValidator,
+  muscleRoleValidator,
+} from "./validators/validators.js";
 
 const urlValidator = v.string();
 
@@ -28,10 +32,95 @@ export default defineSchema({
     .index("by_category", ["category"])
     .index("by_slug", ["slug"]),
 
+  exercises: defineTable({
+    title: v.string(),
+    description: v.string(),
+    category: exerciseCategoryValidator,
+    level: exerciseLevelValidator,
+    difficulty: v.number(),
+    prerequisites: v.array(
+      v.union(v.id("exercises"), v.id("private_exercises")),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    createdBy: v.string(),
+  })
+    .index("by_level", ["level"])
+    .index("by_difficulty", ["difficulty"])
+    .index("by_category", ["category"])
+    .searchIndex("search_title", {
+      searchField: "title",
+      filterFields: ["level", "difficulty", "category"],
+    })
+    .searchIndex("search_description", {
+      searchField: "description",
+      filterFields: ["level", "difficulty", "category"],
+    }),
+
+  private_exercises: defineTable({
+    userId: v.string(),
+    title: v.string(),
+    description: v.string(),
+    category: exerciseCategoryValidator,
+    level: exerciseLevelValidator,
+    difficulty: v.number(),
+    prerequisites: v.array(
+      v.union(v.id("exercises"), v.id("private_exercises")),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    createdBy: v.string(),
+  })
+    .index("by_level", ["level"])
+    .index("by_difficulty", ["difficulty"])
+    .index("by_category", ["category"])
+    .index("by_user", ["createdBy"])
+    .searchIndex("search_title", {
+      searchField: "title",
+      filterFields: ["level", "difficulty", "category"],
+    })
+    .searchIndex("search_description", {
+      searchField: "description",
+      filterFields: ["level", "difficulty", "category"],
+    }),
+
+  exercise_variants: defineTable({
+    exercise: v.union(v.id("exercises"), v.id("private_exercises")),
+    equipment: v.array(v.id("equipment")),
+    tips: v.array(v.string()),
+    embedded_videos: v.array(urlValidator),
+    overriddenTitle: v.optional(v.string()),
+    overriddenDescription: v.optional(v.string()),
+    overriddenDifficulty: v.optional(v.number()),
+    overriddenMuscles: v.optional(v.array(v.id("exercises_muscles"))),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_exercise", ["exercise"])
+    .index("by_equipment", ["equipment"]),
+
+  exercises_muscles: defineTable({
+    exercise: v.union(v.id("exercises"), v.id("private_exercises")),
+    muscle: v.id("muscles"),
+    role: muscleRoleValidator,
+  })
+    .index("by_exercise", ["exercise"])
+    .index("by_muscle", ["muscle"])
+    .index("by_muscle_and_role", ["muscle", "role"])
+    .index("by_exercise_and_role", ["exercise", "role"]),
+
+  exercise_progressions: defineTable({
+    fromExercise: v.union(v.id("exercises"), v.id("private_exercises")),
+    toExercise: v.union(v.id("exercises"), v.id("private_exercises")),
+    createdAt: v.number(),
+  })
+    .index("by_from_exercise", ["fromExercise"])
+    .index("by_to_exercise", ["toExercise"]),
+
   skills: defineTable({
     title: v.string(),
     description: v.string(),
-    level: levelValidator,
+    level: exerciseLevelValidator,
     difficulty: v.number(),
     muscles: v.array(v.id("muscles")),
     equipment: v.array(v.id("equipment")),
@@ -57,7 +146,7 @@ export default defineSchema({
   private_skills: defineTable({
     title: v.string(),
     description: v.string(),
-    level: levelValidator,
+    level: exerciseLevelValidator,
     difficulty: v.number(),
     muscles: v.array(v.id("muscles")),
     equipment: v.array(v.id("equipment")),
@@ -85,7 +174,7 @@ export default defineSchema({
     // All skill fields
     title: v.string(),
     description: v.string(),
-    level: levelValidator,
+    level: exerciseLevelValidator,
     difficulty: v.number(),
     muscles: v.array(v.id("muscles")),
     equipment: v.array(v.id("equipment")),
