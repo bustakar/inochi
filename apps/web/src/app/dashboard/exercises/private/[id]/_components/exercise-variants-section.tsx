@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
@@ -15,6 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@inochi/ui";
+
+import { CreateVariantDialog } from "./create-variant-dialog";
 
 // ============================================================================
 // Exercise Variants Section Component
@@ -32,6 +33,10 @@ export function ExerciseVariantsSection({
   });
 
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [editingVariantId, setEditingVariantId] = React.useState<
+    Id<"exercise_variants"> | undefined
+  >(undefined);
 
   if (variants === undefined) {
     return (
@@ -41,24 +46,42 @@ export function ExerciseVariantsSection({
     );
   }
 
+  const handleDialogClose = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      setEditingVariantId(undefined);
+    }
+  };
+
   if (variants.length === 0) {
+    const handleCreate = () => {
+      setEditingVariantId(undefined);
+      setDialogOpen(true);
+    };
     return (
-      <div>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-foreground text-lg font-semibold">Variants</h2>
-          <Button variant="outline" size="sm" onClick={() => {}}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Variant
-          </Button>
+      <>
+        <div>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-foreground text-lg font-semibold">Variants</h2>
+            <Button variant="outline" size="sm" onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Variant
+            </Button>
+          </div>
+          <Card>
+            <CardContent className="py-6">
+              <p className="text-muted-foreground text-center text-sm">
+                No variants yet. Create your first variant to get started.
+              </p>
+            </CardContent>
+          </Card>
         </div>
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-muted-foreground text-center text-sm">
-              No variants yet. Create your first variant to get started.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+        <CreateVariantDialog
+          open={dialogOpen}
+          onOpenChange={handleDialogClose}
+          exerciseId={exerciseId}
+        />
+      </>
     );
   }
 
@@ -71,6 +94,16 @@ export function ExerciseVariantsSection({
       </div>
     );
   }
+
+  const handleCreate = () => {
+    setEditingVariantId(undefined);
+    setDialogOpen(true);
+  };
+
+  const handleEdit = () => {
+    setEditingVariantId(currentVariant._id);
+    setDialogOpen(true);
+  };
 
   const hasMultipleVariants = variants.length > 1;
 
@@ -110,11 +143,11 @@ export function ExerciseVariantsSection({
               </Button>
             </>
           )}
-          <Button variant="outline" size="sm" onClick={() => {}}>
+          <Button variant="outline" size="sm" onClick={handleEdit}>
             <Edit className="mr-2 h-4 w-4" />
             Edit
           </Button>
-          <Button variant="outline" size="sm" onClick={() => {}}>
+          <Button variant="outline" size="sm" onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
             Create
           </Button>
@@ -197,6 +230,12 @@ export function ExerciseVariantsSection({
           )}
         </CardContent>
       </Card>
+      <CreateVariantDialog
+        open={dialogOpen}
+        onOpenChange={handleDialogClose}
+        exerciseId={exerciseId}
+        variantId={editingVariantId}
+      />
     </div>
   );
 }

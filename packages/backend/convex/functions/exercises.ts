@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
 import { mutation, query, QueryCtx } from "../_generated/server";
 import {
+  createExerciseVariantValidator,
   createPrivateExerciseValidator,
   exerciseCategoryValidator,
   exerciseLevelValidator,
@@ -830,6 +831,130 @@ export const deletePrivateExercise = mutation({
       );
     }
     await ctx.db.delete(args.id);
+    return null;
+  },
+});
+
+export const createExerciseVariant = mutation({
+  args: {
+    data: createExerciseVariantValidator,
+  },
+  returns: v.id("exercise_variants"),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized: You must be logged in");
+    }
+
+    // Validate that the exercise exists and user has access
+    const exerciseId = args.data.exercise;
+    const privateExercise = await ctx.db.get(
+      exerciseId as Id<"private_exercises">,
+    );
+    if (privateExercise) {
+      if (privateExercise.createdBy !== userId) {
+        throw new Error(
+          "Unauthorized: You can only create variants for your own exercises",
+        );
+      }
+    } else {
+      // Check if it's a public exercise
+      const publicExercise = await ctx.db.get(exerciseId as Id<"exercises">);
+      if (!publicExercise) {
+        throw new Error("Exercise not found");
+      }
+    }
+
+    // Validate that all equipment exists
+    for (const equipmentId of args.data.equipment) {
+      const equipment = await ctx.db.get(equipmentId);
+      if (!equipment) {
+        throw new Error(`Equipment not found: ${equipmentId}`);
+      }
+    }
+
+    // Validate difficulty if provided
+    if (args.data.overriddenDifficulty !== undefined) {
+      validateDifficulty(args.data.overriddenDifficulty);
+    }
+
+    const now = Date.now();
+    const variantId = await ctx.db.insert("exercise_variants", {
+      exercise: args.data.exercise,
+      equipment: args.data.equipment,
+      tips: args.data.tips,
+      embedded_videos: args.data.embedded_videos,
+      overriddenTitle: args.data.overriddenTitle,
+      overriddenDescription: args.data.overriddenDescription,
+      overriddenDifficulty: args.data.overriddenDifficulty,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return variantId;
+  },
+});
+
+export const updateExerciseVariant = mutation({
+  args: {
+    id: v.id("exercise_variants"),
+    data: createExerciseVariantValidator,
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized: You must be logged in");
+    }
+
+    const variant = await ctx.db.get(args.id);
+    if (!variant) {
+      throw new Error("Exercise variant not found");
+    }
+
+    // Validate that the exercise exists and user has access
+    const exerciseId = args.data.exercise;
+    const privateExercise = await ctx.db.get(
+      exerciseId as Id<"private_exercises">,
+    );
+    if (privateExercise) {
+      if (privateExercise.createdBy !== userId) {
+        throw new Error(
+          "Unauthorized: You can only update variants for your own exercises",
+        );
+      }
+    } else {
+      // Check if it's a public exercise
+      const publicExercise = await ctx.db.get(exerciseId as Id<"exercises">);
+      if (!publicExercise) {
+        throw new Error("Exercise not found");
+      }
+    }
+
+    // Validate that all equipment exists
+    for (const equipmentId of args.data.equipment) {
+      const equipment = await ctx.db.get(equipmentId);
+      if (!equipment) {
+        throw new Error(`Equipment not found: ${equipmentId}`);
+      }
+    }
+
+    // Validate difficulty if provided
+    if (args.data.overriddenDifficulty !== undefined) {
+      validateDifficulty(args.data.overriddenDifficulty);
+    }
+
+    await ctx.db.patch(args.id, {
+      exercise: args.data.exercise,
+      equipment: args.data.equipment,
+      tips: args.data.tips,
+      embedded_videos: args.data.embedded_videos,
+      overriddenTitle: args.data.overriddenTitle,
+      overriddenDescription: args.data.overriddenDescription,
+      overriddenDifficulty: args.data.overriddenDifficulty,
+      updatedAt: Date.now(),
+    });
+
     return null;
   },
 });

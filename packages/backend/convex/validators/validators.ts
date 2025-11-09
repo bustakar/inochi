@@ -113,3 +113,14 @@ export function validateUrl(url: string): void {
 export function validateUrlArray(urls: string[]): void {
   urls.forEach((url) => validateUrl(url));
 }
+
+// Validator for creating/updating exercise variants
+export const createExerciseVariantValidator = v.object({
+  exercise: v.union(v.id("exercises"), v.id("private_exercises")),
+  equipment: v.array(v.id("equipment")),
+  tips: v.array(v.string()),
+  embedded_videos: v.array(v.string()),
+  overriddenTitle: v.optional(v.string()),
+  overriddenDescription: v.optional(v.string()),
+  overriddenDifficulty: v.optional(v.number()),
+});
