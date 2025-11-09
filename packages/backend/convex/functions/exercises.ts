@@ -339,6 +339,33 @@ export const createPrivateExercise = mutation({
       validateDifficulty(args.data.difficulty);
     }
 
+    // Validate that prerequisite exercises exist if provided
+    if (args.data.prerequisites) {
+      for (const prereqId of args.data.prerequisites) {
+        // Try private exercises first
+        const privatePrereq = await ctx.db.get(
+          prereqId as Id<"private_exercises">,
+        );
+        if (privatePrereq) continue;
+
+        // Try public exercises
+        const publicPrereq = await ctx.db.get(prereqId as Id<"exercises">);
+        if (!publicPrereq) {
+          throw new Error(`Prerequisite exercise not found: ${prereqId}`);
+        }
+      }
+    }
+
+    // Validate that muscles exist if provided
+    if (args.data.muscles) {
+      for (const muscleId of args.data.muscles) {
+        const muscle = await ctx.db.get(muscleId);
+        if (!muscle) {
+          throw new Error(`Muscle not found: ${muscleId}`);
+        }
+      }
+    }
+
     const now = Date.now();
     const exerciseId = await ctx.db.insert("private_exercises", {
       userId: userId,
@@ -352,6 +379,29 @@ export const createPrivateExercise = mutation({
       updatedAt: now,
       createdBy: userId,
     });
+
+    // Save muscles to exercises_muscles table
+    if (args.data.muscles && args.data.muscles.length > 0) {
+      for (const muscleId of args.data.muscles) {
+        await ctx.db.insert("exercises_muscles", {
+          exercise: exerciseId,
+          muscle: muscleId,
+          role: "primary", // Default role, can be made configurable later
+        });
+      }
+    }
+
+    // Save prerequisites to exercise_progressions table
+    // In progressions: fromExercise = prerequisite, toExercise = this exercise
+    if (args.data.prerequisites && args.data.prerequisites.length > 0) {
+      for (const prereqId of args.data.prerequisites) {
+        await ctx.db.insert("exercise_progressions", {
+          fromExercise: prereqId,
+          toExercise: exerciseId,
+          createdAt: now,
+        });
+      }
+    }
 
     return exerciseId;
   },

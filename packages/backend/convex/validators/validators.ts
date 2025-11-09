@@ -50,6 +50,9 @@ export const createPrivateExerciseValidator = v.object({
   difficulty: v.optional(v.number()),
   category: v.optional(exerciseCategoryValidator),
   muscles: v.optional(v.array(v.id("muscles"))),
+  prerequisites: v.optional(
+    v.array(v.union(v.id("exercises"), v.id("private_exercises"))),
+  ),
 });
 
 // Partial skill data validator for updates

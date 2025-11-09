@@ -6,7 +6,7 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useMutation, useQuery } from "convex/react";
-import { CopyPlus, Search, Target } from "lucide-react";
+import { CopyPlus, Layers, Search, Target } from "lucide-react";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -48,6 +48,7 @@ const exerciseFormSchema = z.object({
   difficulty: z.number(),
   category: z.enum(["calisthenics", "gym", "stretch", "mobility"]),
   muscles: z.array(z.string()),
+  prerequisites: z.array(z.string()),
 });
 
 type ExerciseFormData = z.infer<typeof exerciseFormSchema>;
@@ -212,6 +213,107 @@ interface Muscle {
   _id: Id<"muscles">;
   name: string;
   muscleGroup?: string;
+}
+
+interface Exercise {
+  _id: Id<"private_exercises">;
+  title: string;
+}
+
+function PrerequisitesField({
+  exercises,
+}: {
+  exercises: Exercise[] | undefined;
+}) {
+  const field = useFieldContext<string[] | undefined>();
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const selectedExerciseIds = field.state.value || [];
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  const handleToggleExercise = (exerciseId: Id<"private_exercises">) => {
+    const exerciseIdStr = exerciseId as string;
+    const currentIds = selectedExerciseIds;
+    if (currentIds.includes(exerciseIdStr)) {
+      field.handleChange(currentIds.filter((id) => id !== exerciseIdStr));
+    } else {
+      field.handleChange([...currentIds, exerciseIdStr]);
+    }
+  };
+
+  // Filter exercises based on search query
+  const filteredExercises = React.useMemo(() => {
+    if (!exercises) return [];
+    if (!searchQuery.trim()) return exercises;
+
+    const query = searchQuery.toLowerCase();
+    return exercises.filter((exercise) =>
+      exercise.title.toLowerCase().includes(query),
+    );
+  }, [exercises, searchQuery]);
+
+  return (
+    <Field data-invalid={isInvalid}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant={selectedExerciseIds.length > 0 ? "default" : "outline"}
+            size="sm"
+            className="h-8 w-8"
+            aria-invalid={isInvalid}
+            title={
+              selectedExerciseIds.length > 0
+                ? `${selectedExerciseIds.length} prerequisite${selectedExerciseIds.length > 1 ? "s" : ""} selected`
+                : "Prerequisites"
+            }
+          >
+            <Layers className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          className="max-h-96 w-80 overflow-y-auto md:w-96"
+        >
+          <div className="p-2">
+            <div className="relative">
+              <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+              <Input
+                type="search"
+                placeholder="Search exercises..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-8 pl-8"
+                autoFocus
+              />
+            </div>
+          </div>
+          <DropdownMenuSeparator />
+          <div className="space-y-0.5 p-1">
+            {filteredExercises.length === 0 ? (
+              <div className="text-muted-foreground px-2 py-4 text-center text-sm">
+                {searchQuery.trim()
+                  ? "No exercises found"
+                  : "No exercises available"}
+              </div>
+            ) : (
+              filteredExercises.map((exercise) => (
+                <DropdownMenuCheckboxItem
+                  key={exercise._id}
+                  checked={selectedExerciseIds.includes(exercise._id as string)}
+                  onCheckedChange={() => handleToggleExercise(exercise._id)}
+                  onSelect={(e) => e.preventDefault()}
+                  className="text-sm"
+                >
+                  {exercise.title}
+                </DropdownMenuCheckboxItem>
+              ))
+            )}
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+    </Field>
+  );
 }
 
 function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
@@ -410,6 +512,7 @@ const { useAppForm } = createFormHook({
     LevelField,
     DifficultyField,
     MusclesField,
+    PrerequisitesField,
   },
   formComponents: {},
 });
@@ -432,6 +535,10 @@ export function CreateExerciseDialog({
     api.functions.exercises.createPrivateExercise,
   );
   const muscles = useQuery(api.functions.skills.getMuscles, {});
+  const privateExercises = useQuery(
+    api.functions.exercises.getPrivateExercises,
+    {},
+  );
   const [createMore, setCreateMore] = React.useState(false);
 
   const form = useAppForm({
@@ -442,6 +549,7 @@ export function CreateExerciseDialog({
       difficulty: 1,
       category: "calisthenics",
       muscles: [],
+      prerequisites: [],
     },
     validators: {
       onSubmit: exerciseFormSchema,
@@ -460,7 +568,15 @@ export function CreateExerciseDialog({
   const onSubmit = async (data: ExerciseFormData) => {
     try {
       const exerciseId = await createPrivateExercise({
-        data: data,
+        data: {
+          title: data.title,
+          description: data.description,
+          level: data.level,
+          difficulty: data.difficulty,
+          category: data.category,
+          muscles: data.muscles as Id<"muscles">[],
+          prerequisites: data.prerequisites as Id<"private_exercises">[],
+        },
       });
       toast.success("Private exercise created!");
       onOpenChange(false);
@@ -516,6 +632,21 @@ export function CreateExerciseDialog({
                   name="muscles"
                   children={() => (
                     <MusclesField muscles={muscles as Muscle[]} />
+                  )}
+                />
+              )}
+              {privateExercises && (
+                <form.AppField
+                  name="prerequisites"
+                  children={() => (
+                    <PrerequisitesField
+                      exercises={
+                        privateExercises.map((ex) => ({
+                          _id: ex._id,
+                          title: ex.title,
+                        })) as Exercise[]
+                      }
+                    />
                   )}
                 />
               )}
