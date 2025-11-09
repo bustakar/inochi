@@ -15,16 +15,23 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
   Form,
+  FormControl,
+  FormField,
+  FormItem,
 } from "@inochi/ui";
 
-import type { SkillFormData } from "../../../../types/skill-form-schema";
+import type { ExerciseSubmissionFormData } from "../../../../types/exercise-submission-form-schema";
 import {
   ArrayInputField,
   BasicFormFields,
   CheckboxGroupField,
 } from "../../../../components/forms";
-import { skillFormSchema } from "../../../../types/skill-form-schema";
+import { exerciseSubmissionFormSchema } from "../../../../types/exercise-submission-form-schema";
 
 // ============================================================================
 // Types
@@ -51,18 +58,18 @@ function useEditSubmissionForm(
     api.functions.submissions.updateSubmission,
   );
 
-  const form = useForm<SkillFormData>({
-    resolver: standardSchemaResolver(skillFormSchema),
+  const form = useForm<ExerciseSubmissionFormData>({
+    resolver: standardSchemaResolver(exerciseSubmissionFormSchema),
     defaultValues: {
       title: submission.title,
       description: submission.description,
       level: submission.level,
       difficulty: submission.difficulty,
+      category: submission.category,
       muscles: submission.muscles,
       equipment: submission.equipment,
       embedded_videos: submission.embedded_videos,
       prerequisites: submission.prerequisites,
-      variants: submission.variants,
       tips: submission.tips,
     },
   });
@@ -75,17 +82,17 @@ function useEditSubmissionForm(
         description: submission.description,
         level: submission.level,
         difficulty: submission.difficulty,
+        category: submission.category,
         muscles: submission.muscles,
         equipment: submission.equipment,
         embedded_videos: submission.embedded_videos,
         prerequisites: submission.prerequisites,
-        variants: submission.variants,
         tips: submission.tips,
       });
     }
   }, [submission._id, open, form, submission]);
 
-  const onSubmit = async (data: SkillFormData) => {
+  const onSubmit = async (data: ExerciseSubmissionFormData) => {
     try {
       await updateSubmission({
         id: submission._id,
@@ -93,13 +100,13 @@ function useEditSubmissionForm(
         description: data.description,
         level: data.level,
         difficulty: data.difficulty,
+        category: data.category,
         muscles: data.muscles,
         equipment: data.equipment,
         embedded_videos: data.embedded_videos.filter(
           (v: string) => v.trim() !== "",
         ),
         prerequisites: data.prerequisites,
-        variants: data.variants,
         tips: data.tips.filter((t: string) => t.trim() !== ""),
       });
       toast.success("Submission updated successfully!");
@@ -127,21 +134,18 @@ export function EditSubmissionDialog({
   open,
   onOpenChange,
 }: EditSubmissionDialogProps) {
-  const muscles = useQuery(api.functions.skills.getMuscles, {});
-  const equipment = useQuery(api.functions.skills.getEquipment, {});
-  const skills = useQuery(api.functions.skills.getSkills, {});
+  const muscles = useQuery(api.functions.exercises.getMuscles, {});
+  const equipment = useQuery(api.functions.exercises.getEquipment, {});
+  const exercises = useQuery(api.functions.exercises.getPrivateExercises, {});
 
   const { form, onSubmit } = useEditSubmissionForm(submission, open);
 
-  const handleSubmit = async (data: SkillFormData) => {
+  const handleSubmit = async (data: ExerciseSubmissionFormData) => {
     const success = await onSubmit(data);
     if (success) {
       onOpenChange(false);
     }
   };
-
-  const prerequisites = form.watch("prerequisites");
-  const variants = form.watch("variants");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -161,13 +165,40 @@ export function EditSubmissionDialog({
               levelFieldName="level"
               difficultyFieldName="difficulty"
             />
+            <FormField
+              control={form.control as any}
+              name="category"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <Field data-invalid={!!fieldState.error}>
+                    <FieldLabel>Category</FieldLabel>
+                    <FieldContent>
+                      <FormControl>
+                        <select
+                          {...field}
+                          className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="calisthenics">Calisthenics</option>
+                          <option value="gym">Gym</option>
+                          <option value="stretch">Stretch</option>
+                          <option value="mobility">Mobility</option>
+                        </select>
+                      </FormControl>
+                      {fieldState.error && (
+                        <FieldError>{fieldState.error.message}</FieldError>
+                      )}
+                    </FieldContent>
+                  </Field>
+                </FormItem>
+              )}
+            />
 
             <CheckboxGroupField
               control={form.control}
               name="muscles"
               options={muscles}
               label="Muscles"
-              description="Select the muscles targeted by this skill"
+              description="Select the muscles targeted by this exercise"
             />
 
             <CheckboxGroupField
@@ -175,7 +206,7 @@ export function EditSubmissionDialog({
               name="equipment"
               options={equipment}
               label="Equipment"
-              description="Select the equipment needed for this skill"
+              description="Select the equipment needed for this exercise"
             />
 
             <ArrayInputField
@@ -186,26 +217,17 @@ export function EditSubmissionDialog({
               addButtonText="Add Video URL"
             />
 
-            {skills && (
-              <>
-                <CheckboxGroupField
-                  control={form.control}
-                  name="prerequisites"
-                  options={skills.map((s) => ({ _id: s._id, title: s.title }))}
-                  label="Prerequisites"
-                  description="Select skills that should be mastered before this one"
-                  excludeIds={variants.map((id: string) => String(id))}
-                />
-
-                <CheckboxGroupField
-                  control={form.control}
-                  name="variants"
-                  options={skills.map((s) => ({ _id: s._id, title: s.title }))}
-                  label="Variants"
-                  description="Select alternative versions of this skill"
-                  excludeIds={prerequisites.map((id: string) => String(id))}
-                />
-              </>
+            {exercises && (
+              <CheckboxGroupField
+                control={form.control}
+                name="prerequisites"
+                options={exercises.map((e) => ({
+                  _id: e._id,
+                  title: e.title,
+                }))}
+                label="Prerequisites"
+                description="Select exercises that should be mastered before this one"
+              />
             )}
 
             <ArrayInputField

@@ -117,70 +117,19 @@ export default defineSchema({
     .index("by_from_exercise", ["fromExercise"])
     .index("by_to_exercise", ["toExercise"]),
 
-  skills: defineTable({
-    title: v.string(),
-    description: v.string(),
-    level: exerciseLevelValidator,
-    difficulty: v.number(),
-    muscles: v.array(v.id("muscles")),
-    equipment: v.array(v.id("equipment")),
-    embedded_videos: v.array(urlValidator),
-    prerequisites: v.array(v.id("skills")),
-    variants: v.array(v.id("skills")),
-    tips: v.array(v.string()),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-    createdBy: v.string(),
-  })
-    .index("by_level", ["level"])
-    .index("by_difficulty", ["difficulty"])
-    .searchIndex("search_title", {
-      searchField: "title",
-      filterFields: ["level", "difficulty"],
-    })
-    .searchIndex("search_description", {
-      searchField: "description",
-      filterFields: ["level", "difficulty"],
-    }),
-
-  private_skills: defineTable({
-    title: v.string(),
-    description: v.string(),
-    level: exerciseLevelValidator,
-    difficulty: v.number(),
-    muscles: v.array(v.id("muscles")),
-    equipment: v.array(v.id("equipment")),
-    embedded_videos: v.array(urlValidator),
-    prerequisites: v.array(v.union(v.id("skills"), v.id("private_skills"))),
-    variants: v.array(v.union(v.id("skills"), v.id("private_skills"))),
-    tips: v.array(v.string()),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-    userId: v.string(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_level", ["level"])
-    .index("by_difficulty", ["difficulty"])
-    .searchIndex("search_title", {
-      searchField: "title",
-      filterFields: ["level", "difficulty"],
-    })
-    .searchIndex("search_description", {
-      searchField: "description",
-      filterFields: ["level", "difficulty"],
-    }),
-
   user_submissions: defineTable({
-    // All skill fields
+    // All exercise fields
     title: v.string(),
     description: v.string(),
     level: exerciseLevelValidator,
     difficulty: v.number(),
+    category: exerciseCategoryValidator,
     muscles: v.array(v.id("muscles")),
     equipment: v.array(v.id("equipment")),
     embedded_videos: v.array(urlValidator),
-    prerequisites: v.array(v.id("skills")),
-    variants: v.array(v.id("skills")),
+    prerequisites: v.array(
+      v.union(v.id("exercises"), v.id("private_exercises")),
+    ),
     tips: v.array(v.string()),
     // Submission-specific fields
     submissionType: v.union(v.literal("create"), v.literal("edit")),
@@ -189,8 +138,8 @@ export default defineSchema({
       v.literal("approved"),
       v.literal("rejected"),
     ),
-    originalSkillId: v.optional(v.id("skills")),
-    privateSkillId: v.optional(v.id("private_skills")),
+    originalExerciseId: v.optional(v.id("exercises")),
+    privateExerciseId: v.optional(v.id("private_exercises")),
     submittedBy: v.string(),
     submittedAt: v.number(),
     reviewedBy: v.optional(v.string()),

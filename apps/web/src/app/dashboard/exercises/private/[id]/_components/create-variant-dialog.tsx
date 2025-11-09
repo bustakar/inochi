@@ -410,7 +410,7 @@ export function CreateVariantDialog({
   const updateVariant = useMutation(
     api.functions.exercises.updateExerciseVariant,
   );
-  const equipment = useQuery(api.functions.skills.getEquipment, {});
+  const equipment = useQuery(api.functions.exercises.getEquipment, {});
   const variant = useQuery(api.functions.exercises.getExerciseVariants, {
     exerciseId,
   });
