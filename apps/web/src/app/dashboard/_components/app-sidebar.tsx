@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FileText, GraduationCap } from "lucide-react";
+import { Dumbbell, FileText } from "lucide-react";
 
 import {
   Sidebar,
@@ -17,9 +17,9 @@ import { NavUser } from "./nav-user";
 const platformData = {
   navMain: [
     {
-      title: "Skills",
-      url: "/dashboard/skills",
-      icon: GraduationCap,
+      title: "Exercises",
+      url: "/dashboard/exercises",
+      icon: Dumbbell,
     },
   ],
 };

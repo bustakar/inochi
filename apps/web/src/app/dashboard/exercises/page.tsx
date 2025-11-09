@@ -6,16 +6,9 @@ import { useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { Dumbbell, MoreVertical, Target } from "lucide-react";
+import { Dumbbell, Target } from "lucide-react";
 
-import {
-  Badge,
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@inochi/ui";
+import { Badge } from "@inochi/ui";
 
 import { CreateExerciseDialog } from "./_components/create-exercise-dialog";
 
@@ -36,7 +29,6 @@ interface ExerciseCardProps {
     musclesData: Array<Doc<"muscles"> & { role?: string }>;
     equipmentData: Array<Doc<"equipment">>;
   };
-  onEditExercise: (exercise: Doc<"private_exercises">) => void;
 }
 
 const levelColors: Record<string, string> = {
@@ -61,18 +53,12 @@ const categoryColors: Record<string, string> = {
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
 };
 
-function ExerciseCard({ exercise, onEditExercise }: ExerciseCardProps) {
+function ExerciseCard({ exercise }: ExerciseCardProps) {
   const router = useRouter();
-
   const detailUrl = `/dashboard/exercises/private/${exercise._id}`;
 
   const handleCardClick = () => {
     router.push(detailUrl);
-  };
-
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    router.push(`/dashboard/exercises/private/${exercise._id}/edit`);
   };
 
   const displayDescription = React.useMemo(() => {
@@ -96,21 +82,6 @@ function ExerciseCard({ exercise, onEditExercise }: ExerciseCardProps) {
         <h3 className="text-card-foreground flex-1 pr-8 text-lg font-semibold">
           {exercise.title}
         </h3>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 flex-shrink-0"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleEditClick}>Edit</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       {/* Level and category badges */}
@@ -197,11 +168,7 @@ function ExerciseCard({ exercise, onEditExercise }: ExerciseCardProps) {
 // Exercises List Component
 // ============================================================================
 
-interface ExercisesListProps {
-  onEditExercise: (exercise: Doc<"private_exercises">) => void;
-}
-
-function ExercisesList({ onEditExercise }: ExercisesListProps) {
+function ExercisesList() {
   const exercises = useQuery(api.functions.exercises.getPrivateExercises, {});
 
   if (exercises === undefined) {
@@ -223,11 +190,7 @@ function ExercisesList({ onEditExercise }: ExercisesListProps) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {exercises.map((exercise) => (
-        <ExerciseCard
-          key={exercise._id}
-          exercise={exercise}
-          onEditExercise={onEditExercise}
-        />
+        <ExerciseCard key={exercise._id} exercise={exercise} />
       ))}
     </div>
   );
@@ -240,11 +203,6 @@ function ExercisesList({ onEditExercise }: ExercisesListProps) {
 export default function ExercisesPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-  const handleEditExercise = (exercise: Doc<"private_exercises">) => {
-    // TODO: Navigate to edit page when implemented
-    console.log("Edit exercise:", exercise);
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -256,7 +214,7 @@ export default function ExercisesPage() {
       </div>
 
       {/* Exercises List */}
-      <ExercisesList onEditExercise={handleEditExercise} />
+      <ExercisesList />
     </div>
   );
 }

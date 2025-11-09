@@ -58,7 +58,7 @@ export const HeroHeader = () => {
               <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
                 {user ? (
                   <Button asChild size="sm">
-                    <Link href="/dashboard/skills">
+                    <Link href="/dashboard/exercises">
                       <span>Dashboard</span>
                     </Link>
                   </Button>
