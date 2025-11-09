@@ -1,7 +1,7 @@
 import { Auth } from "convex/server";
 import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
-import { mutation, query, QueryCtx } from "../_generated/server";
+import { internalQuery, mutation, query, QueryCtx } from "../_generated/server";
 import {
   createExerciseVariantValidator,
   createPrivateExerciseValidator,
@@ -956,5 +956,58 @@ export const updateExerciseVariant = mutation({
     });
 
     return null;
+  },
+});
+
+// Internal query for AI - returns simplified exercise data
+export const getAllExercisesForAI = internalQuery({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("exercises"),
+      title: v.string(),
+      level: exerciseLevelValidator,
+      difficulty: v.number(),
+      category: exerciseCategoryValidator,
+    }),
+  ),
+  handler: async (ctx) => {
+    const exercises = await ctx.db.query("exercises").collect();
+    return exercises.map((e) => ({
+      _id: e._id,
+      title: e.title,
+      level: e.level,
+      difficulty: e.difficulty,
+      category: e.category,
+    }));
+  },
+});
+
+// Internal query for AI - returns user's private exercises
+export const getPrivateExercisesForAI = internalQuery({
+  args: {
+    userId: v.string(),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("private_exercises"),
+      title: v.string(),
+      level: exerciseLevelValidator,
+      difficulty: v.number(),
+      category: exerciseCategoryValidator,
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const exercises = await ctx.db
+      .query("private_exercises")
+      .withIndex("by_user", (q) => q.eq("createdBy", args.userId))
+      .collect();
+    return exercises.map((e) => ({
+      _id: e._id,
+      title: e.title,
+      level: e.level,
+      difficulty: e.difficulty,
+      category: e.category,
+    }));
   },
 });

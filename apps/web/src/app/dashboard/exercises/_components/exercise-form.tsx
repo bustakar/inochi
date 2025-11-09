@@ -1,11 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useQuery } from "convex/react";
-import { Layers, Search, Target } from "lucide-react";
+import { Layers, Search, Sparkles, Target } from "lucide-react";
 import * as z from "zod";
 
 import {
@@ -60,22 +58,39 @@ export interface Exercise {
 
 const { fieldContext, formContext, useFieldContext } = createFormHookContexts();
 
-function TitleField() {
+function TitleField({
+  onFillWithAI,
+  isGenerating,
+}: {
+  onFillWithAI: () => void;
+  isGenerating: boolean;
+}) {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const isTitleEmpty = !field.state.value || field.state.value.trim() === "";
   return (
     <Field data-invalid={isInvalid}>
       <FieldLabel htmlFor={field.name}>Title</FieldLabel>
-      <Input
-        id={field.name}
-        name={field.name}
-        value={field.state.value}
-        onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(e.target.value)}
-        aria-invalid={isInvalid}
-        placeholder="Push Up"
-        autoComplete="off"
-      />
+      <div className="flex items-center justify-between gap-2">
+        <Input
+          id={field.name}
+          name={field.name}
+          value={field.state.value}
+          onBlur={field.handleBlur}
+          onChange={(e) => field.handleChange(e.target.value)}
+          aria-invalid={isInvalid}
+          placeholder="Push Up"
+          autoComplete="off"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onFillWithAI}
+          disabled={isGenerating || isTitleEmpty}
+        >
+          <Sparkles className="mr-2 size-4" />
+        </Button>
+      </div>
       {isInvalid && <FieldError errors={field.state.meta.errors} />}
     </Field>
   );
@@ -518,15 +533,27 @@ export const { useAppForm } = createFormHook({
 
 interface ExerciseFormProps {
   form: any; // Using any to avoid complex type issues with tanstack form
-  muscles: Muscle[] | undefined;
-  exercises: Exercise[] | undefined;
+  isGenerating: boolean;
+  onFillWithAI: () => void;
 }
 
-export function ExerciseForm({ form, muscles, exercises }: ExerciseFormProps) {
+export function ExerciseForm({
+  form,
+  isGenerating,
+  onFillWithAI,
+}: ExerciseFormProps) {
   return (
     <>
       <FieldGroup>
-        <form.AppField name="title" children={() => <TitleField />} />
+        <form.AppField
+          name="title"
+          children={() => (
+            <TitleField
+              onFillWithAI={onFillWithAI}
+              isGenerating={isGenerating}
+            />
+          )}
+        />
         <form.AppField
           name="description"
           children={() => <DescriptionField />}
@@ -538,12 +565,18 @@ export function ExerciseForm({ form, muscles, exercises }: ExerciseFormProps) {
   );
 }
 
+interface ExerciseFormFieldsProps {
+  form: any; // Using any to avoid complex type issues with tanstack form
+  muscles: Muscle[] | undefined;
+  exercises: Exercise[] | undefined;
+}
+
 // Component for rendering form fields in DialogFooter (leading side)
 export function ExerciseFormFields({
   form,
   muscles,
   exercises,
-}: ExerciseFormProps) {
+}: ExerciseFormFieldsProps) {
   return (
     <div className="flex shrink-0 gap-1">
       <form.AppField name="level" children={() => <LevelField />} />
