@@ -10,6 +10,7 @@ import { Dumbbell, Target } from "lucide-react";
 
 import { Badge } from "@inochi/ui";
 
+import { Search } from "../../../components/search";
 import { CreateExerciseDialog } from "./_components/create-exercise-dialog";
 
 // ============================================================================
@@ -177,8 +178,14 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
 // Exercises List Component
 // ============================================================================
 
-function ExercisesList() {
-  const exercises = useQuery(api.functions.exercises.getPrivateExercises, {});
+interface ExercisesListProps {
+  searchQuery: string;
+}
+
+function ExercisesList({ searchQuery }: ExercisesListProps) {
+  const exercises = useQuery(api.functions.exercises.getPrivateExercises, {
+    searchQuery: searchQuery.trim() || undefined,
+  });
 
   if (exercises === undefined) {
     return (
@@ -191,7 +198,11 @@ function ExercisesList() {
   if (exercises.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">No exercises found.</p>
+        <p className="text-muted-foreground">
+          {searchQuery.trim()
+            ? "No exercises found matching your search."
+            : "No exercises found."}
+        </p>
       </div>
     );
   }
@@ -211,6 +222,7 @@ function ExercisesList() {
 
 export default function ExercisesPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <div className="space-y-6">
@@ -222,8 +234,17 @@ export default function ExercisesPage() {
         />
       </div>
 
+      {/* Search */}
+      <div className="max-w-md">
+        <Search
+          initialValue={searchQuery}
+          onSearchUpdate={setSearchQuery}
+          placeholder="Search exercises by title or description..."
+        />
+      </div>
+
       {/* Exercises List */}
-      <ExercisesList />
+      <ExercisesList searchQuery={searchQuery} />
     </div>
   );
 }

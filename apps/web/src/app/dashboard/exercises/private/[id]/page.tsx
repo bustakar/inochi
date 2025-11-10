@@ -65,7 +65,7 @@ function ExerciseHeader({
 }: ExerciseHeaderProps & { onEditClick: () => void }) {
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-start gap-4 md:flex-col md:flex-row md:items-center">
         <h1 className="text-foreground text-3xl font-bold">{exercise.title}</h1>
         <div className="flex items-center gap-1">
           <Badge className={levelColors[exercise.level]}>
