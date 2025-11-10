@@ -234,6 +234,7 @@ export const getPrivateExercises = query({
     maxDifficulty: v.optional(v.number()),
     muscleIds: v.optional(v.array(v.id("muscles"))),
     equipmentIds: v.optional(v.array(v.id("equipment"))),
+    searchQuery: v.optional(v.string()),
   },
   returns: v.array(
     v.object({
@@ -320,7 +321,19 @@ export const getPrivateExercises = query({
       }
     }
 
-    // Step 4: Pre-fetch all muscles and equipment for enrichment
+    // Step 4: Filter by search query if provided
+    if (args.searchQuery && args.searchQuery.trim().length > 0) {
+      const searchLower = args.searchQuery.toLowerCase().trim();
+      privateExercises = privateExercises.filter((exercise) => {
+        const titleMatch = exercise.title.toLowerCase().includes(searchLower);
+        const descriptionMatch = exercise.description
+          .toLowerCase()
+          .includes(searchLower);
+        return titleMatch || descriptionMatch;
+      });
+    }
+
+    // Step 5: Pre-fetch all muscles and equipment for enrichment
     const muscles = await ctx.db.query("muscles").collect();
     const equipment = await ctx.db.query("equipment").collect();
 
@@ -331,7 +344,7 @@ export const getPrivateExercises = query({
     const equipmentDataMap = new Map<Id<"equipment">, Doc<"equipment">>();
     equipment.forEach((e) => equipmentDataMap.set(e._id, e));
 
-    // Step 5: Enrich each exercise with muscle and equipment data
+    // Step 6: Enrich each exercise with muscle and equipment data
     return Promise.all(
       privateExercises.map((exercise) =>
         enrichExercise(ctx, exercise, musclesDataMap, equipmentDataMap),
