@@ -35,7 +35,12 @@ export const exerciseFormSchema = z.object({
   level: z.enum(["beginner", "intermediate", "advanced", "expert", "elite"]),
   difficulty: z.number(),
   category: z.enum(["calisthenics", "gym", "stretch", "mobility"]),
-  muscles: z.array(z.string()),
+  muscles: z.array(
+    z.object({
+      muscleId: z.string(),
+      role: z.enum(["primary", "secondary", "tertiary", "stabilizer"]),
+    }),
+  ),
   prerequisites: z.array(z.string()),
 });
 
@@ -323,47 +328,91 @@ function PrerequisitesField({
   );
 }
 
+type MuscleRole = "primary" | "secondary" | "tertiary" | "stabilizer";
+
+interface MuscleWithRole {
+  muscleId: string;
+  role: MuscleRole;
+}
+
 function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
-  const field = useFieldContext<string[] | undefined>();
+  const field = useFieldContext<MuscleWithRole[] | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-  const selectedMuscleIds = field.state.value || [];
+  const selectedMuscles = field.state.value || [];
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [currentRole, setCurrentRole] = React.useState<MuscleRole>("primary");
+
+  // Get muscle IDs for a specific role
+  const getMuscleIdsForRole = (role: MuscleRole): string[] => {
+    return selectedMuscles
+      .filter((m) => m.role === role)
+      .map((m) => m.muscleId);
+  };
+
+  // Check if a muscle is selected in any role
+  const isMuscleSelected = (muscleId: string): boolean => {
+    return selectedMuscles.some((m) => m.muscleId === muscleId);
+  };
+
+  // Get the role of a muscle if selected
+  const getMuscleRole = (muscleId: string): MuscleRole | null => {
+    const muscle = selectedMuscles.find((m) => m.muscleId === muscleId);
+    return muscle ? muscle.role : null;
+  };
 
   const handleToggleMuscle = (muscleId: Id<"muscles">) => {
     const muscleIdStr = muscleId as string;
-    const currentIds = selectedMuscleIds;
-    if (currentIds.includes(muscleIdStr)) {
-      field.handleChange(currentIds.filter((id) => id !== muscleIdStr));
+    const existingMuscle = selectedMuscles.find(
+      (m) => m.muscleId === muscleIdStr,
+    );
+
+    if (existingMuscle) {
+      // If muscle is already selected, remove it
+      field.handleChange(
+        selectedMuscles.filter((m) => m.muscleId !== muscleIdStr),
+      );
     } else {
-      field.handleChange([...currentIds, muscleIdStr]);
+      // Add muscle with current role, removing it from any other role first
+      const updatedMuscles = selectedMuscles.filter(
+        (m) => m.muscleId !== muscleIdStr,
+      );
+      updatedMuscles.push({ muscleId: muscleIdStr, role: currentRole });
+      field.handleChange(updatedMuscles);
     }
+  };
+
+  const handleRoleChange = (newRole: MuscleRole) => {
+    // Simply change the current role - don't move muscles
+    // When user selects a muscle, it will be added with the current role
+    setCurrentRole(newRole);
   };
 
   const handleToggleGroup = (groupMuscles: Muscle[]) => {
     const groupMuscleIds = groupMuscles.map((m) => m._id as string);
-    const allSelected = groupMuscleIds.every((id) =>
-      selectedMuscleIds.includes(id),
-    );
+    const selectedInGroup = groupMuscleIds.filter((id) => isMuscleSelected(id));
+    const allSelected = selectedInGroup.length === groupMuscleIds.length;
 
     if (allSelected) {
+      // Remove all muscles in this group
       field.handleChange(
-        selectedMuscleIds.filter((id) => !groupMuscleIds.includes(id)),
+        selectedMuscles.filter((m) => !groupMuscleIds.includes(m.muscleId)),
       );
     } else {
-      const newSelection = [...selectedMuscleIds];
+      // Add all muscles in this group with current role
+      const updatedMuscles = selectedMuscles.filter(
+        (m) => !groupMuscleIds.includes(m.muscleId),
+      );
       for (const id of groupMuscleIds) {
-        if (!newSelection.includes(id)) {
-          newSelection.push(id);
-        }
+        updatedMuscles.push({ muscleId: id, role: currentRole });
       }
-      field.handleChange(newSelection);
+      field.handleChange(updatedMuscles);
     }
   };
 
   const getGroupSelectionState = (groupMuscles: Muscle[]) => {
     const groupMuscleIds = groupMuscles.map((m) => m._id as string);
     const selectedCount = groupMuscleIds.filter((id) =>
-      selectedMuscleIds.includes(id),
+      isMuscleSelected(id),
     ).length;
 
     if (selectedCount === 0) return "none";
@@ -425,13 +474,13 @@ function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
         <DropdownMenuTrigger asChild>
           <Button
             type="button"
-            variant={selectedMuscleIds.length > 0 ? "default" : "outline"}
+            variant={selectedMuscles.length > 0 ? "default" : "outline"}
             size="sm"
             className="h-8 w-8"
             aria-invalid={isInvalid}
             title={
-              selectedMuscleIds.length > 0
-                ? `${selectedMuscleIds.length} muscle${selectedMuscleIds.length > 1 ? "s" : ""} selected`
+              selectedMuscles.length > 0
+                ? `${selectedMuscles.length} muscle${selectedMuscles.length > 1 ? "s" : ""} selected`
                 : "Muscles"
             }
           >
@@ -442,7 +491,7 @@ function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
           align="start"
           className="max-h-96 w-80 overflow-y-auto md:w-96"
         >
-          <div className="p-2">
+          <div className="space-y-2 p-2">
             <div className="relative">
               <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
               <Input
@@ -456,6 +505,29 @@ function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
                 }}
                 className="h-8 pl-8"
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1">
+                {(
+                  [
+                    "primary",
+                    "secondary",
+                    "tertiary",
+                    "stabilizer",
+                  ] as MuscleRole[]
+                ).map((role) => (
+                  <Button
+                    key={role}
+                    type="button"
+                    variant={currentRole === role ? "default" : "outline"}
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => handleRoleChange(role)}
+                  >
+                    {role.charAt(0).toUpperCase() + role.slice(1)}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
           <DropdownMenuSeparator />
@@ -487,19 +559,32 @@ function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
                       </Label>
                     </div>
                     <div className="grid grid-cols-1 gap-0.5 md:grid-cols-2">
-                      {groupMuscles.map((muscle) => (
-                        <DropdownMenuCheckboxItem
-                          key={muscle._id}
-                          checked={selectedMuscleIds.includes(
-                            muscle._id as string,
-                          )}
-                          onCheckedChange={() => handleToggleMuscle(muscle._id)}
-                          onSelect={(e) => e.preventDefault()}
-                          className="text-sm"
-                        >
-                          {muscle.name}
-                        </DropdownMenuCheckboxItem>
-                      ))}
+                      {groupMuscles.map((muscle) => {
+                        const muscleIdStr = muscle._id as string;
+                        const isSelected = isMuscleSelected(muscleIdStr);
+                        const muscleRole = getMuscleRole(muscleIdStr);
+
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={muscle._id}
+                            checked={isSelected}
+                            onCheckedChange={() =>
+                              handleToggleMuscle(muscle._id)
+                            }
+                            onSelect={(e) => e.preventDefault()}
+                            className="text-sm"
+                          >
+                            <span className="flex flex-col items-start gap-1">
+                              {isSelected && muscleRole !== currentRole && (
+                                <span className="text-muted-foreground text-xs">
+                                  ({muscleRole})
+                                </span>
+                              )}
+                              {muscle.name}
+                            </span>
+                          </DropdownMenuCheckboxItem>
+                        );
+                      })}
                     </div>
                   </div>
                 );

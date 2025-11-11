@@ -6,6 +6,7 @@ import { missingEnvVariableUrl } from "../utils";
 import {
   exerciseCategoryValidator,
   exerciseLevelValidator,
+  muscleRoleValidator,
 } from "../validators/validators";
 
 export const openaiKeySet = query({
@@ -25,7 +26,12 @@ export const generateExerciseData = action({
     level: exerciseLevelValidator,
     difficulty: v.number(),
     category: exerciseCategoryValidator,
-    muscles: v.array(v.id("muscles")),
+    muscles: v.array(
+      v.object({
+        muscleId: v.id("muscles"),
+        role: muscleRoleValidator,
+      }),
+    ),
     prerequisites: v.array(
       v.union(v.id("exercises"), v.id("private_exercises")),
     ),
@@ -84,7 +90,10 @@ Return a JSON object with this exact structure:
   "level": "beginner" | "intermediate" | "advanced" | "expert" | "elite",
   "difficulty": number between 1-10,
   "category": "calisthenics" | "gym" | "stretch" | "mobility",
-  "muscles": ["exact muscle name 1", "exact muscle name 2"],
+  "muscles": [
+    {"muscleName": "exact muscle name 1", "role": "primary"},
+    {"muscleName": "exact muscle name 2", "role": "secondary"}
+  ],
   "prerequisites": ["exact exercise title 1", "exact exercise title 2"] or []
 }
 
@@ -92,6 +101,8 @@ Important:
 - Description must be maximum 200 characters
 - Use EXACT names/titles from the lists above (without the level/difficulty/category info in parentheses)
 - If a muscle/exercise doesn't exist in the lists, don't include it
+- For muscles, assign roles: "primary" for main muscles used, "secondary" for supporting muscles, "tertiary" for minor muscles, "stabilizer" for stabilizing muscles
+- Typically, 1-3 muscles should be "primary", others should be "secondary", "tertiary", or "stabilizer"
 - Prerequisites should be exercises that are easier or foundational to this exercise (choose exercises with lower difficulty/level)
 - Consider the difficulty and level of existing exercises when determining appropriate prerequisites
 - Category should match the type of exercise (calisthenics for bodyweight, gym for weights, stretch for flexibility, mobility for movement)`;
@@ -115,7 +126,7 @@ Important:
         },
         { role: "user", content: prompt },
       ],
-      model: "google/gemini-2.0-flash-exp:free",
+      model: "google/gemini-2.0-flash-lite-001",
       response_format: { type: "json_object" },
       temperature: 0.7,
     });
@@ -127,24 +138,39 @@ Important:
 
     const aiData = JSON.parse(messageContent);
 
-    // Match names to IDs (case-insensitive)
+    // Match names to IDs with roles (case-insensitive)
     const matchedMuscles =
       aiData.muscles
-        ?.map((name: string) =>
-          muscles.find(
+        ?.map((muscleData: { muscleName: string; role: string }) => {
+          const muscle = muscles.find(
             (m: { name: string }) =>
-              m.name.toLowerCase() === name.toLowerCase(),
-          ),
-        )
+              m.name.toLowerCase() === muscleData.muscleName.toLowerCase(),
+          );
+          if (!muscle) return null;
+
+          // Validate and normalize role
+          const validRoles = ["primary", "secondary", "tertiary", "stabilizer"];
+          const role = validRoles.includes(muscleData.role?.toLowerCase())
+            ? (muscleData.role.toLowerCase() as
+                | "primary"
+                | "secondary"
+                | "tertiary"
+                | "stabilizer")
+            : "primary"; // Default to primary if invalid role
+
+          return {
+            muscleId: muscle._id,
+            role,
+          };
+        })
         .filter(
           (
-            m: { _id: string; name: string } | undefined,
+            m: { muscleId: string; role: string } | null,
           ): m is {
-            _id: string;
-            name: string;
-          } => m !== undefined,
-        )
-        .map((m: { _id: string; name: string }) => m._id) || [];
+            muscleId: string;
+            role: "primary" | "secondary" | "tertiary" | "stabilizer";
+          } => m !== null,
+        ) || [];
 
     const matchedPrerequisites =
       aiData.prerequisites
@@ -173,7 +199,15 @@ Important:
       level: aiData.level || "beginner",
       difficulty: aiData.difficulty || 1,
       category: aiData.category || "calisthenics",
-      muscles: matchedMuscles,
+      muscles: matchedMuscles.map(
+        (m: {
+          muscleId: string;
+          role: "primary" | "secondary" | "tertiary" | "stabilizer";
+        }) => ({
+          muscleId: m.muscleId,
+          role: m.role,
+        }),
+      ),
       prerequisites: matchedPrerequisites,
     };
   },
