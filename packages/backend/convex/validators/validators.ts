@@ -49,7 +49,14 @@ export const createPrivateExerciseValidator = v.object({
   level: v.optional(exerciseLevelValidator),
   difficulty: v.optional(v.number()),
   category: v.optional(exerciseCategoryValidator),
-  muscles: v.optional(v.array(v.id("muscles"))),
+  muscles: v.optional(
+    v.array(
+      v.object({
+        muscleId: v.id("muscles"),
+        role: muscleRoleValidator,
+      }),
+    ),
+  ),
   prerequisites: v.optional(
     v.array(v.union(v.id("exercises"), v.id("private_exercises"))),
   ),
@@ -80,6 +87,14 @@ export const updatePrivateExerciseValidator = v.object({
   category: v.optional(exerciseCategoryValidator),
   level: v.optional(exerciseLevelValidator),
   difficulty: v.optional(v.number()),
+  muscles: v.optional(
+    v.array(
+      v.object({
+        muscleId: v.id("muscles"),
+        role: muscleRoleValidator,
+      }),
+    ),
+  ),
   prerequisites: v.optional(v.array(v.id("exercises"))),
   progressionFrom: v.optional(v.array(v.id("exercises"))),
   progressionTo: v.optional(v.array(v.id("exercises"))),

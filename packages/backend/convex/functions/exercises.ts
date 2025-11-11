@@ -158,6 +158,7 @@ async function enrichExercise(
     muscleGroup?: string;
     role?: "primary" | "secondary" | "tertiary" | "stabilizer";
   }>;
+  primaryMuscleGroups: Array<string>;
   equipmentData: Array<{
     _id: Id<"equipment">;
     name: string;
@@ -212,6 +213,23 @@ async function enrichExercise(
       category: equipment.category,
     }));
 
+  // Group primary muscles by muscle group
+  const primaryMuscles = exerciseMuscles.filter(
+    (muscle) => muscle.role === "primary",
+  );
+  const groups = new Set<string>();
+  for (const muscle of primaryMuscles) {
+    const group = muscle.muscleGroup || "Other";
+    // Capitalize first letter of each word
+    const displayName =
+      group
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ") || group;
+    groups.add(displayName);
+  }
+  const primaryMuscleGroups = Array.from(groups);
+
   return {
     _id: exercise._id,
     _creationTime: exercise._creationTime,
@@ -222,6 +240,7 @@ async function enrichExercise(
     level: exercise.level,
     difficulty: exercise.difficulty,
     musclesData: exerciseMuscles,
+    primaryMuscleGroups,
     equipmentData: exerciseEquipment,
   };
 }
@@ -261,6 +280,7 @@ export const getPrivateExercises = query({
           ),
         }),
       ),
+      primaryMuscleGroups: v.array(v.string()),
       equipmentData: v.array(
         v.object({
           _id: v.id("equipment"),
@@ -389,10 +409,10 @@ export const createPrivateExercise = mutation({
 
     // Validate that muscles exist if provided
     if (args.data.muscles) {
-      for (const muscleId of args.data.muscles) {
-        const muscle = await ctx.db.get(muscleId);
+      for (const muscleData of args.data.muscles) {
+        const muscle = await ctx.db.get(muscleData.muscleId);
         if (!muscle) {
-          throw new Error(`Muscle not found: ${muscleId}`);
+          throw new Error(`Muscle not found: ${muscleData.muscleId}`);
         }
       }
     }
@@ -413,11 +433,11 @@ export const createPrivateExercise = mutation({
 
     // Save muscles to exercises_muscles table
     if (args.data.muscles && args.data.muscles.length > 0) {
-      for (const muscleId of args.data.muscles) {
+      for (const muscleData of args.data.muscles) {
         await ctx.db.insert("exercises_muscles", {
           exercise: exerciseId,
-          muscle: muscleId,
-          role: "primary", // Default role, can be made configurable later
+          muscle: muscleData.muscleId,
+          role: muscleData.role,
         });
       }
     }
@@ -466,6 +486,16 @@ export const updatePrivateExercise = mutation({
     // Validate difficulty if provided
     if (args.exerciseData.difficulty !== undefined) {
       validateDifficulty(args.exerciseData.difficulty);
+    }
+
+    // Validate that muscles exist if provided
+    if (args.exerciseData.muscles !== undefined) {
+      for (const muscleData of args.exerciseData.muscles) {
+        const muscle = await ctx.db.get(muscleData.muscleId);
+        if (!muscle) {
+          throw new Error(`Muscle not found: ${muscleData.muscleId}`);
+        }
+      }
     }
 
     // Validate that prerequisites exist if provided
@@ -523,6 +553,29 @@ export const updatePrivateExercise = mutation({
     }
 
     await ctx.db.patch(args.id, updateData);
+
+    // Update muscles in exercises_muscles table if provided
+    if (args.exerciseData.muscles !== undefined) {
+      // Delete existing muscle relations
+      const existingMuscleRelations = await ctx.db
+        .query("exercises_muscles")
+        .withIndex("by_exercise", (q) => q.eq("exercise", args.id))
+        .collect();
+
+      for (const relation of existingMuscleRelations) {
+        await ctx.db.delete(relation._id);
+      }
+
+      // Insert new muscle relations
+      for (const muscleData of args.exerciseData.muscles) {
+        await ctx.db.insert("exercises_muscles", {
+          exercise: args.id,
+          muscle: muscleData.muscleId,
+          role: muscleData.role,
+        });
+      }
+    }
+
     return null;
   },
 });

@@ -95,7 +95,18 @@ export function CreateExerciseDialog({
       form.setFieldValue("level", aiData.level);
       form.setFieldValue("difficulty", aiData.difficulty);
       form.setFieldValue("category", aiData.category);
-      form.setFieldValue("muscles", aiData.muscles);
+      form.setFieldValue(
+        "muscles",
+        aiData.muscles.map(
+          (m: {
+            muscleId: Id<"muscles">;
+            role: "primary" | "secondary" | "tertiary" | "stabilizer";
+          }) => ({
+            muscleId: m.muscleId as string,
+            role: m.role,
+          }),
+        ),
+      );
       form.setFieldValue("prerequisites", aiData.prerequisites);
 
       toast.success("Exercise data filled with AI!");
@@ -120,7 +131,10 @@ export function CreateExerciseDialog({
           level: data.level,
           difficulty: data.difficulty,
           category: data.category,
-          muscles: data.muscles as Id<"muscles">[],
+          muscles: data.muscles.map((m) => ({
+            muscleId: m.muscleId as Id<"muscles">,
+            role: m.role,
+          })),
           prerequisites: data.prerequisites as Id<"private_exercises">[],
         },
       });

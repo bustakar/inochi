@@ -61,7 +61,15 @@ export function UpdateExerciseDialog({
       level: exercise?.level || "beginner",
       difficulty: exercise?.difficulty || 1,
       category: exercise?.category || "calisthenics",
-      muscles: exercise?.muscles.map((m) => m._id as string) || [],
+      muscles:
+        exercise?.muscles.map((m) => ({
+          muscleId: m._id as string,
+          role: (m.role || "primary") as
+            | "primary"
+            | "secondary"
+            | "tertiary"
+            | "stabilizer",
+        })) || [],
       prerequisites: exercise?.prerequisites.map((p) => p._id as string) || [],
     },
     validators: {
@@ -90,7 +98,18 @@ export function UpdateExerciseDialog({
       form.setFieldValue("level", aiData.level);
       form.setFieldValue("difficulty", aiData.difficulty);
       form.setFieldValue("category", aiData.category);
-      form.setFieldValue("muscles", aiData.muscles);
+      form.setFieldValue(
+        "muscles",
+        aiData.muscles.map(
+          (m: {
+            muscleId: Id<"muscles">;
+            role: "primary" | "secondary" | "tertiary" | "stabilizer";
+          }) => ({
+            muscleId: m.muscleId as string,
+            role: m.role,
+          }),
+        ),
+      );
       form.setFieldValue("prerequisites", aiData.prerequisites);
 
       toast.success("Exercise data filled with AI!");
@@ -116,6 +135,10 @@ export function UpdateExerciseDialog({
           level: data.level,
           difficulty: data.difficulty,
           category: data.category,
+          muscles: data.muscles.map((m) => ({
+            muscleId: m.muscleId as Id<"muscles">,
+            role: m.role,
+          })),
         },
       });
       toast.success("Exercise updated!");
