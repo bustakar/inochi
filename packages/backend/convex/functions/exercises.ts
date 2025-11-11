@@ -158,6 +158,7 @@ async function enrichExercise(
     muscleGroup?: string;
     role?: "primary" | "secondary" | "tertiary" | "stabilizer";
   }>;
+  primaryMuscleGroups: Array<string>;
   equipmentData: Array<{
     _id: Id<"equipment">;
     name: string;
@@ -212,6 +213,23 @@ async function enrichExercise(
       category: equipment.category,
     }));
 
+  // Group primary muscles by muscle group
+  const primaryMuscles = exerciseMuscles.filter(
+    (muscle) => muscle.role === "primary",
+  );
+  const groups = new Set<string>();
+  for (const muscle of primaryMuscles) {
+    const group = muscle.muscleGroup || "Other";
+    // Capitalize first letter of each word
+    const displayName =
+      group
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ") || group;
+    groups.add(displayName);
+  }
+  const primaryMuscleGroups = Array.from(groups);
+
   return {
     _id: exercise._id,
     _creationTime: exercise._creationTime,
@@ -222,6 +240,7 @@ async function enrichExercise(
     level: exercise.level,
     difficulty: exercise.difficulty,
     musclesData: exerciseMuscles,
+    primaryMuscleGroups,
     equipmentData: exerciseEquipment,
   };
 }
@@ -261,6 +280,7 @@ export const getPrivateExercises = query({
           ),
         }),
       ),
+      primaryMuscleGroups: v.array(v.string()),
       equipmentData: v.array(
         v.object({
           _id: v.id("equipment"),
