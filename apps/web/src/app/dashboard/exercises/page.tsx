@@ -33,6 +33,7 @@ interface ExerciseCardProps {
       muscleGroup?: string;
       role?: "primary" | "secondary" | "tertiary" | "stabilizer";
     }>;
+    primaryMuscleGroups: Array<string>;
     equipmentData: Array<{
       _id: Doc<"equipment">["_id"];
       name: string;
@@ -140,22 +141,17 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
         </span>
       </div>
 
-      {(exercise.musclesData && exercise.musclesData.length > 0) ||
+      {exercise.primaryMuscleGroups.length > 0 ||
       (exercise.equipmentData && exercise.equipmentData.length > 0) ? (
         <div className="mt-3 flex flex-wrap gap-2">
-          {exercise.musclesData?.map((muscle) => (
+          {exercise.primaryMuscleGroups.map((groupName, index) => (
             <Badge
-              key={muscle._id}
+              key={`group-${index}`}
               variant="outline"
               className="flex items-center gap-1 text-xs"
             >
               <Target className="h-3 w-3" />
-              {muscle.name}
-              {muscle.role && (
-                <span className="text-muted-foreground ml-1">
-                  ({muscle.role})
-                </span>
-              )}
+              {groupName}
             </Badge>
           ))}
           {exercise.equipmentData?.map((equip) => (
