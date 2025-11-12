@@ -5,7 +5,13 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Link as LinkIcon,
+  Search,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -37,16 +43,31 @@ import {
 // Types
 // ============================================================================
 
+const tipV2Schema = z.object({
+  text: z.string().min(1, "Tip text is required"),
+  videoUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  exerciseReference: z.string().optional(),
+});
+
 const variantFormSchema = z.object({
   equipment: z.array(z.string()),
-  tips: z.array(z.string()),
-  embedded_videos: z.array(z.string()),
+  tipsV2: z.array(tipV2Schema), // New unified field
   overriddenTitle: z.union([z.string(), z.undefined()]),
   overriddenDescription: z.union([z.string(), z.undefined()]),
   overriddenDifficulty: z.union([z.number(), z.undefined()]),
 });
 
-type VariantFormData = z.infer<typeof variantFormSchema>;
+type VariantFormData = {
+  equipment: string[];
+  tipsV2: Array<{
+    text: string;
+    videoUrl?: string;
+    exerciseReference?: string;
+  }>;
+  overriddenTitle: string | undefined;
+  overriddenDescription: string | undefined;
+  overriddenDifficulty: number | undefined;
+};
 
 interface Equipment {
   _id: Id<"equipment">;
@@ -194,6 +215,230 @@ function EquipmentField({ equipment }: { equipment: Equipment[] | undefined }) {
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
+      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+    </Field>
+  );
+}
+
+function TipV2Field() {
+  const field =
+    useFieldContext<
+      Array<{ text: string; videoUrl?: string; exerciseReference?: string }>
+    >();
+  const tips =
+    field.state.value.length > 0 ? field.state.value : [{ text: "" }];
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const exercises = useQuery(api.functions.exercises.getPrivateExercises, {});
+  const [searchQueries, setSearchQueries] = React.useState<
+    Record<number, string>
+  >({});
+
+  const handleAdd = () => {
+    field.handleChange([...tips, { text: "" }]);
+  };
+
+  const handleChange = (
+    index: number,
+    updates: Partial<{
+      text: string;
+      videoUrl?: string;
+      exerciseReference?: string;
+    }>,
+  ) => {
+    const newTips = [...tips];
+    const currentTip = newTips[index] || { text: "" };
+    newTips[index] = {
+      ...currentTip,
+      ...updates,
+      text: updates.text !== undefined ? updates.text : currentTip.text || "",
+    };
+    // Remove empty tips except the last one (if text is empty)
+    const filtered = newTips.filter(
+      (tip, i) => (tip.text || "").trim() !== "" || i === newTips.length - 1,
+    );
+    field.handleChange(filtered.length > 0 ? filtered : [{ text: "" }]);
+  };
+
+  const handleRemove = (index: number) => {
+    const newTips = tips.filter((_, i) => i !== index);
+    field.handleChange(newTips.length > 0 ? newTips : [{ text: "" }]);
+  };
+
+  // Filter exercises based on search query for each tip
+  const getFilteredExercises = (index: number) => {
+    if (!exercises) return [];
+    const searchQuery = searchQueries[index]?.toLowerCase() || "";
+    if (!searchQuery.trim()) return exercises.slice(0, 10); // Limit to 10 without search
+
+    return exercises
+      .filter((ex) => ex.title.toLowerCase().includes(searchQuery))
+      .slice(0, 10);
+  };
+
+  return (
+    <Field data-invalid={isInvalid}>
+      <FieldLabel>Tips</FieldLabel>
+      <div className="space-y-3">
+        {tips.map((tip, index) => {
+          const filteredExercises = getFilteredExercises(index);
+          const selectedExercise = exercises?.find(
+            (ex) => ex._id === tip.exerciseReference,
+          );
+
+          return (
+            <div
+              key={index}
+              className="bg-muted/30 space-y-2 rounded-lg border p-3"
+            >
+              <div className="flex items-start gap-2">
+                <Input
+                  value={tip.text || ""}
+                  onChange={(e) =>
+                    handleChange(index, { text: e.target.value })
+                  }
+                  onBlur={field.handleBlur}
+                  placeholder="Enter tip text..."
+                  className="flex-1"
+                  aria-invalid={isInvalid}
+                />
+                {tips.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(index)}
+                    className="text-muted-foreground hover:text-destructive rounded-full p-1 transition-colors"
+                    aria-label={`Remove tip ${index + 1}`}
+                  >
+                    <X className="size-4" />
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <div className="relative">
+                  <Input
+                    type="url"
+                    value={tip.videoUrl || ""}
+                    onChange={(e) =>
+                      handleChange(index, {
+                        videoUrl: e.target.value || undefined,
+                      })
+                    }
+                    placeholder="Video URL (optional)"
+                    className="pr-8"
+                  />
+                  {tip.videoUrl && (
+                    <LinkIcon className="text-muted-foreground absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2" />
+                  )}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant={selectedExercise ? "default" : "outline"}
+                      size="sm"
+                      className="w-full justify-start"
+                    >
+                      {selectedExercise ? (
+                        <>
+                          <LinkIcon className="mr-2 h-4 w-4" />
+                          {selectedExercise.title}
+                        </>
+                      ) : (
+                        "Exercise reference (optional)"
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="max-h-96 w-80 overflow-y-auto md:w-96"
+                  >
+                    <div className="p-2">
+                      <div className="relative">
+                        <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+                        <Input
+                          type="search"
+                          placeholder="Search exercises..."
+                          value={searchQueries[index] || ""}
+                          onChange={(e) =>
+                            setSearchQueries({
+                              ...searchQueries,
+                              [index]: e.target.value,
+                            })
+                          }
+                          onKeyDown={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className="h-8 pl-8"
+                        />
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <div className="space-y-1 p-1">
+                      {filteredExercises.length === 0 ? (
+                        <div className="text-muted-foreground px-2 py-4 text-center text-sm">
+                          {searchQueries[index]?.trim()
+                            ? "No exercises found"
+                            : "Start typing to search"}
+                        </div>
+                      ) : (
+                        filteredExercises.map((exercise) => {
+                          const isChecked =
+                            exercise._id === tip.exerciseReference;
+
+                          return (
+                            <DropdownMenuCheckboxItem
+                              key={exercise._id}
+                              checked={isChecked}
+                              onCheckedChange={(checked) => {
+                                handleChange(
+                                  index,
+                                  checked
+                                    ? {
+                                        exerciseReference: exercise._id,
+                                      }
+                                    : { exerciseReference: undefined },
+                                );
+                              }}
+                              onSelect={(e) => e.preventDefault()}
+                              className="text-sm"
+                            >
+                              {exercise.title}
+                            </DropdownMenuCheckboxItem>
+                          );
+                        })
+                      )}
+                      {selectedExercise && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuCheckboxItem
+                            checked={false}
+                            onCheckedChange={() => {
+                              handleChange(index, {
+                                exerciseReference: undefined,
+                              });
+                            }}
+                            onSelect={(e) => e.preventDefault()}
+                            className="text-sm"
+                          >
+                            Clear selection
+                          </DropdownMenuCheckboxItem>
+                        </>
+                      )}
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          );
+        })}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleAdd}
+          className="w-full"
+        >
+          Add Tip
+        </Button>
+      </div>
       {isInvalid && <FieldError errors={field.state.meta.errors} />}
     </Field>
   );
@@ -379,6 +624,7 @@ const { useAppForm } = createFormHook({
   formContext,
   fieldComponents: {
     EquipmentField,
+    TipV2Field,
     ArrayStringField,
     OverriddenTitleField,
     OverriddenDescriptionField,
@@ -425,16 +671,19 @@ export function CreateVariantDialog({
   const form = useAppForm({
     defaultValues: {
       equipment: existingVariant?.equipment.map((eq) => eq._id as string) || [],
-      tips: existingVariant?.tips.length ? existingVariant.tips : [""],
-      embedded_videos: existingVariant?.embedded_videos.length
-        ? existingVariant.embedded_videos
-        : [""],
+      tipsV2: existingVariant?.tipsV2?.length
+        ? existingVariant.tipsV2.map((tip) => ({
+            text: tip.text,
+            videoUrl: tip.videoUrl,
+            exerciseReference: tip.exerciseReference?._id,
+          }))
+        : [{ text: "" }],
       overriddenTitle: existingVariant?.overriddenTitle,
       overriddenDescription: existingVariant?.overriddenDescription,
       overriddenDifficulty: existingVariant?.overriddenDifficulty,
     },
     validators: {
-      onSubmit: variantFormSchema,
+      onSubmit: variantFormSchema as any,
     },
     onSubmit: async ({ value }: { value: VariantFormData }) => {
       await onSubmit(value);
@@ -450,11 +699,18 @@ export function CreateVariantDialog({
 
   const onSubmit = async (data: VariantFormData) => {
     try {
-      // Filter out empty strings from arrays
-      const tips = data.tips.filter((tip) => tip.trim() !== "");
-      const embedded_videos = data.embedded_videos.filter(
-        (url) => url.trim() !== "",
-      );
+      // Filter out empty tips and normalize
+      const tipsV2 = data.tipsV2
+        .filter((tip) => tip.text.trim() !== "")
+        .map((tip) => ({
+          text: tip.text,
+          videoUrl: tip.videoUrl?.trim() || undefined,
+          exerciseReference: tip.exerciseReference?.trim()
+            ? (tip.exerciseReference as
+                | Id<"exercises">
+                | Id<"private_exercises">)
+            : undefined,
+        }));
 
       if (isEditing && variantId) {
         await updateVariant({
@@ -462,8 +718,7 @@ export function CreateVariantDialog({
           data: {
             exercise: exerciseId,
             equipment: data.equipment as Id<"equipment">[],
-            tips,
-            embedded_videos,
+            tipsV2,
             overriddenTitle: data.overriddenTitle || undefined,
             overriddenDescription: data.overriddenDescription || undefined,
             overriddenDifficulty: data.overriddenDifficulty ?? undefined,
@@ -475,8 +730,7 @@ export function CreateVariantDialog({
           data: {
             exercise: exerciseId,
             equipment: data.equipment as Id<"equipment">[],
-            tips,
-            embedded_videos,
+            tipsV2,
             overriddenTitle: data.overriddenTitle || undefined,
             overriddenDescription: data.overriddenDescription || undefined,
             overriddenDifficulty: data.overriddenDifficulty ?? undefined,
@@ -520,22 +774,7 @@ export function CreateVariantDialog({
                 />
               )}
             />
-            <form.AppField
-              name="tips"
-              children={() => (
-                <ArrayStringField label="Tips" placeholder="Enter a tip..." />
-              )}
-            />
-            <form.AppField
-              name="embedded_videos"
-              children={() => (
-                <ArrayStringField
-                  label="Video URLs"
-                  placeholder="https://..."
-                  inputType="url"
-                />
-              )}
-            />
+            <form.AppField name="tipsV2" children={() => <TipV2Field />} />
           </FieldGroup>
 
           <Separator className="my-4" />

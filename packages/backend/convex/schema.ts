@@ -87,8 +87,19 @@ export default defineSchema({
   exercise_variants: defineTable({
     exercise: v.union(v.id("exercises"), v.id("private_exercises")),
     equipment: v.array(v.id("equipment")),
-    tips: v.array(v.string()),
-    embedded_videos: v.array(urlValidator),
+    tips: v.array(v.string()), // TODO: For compatibility, remove in future versions
+    embedded_videos: v.array(urlValidator), // TODO: For compatibility, remove in future versions
+    tipsV2: v.optional(
+      v.array(
+        v.object({
+          text: v.string(),
+          videoUrl: v.optional(v.string()),
+          exerciseReference: v.optional(
+            v.union(v.id("exercises"), v.id("private_exercises")),
+          ),
+        }),
+      ),
+    ),
     overriddenTitle: v.optional(v.string()),
     overriddenDescription: v.optional(v.string()),
     overriddenDifficulty: v.optional(v.number()),

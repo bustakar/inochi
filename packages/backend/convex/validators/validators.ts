@@ -129,12 +129,22 @@ export function validateUrlArray(urls: string[]): void {
   urls.forEach((url) => validateUrl(url));
 }
 
+// Validator for tipV2 structure
+export const tipV2Validator = v.object({
+  text: v.string(),
+  videoUrl: v.optional(v.string()),
+  exerciseReference: v.optional(
+    v.union(v.id("exercises"), v.id("private_exercises")),
+  ),
+});
+
 // Validator for creating/updating exercise variants
 export const createExerciseVariantValidator = v.object({
   exercise: v.union(v.id("exercises"), v.id("private_exercises")),
   equipment: v.array(v.id("equipment")),
-  tips: v.array(v.string()),
-  embedded_videos: v.array(v.string()),
+  tipsV2: v.optional(v.array(tipV2Validator)),
+  tips: v.optional(v.array(v.string())), // Keep for compatibility (read-only)
+  embedded_videos: v.optional(v.array(v.string())), // Keep for compatibility (read-only)
   overriddenTitle: v.optional(v.string()),
   overriddenDescription: v.optional(v.string()),
   overriddenDifficulty: v.optional(v.number()),

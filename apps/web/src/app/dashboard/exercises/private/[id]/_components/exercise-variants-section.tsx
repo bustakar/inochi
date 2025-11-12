@@ -1,10 +1,17 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { ChevronLeft, ChevronRight, Edit, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Link as LinkIcon,
+  Plus,
+} from "lucide-react";
 
 import {
   Badge,
@@ -200,33 +207,50 @@ export function ExerciseVariantsSection({
             </div>
           )}
 
-          {currentVariant.tips.length > 0 && (
+          {currentVariant.tipsV2.length > 0 && (
             <div>
-              <h3 className="text-foreground mb-2 text-sm font-medium">Tips</h3>
-              <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
-                {currentVariant.tips.map((tip, index) => (
-                  <li key={index}>{tip}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {currentVariant.embedded_videos.length > 0 && (
-            <div>
-              <h3 className="text-foreground mb-2 text-sm font-medium">
-                Videos
-              </h3>
-              <div className="space-y-2">
-                {currentVariant.embedded_videos.map((videoUrl, index) => (
-                  <div key={index} className="aspect-video w-full">
-                    <iframe
-                      src={videoUrl}
-                      className="h-full w-full rounded-md"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                ))}
+              <h3 className="text-foreground mb-3 text-sm font-medium">Tips</h3>
+              <div className="space-y-3">
+                {currentVariant.tipsV2.map((tip, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className="bg-muted/30 flex flex-row items-start justify-between gap-2 rounded-lg border p-2"
+                    >
+                      {tip.text && (
+                        <p className="text-foreground text-sm">{tip.text}</p>
+                      )}
+                      <div className="flex flex-row items-center gap-2">
+                        {tip.videoUrl && (
+                          <a
+                            href={tip.videoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary inline-flex items-center gap-1 text-sm hover:underline"
+                          >
+                            <LinkIcon className="h-4 w-4" />
+                            Watch video
+                          </a>
+                        )}
+                        {tip.exerciseReference && (
+                          <div>
+                            <Link
+                              href={`/dashboard/exercises/private/${tip.exerciseReference._id}`}
+                              className="transition-opacity hover:opacity-80"
+                            >
+                              <Badge
+                                variant="secondary"
+                                className="cursor-pointer"
+                              >
+                                {tip.exerciseReference.title}
+                              </Badge>
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
