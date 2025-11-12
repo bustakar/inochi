@@ -119,28 +119,123 @@ interface MusclesSectionProps {
   muscles: Array<{
     _id: Id<"muscles">;
     name: string;
+    muscleGroup?: string;
     role?: "primary" | "secondary" | "tertiary" | "stabilizer";
   }>;
 }
 
+const roleLabels: Record<
+  "primary" | "secondary" | "tertiary" | "stabilizer",
+  string
+> = {
+  primary: "Primary",
+  secondary: "Secondary",
+  tertiary: "Tertiary",
+  stabilizer: "Stabilizer",
+};
+
 function MusclesSection({ muscles }: MusclesSectionProps) {
-  return (
-    <div>
+  // Group muscles by role, then by muscle group
+  const groupedMuscles = React.useMemo(() => {
+    const grouped: Record<
+      "primary" | "secondary" | "tertiary" | "stabilizer",
+      Map<string, Array<{ _id: Id<"muscles">; name: string }>>
+    > = {
+      primary: new Map(),
+      secondary: new Map(),
+      tertiary: new Map(),
+      stabilizer: new Map(),
+    };
+
+    for (const muscle of muscles) {
+      const role = muscle.role || "primary";
+      const group = muscle.muscleGroup || "Other";
+
+      if (!grouped[role].has(group)) {
+        grouped[role].set(group, []);
+      }
+      grouped[role].get(group)!.push({
+        _id: muscle._id,
+        name: muscle.name,
+      });
+    }
+
+    return grouped;
+  }, [muscles]);
+
+  const hasAnyMuscles = muscles.length > 0;
+
+  if (!hasAnyMuscles) {
+    return (
       <div>
         <h2 className="text-foreground mb-2 text-lg font-semibold">Muscles</h2>
+        <p className="text-muted-foreground text-sm">None</p>
       </div>
-      <div>
-        {muscles.length === 0 ? (
-          <p className="text-muted-foreground text-sm">None</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {muscles.map((muscle) => (
-              <Badge key={muscle._id} variant="secondary">
-                {muscle.name}
-              </Badge>
-            ))}
-          </div>
-        )}
+    );
+  }
+
+  return (
+    <div>
+      <h2 className="text-foreground mb-4 text-lg font-semibold">Muscles</h2>
+      <div className="space-y-4">
+        {(
+          ["primary", "secondary", "tertiary", "stabilizer"] as Array<
+            "primary" | "secondary" | "tertiary" | "stabilizer"
+          >
+        ).map((role) => {
+          const roleGroups = groupedMuscles[role];
+          if (roleGroups.size === 0) return null;
+
+          return (
+            <div key={role} className="space-y-2">
+              <h3 className="text-muted-foreground text-sm font-medium">
+                {roleLabels[role]}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {Array.from(roleGroups.entries()).map(
+                  ([group, groupMuscles]) => {
+                    const displayGroupName =
+                      group === "Other"
+                        ? "Other"
+                        : group
+                            .split(" ")
+                            .map(
+                              (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1),
+                            )
+                            .join(" ");
+
+                    return (
+                      <div
+                        key={`${role}-${group}`}
+                        className="bg-muted/50 inline-flex items-center gap-1 rounded-lg border px-2 py-1"
+                      >
+                        <Badge
+                          variant="outline"
+                          className="border-0 bg-transparent px-1 py-0 text-xs font-semibold"
+                        >
+                          {displayGroupName}
+                        </Badge>
+                        <span className="text-muted-foreground text-xs">•</span>
+                        <div className="flex flex-wrap gap-1">
+                          {groupMuscles.map((muscle) => (
+                            <Badge
+                              key={muscle._id}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {muscle.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  },
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
