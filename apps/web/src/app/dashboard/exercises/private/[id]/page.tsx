@@ -254,6 +254,14 @@ interface ProgressionSectionProps {
 }
 
 function ProgressionSection({ exercises, title }: ProgressionSectionProps) {
+  // Helper to get the route for an exercise based on its ID
+  const getExerciseRoute = (
+    exerciseId: Id<"exercises"> | Id<"private_exercises">,
+  ): string => {
+    // TODO: Handle public exercises once implemented
+    return `/dashboard/exercises/private/${exerciseId}`;
+  };
+
   return (
     <div>
       <h2 className="text-foreground mb-2 text-lg font-semibold">{title}</h2>
@@ -262,9 +270,15 @@ function ProgressionSection({ exercises, title }: ProgressionSectionProps) {
       ) : (
         <div className="flex flex-wrap gap-2">
           {exercises.map((exercise) => (
-            <Badge key={exercise._id} variant="secondary">
-              {exercise.title}
-            </Badge>
+            <Link
+              key={exercise._id}
+              href={getExerciseRoute(exercise._id)}
+              className="transition-opacity hover:opacity-80"
+            >
+              <Badge variant="secondary" className="cursor-pointer">
+                {exercise.title}
+              </Badge>
+            </Link>
           ))}
         </div>
       )}
