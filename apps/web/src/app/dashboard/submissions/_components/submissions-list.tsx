@@ -33,8 +33,8 @@ export function SubmissionsList({ status, userRole }: SubmissionsListProps) {
         <p className="text-muted-foreground">
           {status ? `No ${status} submissions found.` : "No submissions found."}
         </p>
-        <Link href="/dashboard/skills" className="text-primary hover:underline">
-          Suggest a new skill
+        <Link href="/dashboard/exercises" className="text-primary hover:underline">
+          Submit a private exercise
         </Link>
       </div>
     );
