@@ -633,7 +633,7 @@ export const approveSubmission = mutation({
       }
 
       // Create public exercise from submission data
-      await ctx.db.insert("exercises", {
+      const publicExerciseId = await ctx.db.insert("exercises", {
         title: submission.title,
         description: submission.description,
         level: submission.level,
@@ -645,7 +645,47 @@ export const approveSubmission = mutation({
         createdBy: submission.submittedBy,
       });
 
-      // Delete the private exercise
+      // Copy exercise variants (equipment, tips, videos)
+      const variants = await ctx.db
+        .query("exercise_variants")
+        .withIndex("by_exercise", (q) =>
+          q.eq("exercise", submission.privateExerciseId!),
+        )
+        .collect();
+
+      for (const variant of variants) {
+        await ctx.db.insert("exercise_variants", {
+          exercise: publicExerciseId,
+          equipment: variant.equipment,
+          tips: variant.tips || [],
+          embedded_videos: variant.embedded_videos || [],
+          tipsV2: variant.tipsV2,
+          overriddenTitle: variant.overriddenTitle,
+          overriddenDescription: variant.overriddenDescription,
+          overriddenDifficulty: variant.overriddenDifficulty,
+          overriddenMuscles: variant.overriddenMuscles,
+          createdAt: variant.createdAt,
+          updatedAt: now,
+        });
+      }
+
+      // Copy muscle relationships
+      const muscleRelations = await ctx.db
+        .query("exercises_muscles")
+        .withIndex("by_exercise", (q) =>
+          q.eq("exercise", submission.privateExerciseId!),
+        )
+        .collect();
+
+      for (const relation of muscleRelations) {
+        await ctx.db.insert("exercises_muscles", {
+          exercise: publicExerciseId,
+          muscle: relation.muscle,
+          role: relation.role,
+        });
+      }
+
+      // Delete the private exercise (this will cascade delete variants and muscle relations)
       await ctx.db.delete(submission.privateExerciseId);
     } else if (submission.submissionType === "create") {
       // For regular create submissions, also create the exercise in public table
