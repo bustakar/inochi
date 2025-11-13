@@ -226,6 +226,7 @@ export const getSubmission = query({
         v.literal("rejected"),
       ),
       originalExerciseId: v.optional(v.id("exercises")),
+      privateExerciseId: v.optional(v.id("private_exercises")),
       submittedBy: v.string(),
       submittedAt: v.number(),
       reviewedBy: v.optional(v.string()),

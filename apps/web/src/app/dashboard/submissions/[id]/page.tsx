@@ -214,6 +214,21 @@ export default function SubmissionDetailPage() {
           </div>
         )}
 
+      {/* Private Exercise Link (for submissions from private exercises) */}
+      {submission.privateExerciseId && (
+        <div className="bg-muted rounded-lg p-4">
+          <p className="text-muted-foreground mb-1 text-sm">
+            This submission is for a private exercise:
+          </p>
+          <Link
+            href={`/dashboard/exercises/private/${submission.privateExerciseId}`}
+            className="text-primary font-medium hover:underline"
+          >
+            View Private Exercise
+          </Link>
+        </div>
+      )}
+
       {/* Review Info */}
       {submission.reviewedAt && (
         <div className="bg-muted rounded-lg p-4">
