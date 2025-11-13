@@ -170,7 +170,9 @@ export const getUserSubmissions = query({
 
         // Fetch original exercise data if it's an edit submission
         if (submission.originalExerciseId) {
-          const originalExercise = await ctx.db.get(submission.originalExerciseId);
+          const originalExercise = await ctx.db.get(
+            submission.originalExerciseId,
+          );
           return {
             ...enriched,
             originalExerciseData: originalExercise
@@ -309,7 +311,9 @@ export const getSubmission = query({
           description: string;
           level: Doc<"exercises">["level"] | Doc<"private_exercises">["level"];
           difficulty: number;
-          category: Doc<"exercises">["category"] | Doc<"private_exercises">["category"];
+          category:
+            | Doc<"exercises">["category"]
+            | Doc<"private_exercises">["category"];
         }
       | undefined = undefined;
 
@@ -335,142 +339,134 @@ export const getSubmission = query({
   },
 });
 
-// Create a new submission
+// Create a new submission from a private exercise
 export const createSubmission = mutation({
   args: {
-    title: v.string(),
-    description: v.string(),
-    level: exerciseLevelValidator,
-    difficulty: v.number(),
-    category: exerciseCategoryValidator,
-    muscles: v.array(v.id("muscles")),
-    equipment: v.array(v.id("equipment")),
-    embedded_videos: v.array(v.string()),
-    prerequisites: v.array(
-      v.union(v.id("exercises"), v.id("private_exercises")),
-    ),
-    tips: v.array(v.string()),
-    submissionType: v.union(v.literal("create"), v.literal("edit")),
-    originalExerciseId: v.optional(v.id("exercises")),
-    privateExerciseId: v.optional(v.id("private_exercises")),
+    privateExerciseId: v.id("private_exercises"),
   },
   returns: v.id("user_submissions"),
   handler: async (ctx, args) => {
-    throw new Error("Not implemented");
-    // const userId = await getUserId(ctx);
-    // if (!userId) {
-    //   throw new Error("User not authenticated");
-    // }
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
 
-    // // Validate difficulty
-    // validateDifficulty(args.difficulty);
+    // Get the private exercise
+    const privateExercise = await ctx.db.get(args.privateExerciseId);
+    if (!privateExercise) {
+      throw new Error(`Private exercise not found: ${args.privateExerciseId}`);
+    }
 
-    // // Validate URLs
-    // validateUrlArray(args.embedded_videos);
+    // Verify ownership
+    if (privateExercise.createdBy !== userId) {
+      throw new Error(
+        "Unauthorized: You can only submit your own private exercises",
+      );
+    }
 
-    // // Validate privateSkillId if provided
-    // if (args.privateSkillId) {
-    //   const privateSkill = await ctx.db.get(args.privateSkillId);
-    //   if (!privateSkill) {
-    //     throw new Error(`Private skill not found: ${args.privateSkillId}`);
-    //   }
-    //   if (privateSkill.userId !== userId) {
-    //     throw new Error(
-    //       "Unauthorized: You can only suggest your own private skills",
-    //     );
-    //   }
+    // Check if there's already a pending submission for this exercise
+    const existingSubmission = await ctx.db
+      .query("user_submissions")
+      .withIndex("by_user", (q) => q.eq("submittedBy", userId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("privateExerciseId"), args.privateExerciseId),
+          q.eq(q.field("status"), "pending"),
+        ),
+      )
+      .first();
 
-    //   // Validate that all prerequisites and variants are public skills
-    //   // Since args.prerequisites/variants are typed as Id<"skills">[], they should be public
-    //   // We verify they exist in the public skills table
-    //   for (const prereqId of args.prerequisites) {
-    //     const prereq = await ctx.db.get(prereqId);
-    //     if (!prereq) {
-    //       throw new Error(`Prerequisite skill not found: ${prereqId}`);
-    //     }
-    //     // If we successfully got it from the skills table, it's a public skill
-    //     // (Convex IDs are table-specific, so it can't be a private skill)
-    //   }
+    if (existingSubmission) {
+      throw new Error(
+        "A pending submission already exists for this exercise",
+      );
+    }
 
-    //   for (const variantId of args.variants) {
-    //     const variant = await ctx.db.get(variantId);
-    //     if (!variant) {
-    //       throw new Error(`Variant skill not found: ${variantId}`);
-    //     }
-    //     // If we successfully got it from the skills table, it's a public skill
-    //   }
-    // }
+    // Get exercise variants to extract equipment, tips, and videos
+    const variants = await ctx.db
+      .query("exercise_variants")
+      .withIndex("by_exercise", (q) => q.eq("exercise", args.privateExerciseId))
+      .collect();
 
-    // // Validate submission type and originalSkillId
-    // if (args.submissionType === "edit") {
-    //   if (!args.originalSkillId) {
-    //     throw new Error("originalSkillId is required for edit submissions");
-    //   }
-    //   const originalSkill = await ctx.db.get(args.originalSkillId);
-    //   if (!originalSkill) {
-    //     throw new Error(`Original skill not found: ${args.originalSkillId}`);
-    //   }
-    // } else {
-    //   if (args.originalSkillId) {
-    //     throw new Error(
-    //       "originalSkillId should not be provided for create submissions",
-    //     );
-    //   }
-    // }
+    // Collect all equipment IDs from variants
+    const equipmentSet = new Set<Id<"equipment">>();
+    const allTips: string[] = [];
+    const allVideos: string[] = [];
 
-    // // Validate that prerequisites and variants exist (if not already validated above)
-    // if (!args.privateSkillId) {
-    //   for (const prereqId of args.prerequisites) {
-    //     const prereq = await ctx.db.get(prereqId);
-    //     if (!prereq) {
-    //       throw new Error(`Prerequisite skill not found: ${prereqId}`);
-    //     }
-    //   }
+    for (const variant of variants) {
+      variant.equipment.forEach((eqId) => equipmentSet.add(eqId));
+      if (variant.tips) {
+        allTips.push(...variant.tips);
+      }
+      if (variant.embedded_videos) {
+        allVideos.push(...variant.embedded_videos);
+      }
+      if (variant.tipsV2) {
+        variant.tipsV2.forEach((tip) => {
+          if (tip.text) allTips.push(tip.text);
+          if (tip.videoUrl) allVideos.push(tip.videoUrl);
+        });
+      }
+    }
 
-    //   for (const variantId of args.variants) {
-    //     const variant = await ctx.db.get(variantId);
-    //     if (!variant) {
-    //       throw new Error(`Variant skill not found: ${variantId}`);
-    //     }
-    //   }
-    // }
+    // Get muscle IDs from exercises_muscles table
+    const muscleRelations = await ctx.db
+      .query("exercises_muscles")
+      .withIndex("by_exercise", (q) => q.eq("exercise", args.privateExerciseId))
+      .collect();
 
-    // // Validate that muscles and equipment exist
-    // for (const muscleId of args.muscles) {
-    //   const muscle = await ctx.db.get(muscleId);
-    //   if (!muscle) {
-    //     throw new Error(`Muscle not found: ${muscleId}`);
-    //   }
-    // }
+    const muscleIds = muscleRelations.map((rel) => rel.muscle);
 
-    // for (const equipmentId of args.equipment) {
-    //   const equipment = await ctx.db.get(equipmentId);
-    //   if (!equipment) {
-    //     throw new Error(`Equipment not found: ${equipmentId}`);
-    //   }
-    // }
+    // Validate that all prerequisites exist
+    for (const prereqId of privateExercise.prerequisites) {
+      const prereq = await ctx.db.get(prereqId);
+      if (!prereq) {
+        throw new Error(`Prerequisite exercise not found: ${prereqId}`);
+      }
+    }
 
-    // const now = Date.now();
-    // const submissionId = await ctx.db.insert("user_submissions", {
-    //   title: args.title,
-    //   description: args.description,
-    //   level: args.level,
-    //   difficulty: args.difficulty,
-    //   muscles: args.muscles,
-    //   equipment: args.equipment,
-    //   embedded_videos: args.embedded_videos,
-    //   prerequisites: args.prerequisites,
-    //   variants: args.variants,
-    //   tips: args.tips,
-    //   submissionType: args.submissionType,
-    //   status: "pending",
-    //   originalSkillId: args.originalSkillId,
-    //   privateSkillId: args.privateSkillId,
-    //   submittedBy: userId,
-    //   submittedAt: now,
-    // });
+    // Validate that all muscles exist
+    for (const muscleId of muscleIds) {
+      const muscle = await ctx.db.get(muscleId);
+      if (!muscle) {
+        throw new Error(`Muscle not found: ${muscleId}`);
+      }
+    }
 
-    // return submissionId;
+    // Validate that all equipment exists
+    for (const equipmentId of equipmentSet) {
+      const equipment = await ctx.db.get(equipmentId);
+      if (!equipment) {
+        throw new Error(`Equipment not found: ${equipmentId}`);
+      }
+    }
+
+    // Validate difficulty
+    validateDifficulty(privateExercise.difficulty);
+
+    // Validate URLs
+    validateUrlArray(allVideos);
+
+    const now = Date.now();
+    const submissionId = await ctx.db.insert("user_submissions", {
+      title: privateExercise.title,
+      description: privateExercise.description,
+      level: privateExercise.level,
+      difficulty: privateExercise.difficulty,
+      category: privateExercise.category,
+      muscles: muscleIds,
+      equipment: Array.from(equipmentSet),
+      embedded_videos: allVideos,
+      prerequisites: privateExercise.prerequisites,
+      tips: allTips,
+      submissionType: "create",
+      status: "pending",
+      privateExerciseId: args.privateExerciseId,
+      submittedBy: userId,
+      submittedAt: now,
+    });
+
+    return submissionId;
   },
 });
 
