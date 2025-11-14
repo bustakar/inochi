@@ -8,14 +8,16 @@ import { useQuery } from "convex/react";
 import { Roles } from "../../../../types/globals";
 import { SubmissionCard } from "./submission-card";
 
+type SubmissionStatus = "pending" | "approved" | "rejected";
+
 interface SubmissionsListProps {
-  status?: "pending" | "approved" | "rejected";
+  statuses: SubmissionStatus[];
   userRole: Roles;
 }
 
-export function SubmissionsList({ status, userRole }: SubmissionsListProps) {
+export function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
   const submissions = useQuery(api.functions.submissions.getUserSubmissions, {
-    status,
+    statuses,
     userRole,
   });
 
@@ -33,9 +35,6 @@ export function SubmissionsList({ status, userRole }: SubmissionsListProps) {
         <p className="text-muted-foreground">
           {status ? `No ${status} submissions found.` : "No submissions found."}
         </p>
-        <Link href="/dashboard/exercises" className="text-primary hover:underline">
-          Submit a private exercise
-        </Link>
       </div>
     );
   }

@@ -320,12 +320,53 @@ export default function PrivateExerciseDetailPage() {
   const exercise = useQuery(api.functions.exercises.getPrivateExerciseById, {
     exerciseId,
   });
-  const createSubmission = useMutation(api.functions.submissions.createSubmission);
+  const variants = useQuery(
+    api.functions.exerciseVariants.getExerciseVariants,
+    {
+      exerciseId,
+    },
+  );
+  const createSubmission = useMutation(
+    api.functions.submissions.createSubmission,
+  );
 
   const handleSubmit = async () => {
+    if (!exercise || !variants) {
+      return;
+    }
     try {
       const submissionId = await createSubmission({
         privateExerciseId: exerciseId,
+        privateExerciseData: {
+          exercise: {
+            title: exercise.title,
+            description: exercise.description,
+            level: exercise.level,
+            difficulty: exercise.difficulty,
+            category: exercise.category,
+            muscles: exercise.muscles.map((muscle) => ({
+              muscleId: muscle._id,
+              role: muscle.role ?? "primary",
+            })),
+            prerequisites: exercise.prerequisites.map(
+              (prerequisite) => prerequisite._id,
+            ),
+            progressions: exercise.progressions.map(
+              (progression) => progression._id,
+            ),
+          },
+          variants: variants.map((variant) => ({
+            exercise: variant.exercise as
+              | Id<"exercises">
+              | Id<"private_exercises">,
+            equipment: variant.equipment.map((equipment) => equipment._id),
+            tipsV2: variant.tipsV2?.map((tip) => ({
+              text: tip.text,
+              videoUrl: tip.videoUrl,
+              exerciseReference: tip.exerciseReference?._id,
+            })),
+          })),
+        },
       });
       toast.success("Exercise submitted successfully!");
       setSubmitDialogOpen(false);
@@ -380,7 +421,10 @@ export default function PrivateExerciseDetailPage() {
             exercises={exercise.progressions}
             title="Progressions"
           />
-          <ExerciseVariantsSection exerciseId={exerciseId} />
+          <ExerciseVariantsSection
+            exerciseId={exerciseId}
+            variants={variants ?? []}
+          />
         </div>
       </div>
       <UpdateExerciseDialog
@@ -391,11 +435,13 @@ export default function PrivateExerciseDetailPage() {
       <AlertDialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Submit Exercise to Public Database</AlertDialogTitle>
+            <AlertDialogTitle>
+              Submit Exercise to Public Database
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to submit this exercise to the public
-              database? Once approved by moderators, this exercise will be
-              moved to the public database and{" "}
+              database? Once approved by moderators, this exercise will be moved
+              to the public database and{" "}
               <strong>you will no longer be able to edit it</strong>.
             </AlertDialogDescription>
           </AlertDialogHeader>

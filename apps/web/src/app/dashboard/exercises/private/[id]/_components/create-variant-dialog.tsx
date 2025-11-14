@@ -651,13 +651,13 @@ export function CreateVariantDialog({
   variantId,
 }: CreateVariantDialogProps) {
   const createVariant = useMutation(
-    api.functions.exercises.createExerciseVariant,
+    api.functions.exerciseVariants.createExerciseVariant,
   );
   const updateVariant = useMutation(
-    api.functions.exercises.updateExerciseVariant,
+    api.functions.exerciseVariants.updateExerciseVariant,
   );
   const equipment = useQuery(api.functions.exercises.getEquipment, {});
-  const variant = useQuery(api.functions.exercises.getExerciseVariants, {
+  const variant = useQuery(api.functions.exerciseVariants.getExerciseVariants, {
     exerciseId,
   });
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
+import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowLeft,
@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import { Badge, Button } from "@inochi/ui";
 
 import { ApproveRejectButtons } from "../_components/approve-reject-buttons";
-import { EditSubmissionDialog } from "../_components/edit-submission-dialog";
 import {
   getClientRole,
   isClientAdminOrModerator,
@@ -149,7 +148,9 @@ export default function SubmissionDetailPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold">{submission.title}</h1>
+            <h1 className="text-3xl font-bold">
+              {submission.originalExerciseData?.exercise.title}
+            </h1>
             <div className="mt-2 flex items-center gap-2">
               <Badge className={statusInfo.className} variant="outline">
                 <StatusIcon className="mr-1 h-3 w-3" />
@@ -206,22 +207,22 @@ export default function SubmissionDetailPage() {
               This is an edit suggestion for:
             </p>
             <Link
-              href={`/dashboard/exercises/private/${submission.originalExerciseData._id}`}
+              href={`/dashboard/exercises/private/${submission.originalExerciseId}`}
               className="text-primary font-medium hover:underline"
             >
-              {submission.originalExerciseData.title}
+              {submission.originalExerciseData.exercise.title}
             </Link>
           </div>
         )}
 
       {/* Private Exercise Link (for submissions from private exercises) */}
-      {submission.privateExerciseId && (
+      {submission.originalExerciseId && (
         <div className="bg-muted rounded-lg p-4">
           <p className="text-muted-foreground mb-1 text-sm">
             This submission is for a private exercise:
           </p>
           <Link
-            href={`/dashboard/exercises/private/${submission.privateExerciseId}`}
+            href={`/dashboard/exercises/private/${submission.originalExerciseId}`}
             className="text-primary font-medium hover:underline"
           >
             View Private Exercise
@@ -255,14 +256,14 @@ export default function SubmissionDetailPage() {
         <div>
           <h2 className="mb-2 text-lg font-semibold">Description</h2>
           <p className="text-muted-foreground whitespace-pre-wrap">
-            {submission.description}
+            {submission.originalExerciseData?.exercise.description}
           </p>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
           <div>
             <h3 className="mb-1 text-sm font-medium">Level</h3>
-            <Badge>{submission.level}</Badge>
+            <Badge>{submission.originalExerciseData?.exercise.level}</Badge>
           </div>
           <div>
             <h3 className="mb-1 text-sm font-medium">Difficulty</h3>
@@ -272,23 +273,27 @@ export default function SubmissionDetailPage() {
                   <div
                     key={i}
                     className={`h-2 w-2 rounded-full ${
-                      i < submission.difficulty ? "bg-primary" : "bg-muted"
+                      i <
+                      (submission.originalExerciseData?.exercise.difficulty ??
+                        1)
+                        ? "bg-primary"
+                        : "bg-muted"
                     }`}
                   />
                 ))}
               </div>
               <span className="text-muted-foreground text-sm">
-                {submission.difficulty}/10
+                {submission.originalExerciseData?.exercise.difficulty ?? 1}/10
               </span>
             </div>
           </div>
           <div>
             <h3 className="mb-1 text-sm font-medium">Category</h3>
-            <Badge>{submission.category}</Badge>
+            <Badge>{submission.originalExerciseData?.exercise.category}</Badge>
           </div>
         </div>
 
-        {submission.musclesData && submission.musclesData.length > 0 && (
+        {/* {submission.originalExerciseData?.exercise.muscles && submission.originalExerciseData?.exercise.muscles.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium">Muscles</h3>
             <div className="flex flex-wrap gap-2">
@@ -299,9 +304,9 @@ export default function SubmissionDetailPage() {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
-        {submission.equipmentData && submission.equipmentData.length > 0 && (
+        {/* {submission.equipmentData && submission.equipmentData.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium">Equipment</h3>
             <div className="flex flex-wrap gap-2">
@@ -312,9 +317,9 @@ export default function SubmissionDetailPage() {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
-        {submission.embedded_videos &&
+        {/* {submission.embedded_videos &&
           submission.embedded_videos.length > 0 && (
             <div>
               <h3 className="mb-2 text-sm font-medium">Video URLs</h3>
@@ -348,17 +353,8 @@ export default function SubmissionDetailPage() {
               ))}
             </ul>
           </div>
-        )}
+        )} */}
       </div>
-
-      {/* Edit Dialog */}
-      {canEdit && (
-        <EditSubmissionDialog
-          submission={submission}
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
-        />
-      )}
     </div>
   );
 }

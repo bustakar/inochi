@@ -20,14 +20,7 @@ function formatTimeAgo(timestamp: number): string {
 }
 
 interface SubmissionCardProps {
-  submission: Doc<"user_submissions"> & {
-    musclesData?: Array<Doc<"muscles">>;
-    equipmentData?: Array<Doc<"equipment">>;
-    originalExerciseData?: {
-      _id: Doc<"exercises">["_id"] | Doc<"private_exercises">["_id"];
-      title: string;
-    };
-  };
+  submission: Doc<"user_submissions">;
   showSubmitter?: boolean;
 }
 
@@ -82,7 +75,7 @@ export function SubmissionCard({
         <div className="flex-1">
           <div className="mb-2 flex items-center gap-2">
             <h3 className="text-card-foreground text-lg font-semibold">
-              {submission.title}
+              {submission.originalExerciseData?.exercise.title}
             </h3>
             <Badge className={typeInfo.className}>{typeInfo.label}</Badge>
             <Badge className={statusInfo.className} variant="outline">
@@ -100,12 +93,12 @@ export function SubmissionCard({
               <p className="text-muted-foreground mb-2 text-sm">
                 Edit suggestion for:{" "}
                 <span className="font-medium">
-                  {submission.originalExerciseData.title}
+                  {submission.originalExerciseData.exercise.title}
                 </span>
               </p>
             )}
           <p className="text-muted-foreground mb-2 line-clamp-2 text-sm">
-            {submission.description}
+            {submission.originalExerciseData?.exercise.description}
           </p>
         </div>
       </div>

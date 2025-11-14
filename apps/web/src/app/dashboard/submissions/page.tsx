@@ -76,7 +76,10 @@ export default function SubmissionsPage() {
       </div>
 
       {/* Submissions List */}
-      <SubmissionsList status={statusFilter} userRole={userRole} />
+      <SubmissionsList
+        statuses={statusFilter ? [statusFilter] : []}
+        userRole={userRole}
+      />
     </div>
   );
 }
