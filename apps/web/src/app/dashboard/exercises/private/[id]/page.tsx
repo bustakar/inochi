@@ -395,7 +395,6 @@ export default function PrivateExerciseDetailPage() {
       });
       toast.success("Exercise submitted successfully!");
       setSubmitDialogOpen(false);
-      router.push(`/dashboard/submissions/${submissionId}`);
     } catch (error) {
       console.error("Error submitting exercise:", error);
       toast.error(
