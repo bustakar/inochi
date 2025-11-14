@@ -8,8 +8,9 @@
  * @module
  */
 
+import type * as functions_auth from "../functions/auth.js";
+import type * as functions_exerciseVariants from "../functions/exerciseVariants.js";
 import type * as functions_exercises from "../functions/exercises.js";
-import type * as functions_migrations from "../functions/migrations.js";
 import type * as functions_openai from "../functions/openai.js";
 import type * as functions_submissions from "../functions/submissions.js";
 import type * as utils from "../utils.js";
@@ -30,8 +31,9 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "functions/auth": typeof functions_auth;
+  "functions/exerciseVariants": typeof functions_exerciseVariants;
   "functions/exercises": typeof functions_exercises;
-  "functions/migrations": typeof functions_migrations;
   "functions/openai": typeof functions_openai;
   "functions/submissions": typeof functions_submissions;
   utils: typeof utils;

@@ -3,7 +3,10 @@ import { v } from "convex/values";
 import {
   exerciseCategoryValidator,
   exerciseLevelValidator,
+  exerciseValidator,
+  exerciseVariantValidator,
   muscleRoleValidator,
+  submissionStatusValidator,
 } from "./validators/validators.js";
 
 const urlValidator = v.string();
@@ -87,8 +90,8 @@ export default defineSchema({
   exercise_variants: defineTable({
     exercise: v.union(v.id("exercises"), v.id("private_exercises")),
     equipment: v.array(v.id("equipment")),
-    tips: v.array(v.string()), // TODO: For compatibility, remove in future versions
-    embedded_videos: v.array(urlValidator), // TODO: For compatibility, remove in future versions
+    tips: v.optional(v.array(v.string())), // TODO: For compatibility, remove in future versions
+    embedded_videos: v.optional(v.array(urlValidator)), // TODO: For compatibility, remove in future versions
     tipsV2: v.optional(
       v.array(
         v.object({
@@ -129,28 +132,17 @@ export default defineSchema({
     .index("by_to_exercise", ["toExercise"]),
 
   user_submissions: defineTable({
-    // All exercise fields
-    title: v.string(),
-    description: v.string(),
-    level: exerciseLevelValidator,
-    difficulty: v.number(),
-    category: exerciseCategoryValidator,
-    muscles: v.array(v.id("muscles")),
-    equipment: v.array(v.id("equipment")),
-    embedded_videos: v.array(urlValidator),
-    prerequisites: v.array(
+    submissionType: v.union(v.literal("create"), v.literal("edit")),
+    status: submissionStatusValidator,
+    originalExerciseId: v.optional(
       v.union(v.id("exercises"), v.id("private_exercises")),
     ),
-    tips: v.array(v.string()),
-    // Submission-specific fields
-    submissionType: v.union(v.literal("create"), v.literal("edit")),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("approved"),
-      v.literal("rejected"),
+    originalExerciseData: v.optional(
+      v.object({
+        exercise: exerciseValidator,
+        variants: v.array(exerciseVariantValidator),
+      }),
     ),
-    originalExerciseId: v.optional(v.id("exercises")),
-    privateExerciseId: v.optional(v.id("private_exercises")),
     submittedBy: v.string(),
     submittedAt: v.number(),
     reviewedBy: v.optional(v.string()),

@@ -2,9 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { GetExerciseVariantResponse } from "@packages/backend/convex/functions/exerciseVariants";
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,15 +30,13 @@ import { CreateVariantDialog } from "./create-variant-dialog";
 
 interface ExerciseVariantsSectionProps {
   exerciseId: Id<"private_exercises">;
+  variants: Array<GetExerciseVariantResponse>;
 }
 
 export function ExerciseVariantsSection({
   exerciseId,
+  variants,
 }: ExerciseVariantsSectionProps) {
-  const variants = useQuery(api.functions.exercises.getExerciseVariants, {
-    exerciseId,
-  });
-
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingVariantId, setEditingVariantId] = React.useState<
@@ -207,11 +204,11 @@ export function ExerciseVariantsSection({
             </div>
           )}
 
-          {currentVariant.tipsV2.length > 0 && (
+          {currentVariant.tipsV2?.length > 0 && (
             <div>
               <h3 className="text-foreground mb-3 text-sm font-medium">Tips</h3>
               <div className="space-y-3">
-                {currentVariant.tipsV2.map((tip, index) => {
+                {currentVariant.tipsV2?.map((tip, index) => {
                   return (
                     <div
                       key={index}

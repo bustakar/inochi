@@ -2,13 +2,25 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
-import { Edit } from "lucide-react";
+import { useMutation, useQuery } from "convex/react";
+import { Clock, Edit, Upload } from "lucide-react";
+import { toast } from "sonner";
 
-import { Badge, Button } from "@inochi/ui";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Badge,
+  Button,
+} from "@inochi/ui";
 
 import { UpdateExerciseDialog } from "../../_components/update-exercise-dialog";
 import { ExerciseVariantsSection } from "./_components/exercise-variants-section";
@@ -62,7 +74,15 @@ interface ExerciseHeaderProps {
 function ExerciseHeader({
   exercise,
   onEditClick,
-}: ExerciseHeaderProps & { onEditClick: () => void }) {
+  onSubmitClick,
+  hasPendingSubmission,
+  onPendingClick,
+}: ExerciseHeaderProps & {
+  onEditClick: () => void;
+  onSubmitClick: () => void;
+  hasPendingSubmission: boolean;
+  onPendingClick: () => void;
+}) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-col items-start gap-4 md:flex-col md:flex-row md:items-center">
@@ -86,6 +106,21 @@ function ExerciseHeader({
             <Badge variant="outline">Private</Badge> */}
       </div>
       <div className="flex gap-2">
+        {hasPendingSubmission ? (
+          <Button
+            variant="default"
+            className="bg-yellow-500"
+            onClick={onPendingClick}
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            Pending
+          </Button>
+        ) : (
+          <Button variant="default" onClick={onSubmitClick}>
+            <Upload className="mr-2 h-4 w-4" />
+            Submit to Public
+          </Button>
+        )}
         <Button variant="outline" onClick={onEditClick}>
           <Edit className="mr-2 h-4 w-4" />
           Edit
@@ -292,12 +327,84 @@ function ProgressionSection({ exercises, title }: ProgressionSectionProps) {
 
 export default function PrivateExerciseDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const exerciseId = params.id as Id<"private_exercises">;
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
+  const [submitDialogOpen, setSubmitDialogOpen] = React.useState(false);
 
   const exercise = useQuery(api.functions.exercises.getPrivateExerciseById, {
     exerciseId,
   });
+  const variants = useQuery(
+    api.functions.exerciseVariants.getExerciseVariants,
+    {
+      exerciseId,
+    },
+  );
+  const pendingSubmission = useQuery(
+    api.functions.submissions.getPendingSubmissionForExercise,
+    {
+      exerciseId,
+    },
+  );
+  const createSubmission = useMutation(
+    api.functions.submissions.createSubmission,
+  );
+
+  const handlePendingClick = () => {
+    router.push("/dashboard/submissions?status=pending");
+  };
+
+  const handleSubmit = async () => {
+    if (!exercise || !variants) {
+      return;
+    }
+    try {
+      const submissionId = await createSubmission({
+        privateExerciseId: exerciseId,
+        privateExerciseData: {
+          exercise: {
+            title: exercise.title,
+            description: exercise.description,
+            level: exercise.level,
+            difficulty: exercise.difficulty,
+            category: exercise.category,
+            muscles: exercise.muscles.map((muscle) => ({
+              muscleId: muscle._id,
+              role: muscle.role ?? "primary",
+            })),
+            prerequisites: exercise.prerequisites.map(
+              (prerequisite) => prerequisite._id,
+            ),
+            progressions: exercise.progressions.map(
+              (progression) => progression._id,
+            ),
+          },
+          variants: variants.map((variant) => ({
+            exercise: variant.exercise as
+              | Id<"exercises">
+              | Id<"private_exercises">,
+            equipment: variant.equipment.map((equipment) => equipment._id),
+            tipsV2: variant.tipsV2?.map((tip) => ({
+              text: tip.text,
+              videoUrl: tip.videoUrl,
+              exerciseReference: tip.exerciseReference?._id,
+            })),
+          })),
+        },
+      });
+      toast.success("Exercise submitted successfully!");
+      setSubmitDialogOpen(false);
+      router.push(`/dashboard/submissions/${submissionId}`);
+    } catch (error) {
+      console.error("Error submitting exercise:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit exercise. Please try again.",
+      );
+    }
+  };
 
   if (exercise === undefined) {
     return (
@@ -325,6 +432,9 @@ export default function PrivateExerciseDetailPage() {
           exercise={exercise}
           exerciseId={exerciseId}
           onEditClick={() => setEditDialogOpen(true)}
+          onSubmitClick={() => setSubmitDialogOpen(true)}
+          hasPendingSubmission={!!pendingSubmission}
+          onPendingClick={handlePendingClick}
         />
 
         <div className="space-y-6">
@@ -338,7 +448,10 @@ export default function PrivateExerciseDetailPage() {
             exercises={exercise.progressions}
             title="Progressions"
           />
-          <ExerciseVariantsSection exerciseId={exerciseId} />
+          <ExerciseVariantsSection
+            exerciseId={exerciseId}
+            variants={variants ?? []}
+          />
         </div>
       </div>
       <UpdateExerciseDialog
@@ -346,6 +459,27 @@ export default function PrivateExerciseDetailPage() {
         onOpenChange={setEditDialogOpen}
         exerciseId={exerciseId}
       />
+      <AlertDialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Submit Exercise to Public Database
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to submit this exercise to the public
+              database? Once approved by moderators, this exercise will be moved
+              to the public database and{" "}
+              <strong>you will no longer be able to edit it</strong>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSubmit}>
+              Submit Exercise
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
