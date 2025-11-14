@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { Edit, Upload } from "lucide-react";
+import { Clock, Edit, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -75,9 +75,13 @@ function ExerciseHeader({
   exercise,
   onEditClick,
   onSubmitClick,
+  hasPendingSubmission,
+  onPendingClick,
 }: ExerciseHeaderProps & {
   onEditClick: () => void;
   onSubmitClick: () => void;
+  hasPendingSubmission: boolean;
+  onPendingClick: () => void;
 }) {
   return (
     <div className="flex items-center justify-between">
@@ -102,10 +106,21 @@ function ExerciseHeader({
             <Badge variant="outline">Private</Badge> */}
       </div>
       <div className="flex gap-2">
-        <Button variant="default" onClick={onSubmitClick}>
-          <Upload className="mr-2 h-4 w-4" />
-          Submit to Public
-        </Button>
+        {hasPendingSubmission ? (
+          <Button
+            variant="default"
+            className="bg-yellow-500"
+            onClick={onPendingClick}
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            Pending
+          </Button>
+        ) : (
+          <Button variant="default" onClick={onSubmitClick}>
+            <Upload className="mr-2 h-4 w-4" />
+            Submit to Public
+          </Button>
+        )}
         <Button variant="outline" onClick={onEditClick}>
           <Edit className="mr-2 h-4 w-4" />
           Edit
@@ -326,9 +341,19 @@ export default function PrivateExerciseDetailPage() {
       exerciseId,
     },
   );
+  const pendingSubmission = useQuery(
+    api.functions.submissions.getPendingSubmissionForExercise,
+    {
+      exerciseId,
+    },
+  );
   const createSubmission = useMutation(
     api.functions.submissions.createSubmission,
   );
+
+  const handlePendingClick = () => {
+    router.push("/dashboard/submissions?status=pending");
+  };
 
   const handleSubmit = async () => {
     if (!exercise || !variants) {
@@ -408,6 +433,8 @@ export default function PrivateExerciseDetailPage() {
           exerciseId={exerciseId}
           onEditClick={() => setEditDialogOpen(true)}
           onSubmitClick={() => setSubmitDialogOpen(true)}
+          hasPendingSubmission={!!pendingSubmission}
+          onPendingClick={handlePendingClick}
         />
 
         <div className="space-y-6">

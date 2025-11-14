@@ -83,6 +83,32 @@ export const getUserSubmissions = query({
   },
 });
 
+export const getPendingSubmissionForExercise = query({
+  args: {
+    exerciseId: v.union(v.id("exercises"), v.id("private_exercises")),
+  },
+  returns: v.union(submissionResponseValidator, v.null()),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const submission = await ctx.db
+      .query("user_submissions")
+      .withIndex("by_user", (q) => q.eq("submittedBy", userId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("originalExerciseId"), args.exerciseId),
+          q.eq(q.field("status"), "pending"),
+        ),
+      )
+      .first();
+
+    return submission ?? null;
+  },
+});
+
 export const getSubmission = query({
   args: {
     id: v.id("user_submissions"),

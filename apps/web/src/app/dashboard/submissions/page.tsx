@@ -1,74 +1,78 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@inochi/ui";
+
 import { Roles } from "../../../types/globals";
 import { getClientRole, isClientAdminOrModerator } from "../../../utils/roles";
 import { SubmissionCard } from "./_components/submission-card";
 
-type SubmissionStatus = "pending" | "approved" | "rejected" | undefined;
+type SubmissionStatus = "pending" | "approved" | "rejected";
 
 // ============================================================================
-// Status Filter Tabs Component
+// Status Filter Dropdown Component
 // ============================================================================
 
-interface StatusFilterTabsProps {
-  statusFilter: SubmissionStatus;
-  onStatusChange: (status: SubmissionStatus) => void;
+interface StatusFilterDropdownProps {
+  selectedStatuses: SubmissionStatus[];
+  onStatusChange: (statuses: SubmissionStatus[]) => void;
 }
 
-function StatusFilterTabs({
-  statusFilter,
+function StatusFilterDropdown({
+  selectedStatuses,
   onStatusChange,
-}: StatusFilterTabsProps) {
+}: StatusFilterDropdownProps) {
+  const allStatuses: SubmissionStatus[] = ["pending", "approved", "rejected"];
+
+  const handleToggleStatus = (status: SubmissionStatus) => {
+    if (selectedStatuses.includes(status)) {
+      onStatusChange(selectedStatuses.filter((s) => s !== status));
+    } else {
+      onStatusChange([...selectedStatuses, status]);
+    }
+  };
+
   return (
-    <div className="flex gap-2 border-b">
-      <button
-        onClick={() => onStatusChange(undefined)}
-        className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-          statusFilter === undefined
-            ? "border-primary text-primary"
-            : "text-muted-foreground hover:text-foreground border-transparent"
-        }`}
-      >
-        All
-      </button>
-      <button
-        onClick={() => onStatusChange("pending")}
-        className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-          statusFilter === "pending"
-            ? "border-primary text-primary"
-            : "text-muted-foreground hover:text-foreground border-transparent"
-        }`}
-      >
-        Pending
-      </button>
-      <button
-        onClick={() => onStatusChange("approved")}
-        className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-          statusFilter === "approved"
-            ? "border-primary text-primary"
-            : "text-muted-foreground hover:text-foreground border-transparent"
-        }`}
-      >
-        Approved
-      </button>
-      <button
-        onClick={() => onStatusChange("rejected")}
-        className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-          statusFilter === "rejected"
-            ? "border-primary text-primary"
-            : "text-muted-foreground hover:text-foreground border-transparent"
-        }`}
-      >
-        Rejected
-      </button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant={selectedStatuses.length > 0 ? "default" : "outline"}
+          className="min-w-[140px]"
+        >
+          {selectedStatuses.length > 0
+            ? selectedStatuses
+                .map(
+                  (status) => status.charAt(0).toUpperCase() + status.slice(1),
+                )
+                .join(" | ")
+            : "None status"}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        {allStatuses.map((status) => (
+          <DropdownMenuCheckboxItem
+            key={status}
+            checked={selectedStatuses.includes(status)}
+            onCheckedChange={() => handleToggleStatus(status)}
+            onSelect={(e) => e.preventDefault()}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -83,10 +87,9 @@ interface SubmissionsListProps {
 
 function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
   const router = useRouter();
+
   const queryStatuses: ("pending" | "approved" | "rejected")[] =
-    statuses.length > 0
-      ? (statuses as ("pending" | "approved" | "rejected")[])
-      : ["pending", "approved", "rejected"];
+    statuses.length > 0 ? statuses : ["pending", "approved", "rejected"];
 
   const submissions = useQuery(api.functions.submissions.getUserSubmissions, {
     statuses: queryStatuses,
@@ -95,9 +98,6 @@ function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
 
   const handleSubmissionClick = (submission: Doc<"user_submissions">) => {
     if (submission.originalExerciseId) {
-      // Submissions are created from private exercises, so navigate to private exercise detail
-      // The originalExerciseId can be either exercises or private_exercises, but
-      // based on the createSubmission mutation, it's always a private_exercise
       router.push(
         `/dashboard/exercises/private/${submission.originalExerciseId}`,
       );
@@ -117,7 +117,7 @@ function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
       <div className="flex flex-col items-center justify-center space-y-4 p-8">
         <p className="text-muted-foreground">
           {statuses.length > 0
-            ? `No ${statuses[0]} submissions found.`
+            ? `No submissions found with selected status${statuses.length > 1 ? "es" : ""}.`
             : "No submissions found."}
         </p>
       </div>
@@ -150,14 +150,24 @@ function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
 
 interface PageHeaderProps {
   isAdminOrModerator: boolean;
+  selectedStatuses: SubmissionStatus[];
+  onStatusChange: (statuses: SubmissionStatus[]) => void;
 }
 
-function PageHeader({ isAdminOrModerator }: PageHeaderProps) {
+function PageHeader({
+  isAdminOrModerator,
+  selectedStatuses,
+  onStatusChange,
+}: PageHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <h1 className="text-foreground text-3xl font-bold">
         {isAdminOrModerator ? "All Submissions" : "My Submissions"}
       </h1>
+      <StatusFilterDropdown
+        selectedStatuses={selectedStatuses}
+        onStatusChange={onStatusChange}
+      />
     </div>
   );
 }
@@ -167,7 +177,11 @@ function PageHeader({ isAdminOrModerator }: PageHeaderProps) {
 // ============================================================================
 
 export default function SubmissionsPage() {
-  const [statusFilter, setStatusFilter] = useState<SubmissionStatus>(undefined);
+  const searchParams = useSearchParams();
+  const statusParam = searchParams.get("status") as SubmissionStatus | null;
+  const [selectedStatuses, setSelectedStatuses] = useState<SubmissionStatus[]>(
+    statusParam ? [statusParam] : ["pending"],
+  );
   const { sessionClaims, isLoaded } = useAuth();
 
   if (!isLoaded) {
@@ -181,16 +195,14 @@ export default function SubmissionsPage() {
   const userRole = getClientRole(sessionClaims);
   const isAdminOrModeratorResult = isClientAdminOrModerator(sessionClaims);
 
-  const statuses = statusFilter ? [statusFilter] : [];
-
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
-      <PageHeader isAdminOrModerator={isAdminOrModeratorResult} />
-      <StatusFilterTabs
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
+      <PageHeader
+        isAdminOrModerator={isAdminOrModeratorResult}
+        selectedStatuses={selectedStatuses}
+        onStatusChange={setSelectedStatuses}
       />
-      <SubmissionsList statuses={statuses} userRole={userRole} />
+      <SubmissionsList statuses={selectedStatuses} userRole={userRole} />
     </div>
   );
 }
