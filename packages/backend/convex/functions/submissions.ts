@@ -246,8 +246,6 @@ export const approveSubmission = mutation({
         await ctx.db.insert("exercise_variants", {
           exercise: publicExerciseId,
           equipment: variant.equipment,
-          tips: variant.tips ?? [],
-          embedded_videos: variant.embedded_videos ?? [],
           tipsV2: variant.tipsV2,
           overriddenTitle: variant.overriddenTitle,
           overriddenDescription: variant.overriddenDescription,
@@ -255,6 +253,26 @@ export const approveSubmission = mutation({
           createdAt: now,
           updatedAt: now,
         });
+      }
+
+      for (const muscle of submission.originalExerciseData.exercise?.muscles ??
+        []) {
+        await ctx.db.insert("exercises_muscles", {
+          exercise: publicExerciseId,
+          muscle: muscle.muscleId,
+          role: muscle.role,
+        });
+      }
+
+      for (const progressionId of submission.originalExerciseData.exercise
+        ?.progressions ?? []) {
+        if (progressionId as Id<"exercises">) {
+          await ctx.db.insert("exercise_progressions", {
+            fromExercise: publicExerciseId,
+            toExercise: progressionId,
+            createdAt: now,
+          });
+        }
       }
     }
 

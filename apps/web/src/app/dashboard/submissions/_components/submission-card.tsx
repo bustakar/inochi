@@ -75,7 +75,8 @@ export function SubmissionCard({
         <div className="flex-1">
           <div className="mb-2 flex items-center gap-2">
             <h3 className="text-card-foreground text-lg font-semibold">
-              {submission.originalExerciseData?.exercise.title}
+              {submission.originalExerciseData?.exercise.title ??
+                "Untitled Exercise"}
             </h3>
             <Badge className={typeInfo.className}>{typeInfo.label}</Badge>
             <Badge className={statusInfo.className} variant="outline">

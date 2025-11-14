@@ -90,8 +90,8 @@ export default defineSchema({
   exercise_variants: defineTable({
     exercise: v.union(v.id("exercises"), v.id("private_exercises")),
     equipment: v.array(v.id("equipment")),
-    tips: v.array(v.string()), // TODO: For compatibility, remove in future versions
-    embedded_videos: v.array(urlValidator), // TODO: For compatibility, remove in future versions
+    tips: v.optional(v.array(v.string())), // TODO: For compatibility, remove in future versions
+    embedded_videos: v.optional(v.array(urlValidator)), // TODO: For compatibility, remove in future versions
     tipsV2: v.optional(
       v.array(
         v.object({
@@ -132,7 +132,6 @@ export default defineSchema({
     .index("by_to_exercise", ["toExercise"]),
 
   user_submissions: defineTable({
-    _id: v.id("user_submissions"),
     submissionType: v.union(v.literal("create"), v.literal("edit")),
     status: submissionStatusValidator,
     originalExerciseId: v.optional(

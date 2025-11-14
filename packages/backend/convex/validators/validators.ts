@@ -62,8 +62,6 @@ export const exerciseVariantValidator = v.object({
   exercise: v.union(v.id("exercises"), v.id("private_exercises")),
   equipment: v.array(v.id("equipment")),
   tipsV2: v.optional(v.array(tipV2Validator)),
-  tips: v.optional(v.array(v.string())), // Keep for compatibility (read-only)
-  embedded_videos: v.optional(v.array(v.string())), // Keep for compatibility (read-only)
   overriddenTitle: v.optional(v.string()),
   overriddenDescription: v.optional(v.string()),
   overriddenDifficulty: v.optional(v.number()),
