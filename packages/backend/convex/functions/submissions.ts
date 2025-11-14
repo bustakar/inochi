@@ -11,6 +11,7 @@ import { getUserId } from "./auth";
 
 const submissionResponseValidator = v.object({
   _id: v.id("user_submissions"),
+  _creationTime: v.number(),
   submissionType: v.union(v.literal("create"), v.literal("edit")),
   status: submissionStatusValidator,
   originalExerciseId: v.optional(
