@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
@@ -176,7 +176,7 @@ function PageHeader({
 // Main Page Component
 // ============================================================================
 
-export default function SubmissionsPage() {
+function SubmissionsPageContent() {
   const searchParams = useSearchParams();
   const statusParam = searchParams.get("status") as SubmissionStatus | null;
   const [selectedStatuses, setSelectedStatuses] = useState<SubmissionStatus[]>(
@@ -204,5 +204,19 @@ export default function SubmissionsPage() {
       />
       <SubmissionsList statuses={selectedStatuses} userRole={userRole} />
     </div>
+  );
+}
+
+export default function SubmissionsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center p-8">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      }
+    >
+      <SubmissionsPageContent />
+    </Suspense>
   );
 }
