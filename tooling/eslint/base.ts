@@ -36,10 +36,21 @@ export const restrictEnvAccess = defineConfig(
   },
 );
 
+const ignoreConfig = includeIgnoreFile(
+  path.join(import.meta.dirname, "../../.gitignore"),
+);
+
+const gitignorePatterns = Array.isArray(ignoreConfig.ignores)
+  ? ignoreConfig.ignores.filter((p): p is string => typeof p === "string")
+  : ignoreConfig.ignores
+    ? [ignoreConfig.ignores]
+    : [];
+
 export const baseConfig = defineConfig(
   // Ignore files not tracked by VCS and any config files
-  includeIgnoreFile(path.join(import.meta.dirname, "../../.gitignore")),
-  { ignores: ["**/*.config.*"] },
+  {
+    ignores: [...gitignorePatterns, "**/*.config.*"],
+  },
   {
     files: ["**/*.js", "**/*.ts", "**/*.tsx"],
     plugins: {

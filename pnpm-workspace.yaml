@@ -4,11 +4,11 @@ packages:
   - tooling/*
 
 catalog:
-  "@eslint/js": ^9.38.0
-  "@tailwindcss/postcss": ^4.1.16
-  "@tanstack/react-form": ^1.23.8
-  "@types/node": ^22.18.12
-  eslint: ^9.38.0
+  '@eslint/js': ^9.38.0
+  '@tailwindcss/postcss': ^4.1.16
+  '@tanstack/react-form': ^1.23.8
+  '@types/node': ^22.18.12
+  eslint: ^9.39.1
   prettier: ^3.6.2
   tailwindcss: ^4.1.16
   typescript: ^5.9.3
@@ -16,13 +16,13 @@ catalog:
 
 catalogs:
   react19:
-    "@types/react": ~19.1.10
-    "@types/react-dom": ^19.1.9
-    react: 19.1.1
+    '@types/react': ^19.2.7
+    '@types/react-dom': ^19.1.9
+    react: ^19.2.0
     react-dom: 19.1.1
 
 ignoredBuiltDependencies:
-  - "@clerk/shared"
+  - '@clerk/shared'
   - browser-tabs-lock
   - core-js
   - core-js-pure
