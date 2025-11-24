@@ -20,10 +20,16 @@ import {
   AlertDialogTitle,
   Badge,
   Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@inochi/ui";
 
 import { UpdateExerciseDialog } from "../../_components/update-exercise-dialog";
 import { ExerciseVariantsSection } from "./_components/exercise-variants-section";
+import { PrerequisitesTree } from "./_components/prerequisites-tree";
 
 // ============================================================================
 // Constants
@@ -331,6 +337,9 @@ export default function PrivateExerciseDetailPage() {
   const exerciseId = params.id as Id<"private_exercises">;
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [submitDialogOpen, setSubmitDialogOpen] = React.useState(false);
+  const [prerequisiteLevels, setPrerequisiteLevels] = React.useState<1 | 2 | 3>(
+    3,
+  );
 
   const exercise = useQuery(api.functions.exercises.getPrivateExerciseById, {
     exerciseId,
@@ -439,10 +448,35 @@ export default function PrivateExerciseDetailPage() {
         <div className="space-y-6">
           <DescriptionSection description={exercise.description} />
           <MusclesSection muscles={exercise.muscles} />
-          <ProgressionSection
-            exercises={exercise.prerequisites}
-            title="Prerequisites"
-          />
+          {exercise.prerequisiteTree && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h2 className="text-foreground text-lg font-semibold">
+                  Prerequisites
+                </h2>
+                <Select
+                  value={prerequisiteLevels.toString()}
+                  onValueChange={(value) =>
+                    setPrerequisiteLevels(parseInt(value) as 1 | 2 | 3)
+                  }
+                >
+                  <SelectTrigger className="h-8 w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 Level</SelectItem>
+                    <SelectItem value="2">2 Levels</SelectItem>
+                    <SelectItem value="3">3 Levels</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <PrerequisitesTree
+                tree={exercise.prerequisiteTree}
+                currentExerciseId={exerciseId}
+                maxDepth={prerequisiteLevels}
+              />
+            </div>
+          )}
           <ProgressionSection
             exercises={exercise.progressions}
             title="Progressions"

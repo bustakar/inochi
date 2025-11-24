@@ -762,6 +762,29 @@ export const getPrivateExerciseById = query({
           ),
         }),
       ),
+      prerequisiteTree: v.object({
+        exercise: v.object({
+          _id: v.union(v.id("exercises"), v.id("private_exercises")),
+          title: v.string(),
+        }),
+        prerequisites: v.array(
+          v.object({
+            exercise: v.object({
+              _id: v.union(v.id("exercises"), v.id("private_exercises")),
+              title: v.string(),
+            }),
+            prerequisites: v.array(
+              v.object({
+                exercise: v.object({
+                  _id: v.union(v.id("exercises"), v.id("private_exercises")),
+                  title: v.string(),
+                }),
+                prerequisites: v.array(v.any()),
+              }),
+            ),
+          }),
+        ),
+      }),
       createdAt: v.number(),
       updatedAt: v.number(),
       createdBy: v.string(),
@@ -784,18 +807,191 @@ export const getPrivateExerciseById = query({
     }
 
     // Fetch all related data in parallel
-    const [prerequisites, progressions, muscles] = await Promise.all([
-      getPrerequisites(ctx, args.exerciseId),
-      getProgressions(ctx, args.exerciseId),
-      getExerciseMuscles(ctx, args.exerciseId),
-    ]);
+    const [prerequisites, progressions, muscles, prerequisiteTree] =
+      await Promise.all([
+        getPrerequisites(ctx, args.exerciseId),
+        getProgressions(ctx, args.exerciseId),
+        getExerciseMuscles(ctx, args.exerciseId),
+        getPrerequisiteTreeRecursive(
+          ctx,
+          args.exerciseId,
+          0,
+          2, // Max depth 2 (0-indexed, so 0=current, 1=first level, 2=second level)
+          new Set(),
+        ),
+      ]);
 
     return {
       ...exercise,
       prerequisites,
       progressions,
       muscles,
+      prerequisiteTree,
     };
+  },
+});
+
+// Helper: Recursively fetch prerequisite tree with max depth
+async function getPrerequisiteTreeRecursive(
+  ctx: QueryCtx,
+  exerciseId: Id<"exercises"> | Id<"private_exercises">,
+  currentDepth: number,
+  maxDepth: number,
+  visited: Set<string>,
+): Promise<{
+  exercise: { _id: Id<"exercises"> | Id<"private_exercises">; title: string };
+  prerequisites: Array<{
+    exercise: { _id: Id<"exercises"> | Id<"private_exercises">; title: string };
+    prerequisites: Array<{
+      exercise: {
+        _id: Id<"exercises"> | Id<"private_exercises">;
+        title: string;
+      };
+      prerequisites: Array<unknown>;
+    }>;
+  }>;
+}> {
+  const exerciseIdStr = exerciseId as string;
+
+  // Prevent infinite loops from circular dependencies
+  if (visited.has(exerciseIdStr)) {
+    const exercise = await getExerciseTitle(ctx, exerciseId);
+    return {
+      exercise: exercise || { _id: exerciseId, title: "Unknown Exercise" },
+      prerequisites: [] as Array<{
+        exercise: {
+          _id: Id<"exercises"> | Id<"private_exercises">;
+          title: string;
+        };
+        prerequisites: Array<{
+          exercise: {
+            _id: Id<"exercises"> | Id<"private_exercises">;
+            title: string;
+          };
+          prerequisites: Array<unknown>;
+        }>;
+      }>,
+    };
+  }
+
+  visited.add(exerciseIdStr);
+
+  const exercise = await getExerciseTitle(ctx, exerciseId);
+  if (!exercise) {
+    return {
+      exercise: { _id: exerciseId, title: "Unknown Exercise" },
+      prerequisites: [] as Array<{
+        exercise: {
+          _id: Id<"exercises"> | Id<"private_exercises">;
+          title: string;
+        };
+        prerequisites: Array<{
+          exercise: {
+            _id: Id<"exercises"> | Id<"private_exercises">;
+            title: string;
+          };
+          prerequisites: Array<unknown>;
+        }>;
+      }>,
+    };
+  }
+
+  // Stop recursion if we've reached max depth
+  if (currentDepth >= maxDepth) {
+    return {
+      exercise,
+      prerequisites: [] as Array<{
+        exercise: {
+          _id: Id<"exercises"> | Id<"private_exercises">;
+          title: string;
+        };
+        prerequisites: Array<{
+          exercise: {
+            _id: Id<"exercises"> | Id<"private_exercises">;
+            title: string;
+          };
+          prerequisites: Array<unknown>;
+        }>;
+      }>,
+    };
+  }
+
+  // Fetch direct prerequisites
+  const prerequisitesProgressions = await ctx.db
+    .query("exercise_progressions")
+    .withIndex("by_to_exercise", (q) => q.eq("toExercise", exerciseId))
+    .collect();
+
+  const prerequisites = await Promise.all(
+    prerequisitesProgressions.map(async (prog) => {
+      return await getPrerequisiteTreeRecursive(
+        ctx,
+        prog.fromExercise,
+        currentDepth + 1,
+        maxDepth,
+        new Set(visited), // Pass a copy to allow siblings to be visited
+      );
+    }),
+  );
+
+  return {
+    exercise,
+    prerequisites,
+  };
+}
+
+const getPrerequisiteTree = query({
+  args: {
+    exerciseId: v.id("private_exercises"),
+  },
+  returns: v.object({
+    exercise: v.object({
+      _id: v.union(v.id("exercises"), v.id("private_exercises")),
+      title: v.string(),
+    }),
+    prerequisites: v.array(
+      v.object({
+        exercise: v.object({
+          _id: v.union(v.id("exercises"), v.id("private_exercises")),
+          title: v.string(),
+        }),
+        prerequisites: v.array(
+          v.object({
+            exercise: v.object({
+              _id: v.union(v.id("exercises"), v.id("private_exercises")),
+              title: v.string(),
+            }),
+            prerequisites: v.array(v.any()),
+          }),
+        ),
+      }),
+    ),
+  }),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const exercise = await ctx.db.get(args.exerciseId);
+    if (!exercise) {
+      throw new Error("Exercise not found");
+    }
+
+    if (exercise.createdBy !== userId) {
+      throw new Error("Unauthorized: You can only view your own exercises");
+    }
+
+    // Fetch tree with max depth 3 (current + 2 levels)
+    const tree = await getPrerequisiteTreeRecursive(
+      ctx,
+      args.exerciseId,
+      0,
+      2, // Max depth 2 (0-indexed, so 0=current, 1=first level, 2=second level)
+      new Set(),
+    );
+
+    return tree;
   },
 });
 
