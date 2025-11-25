@@ -1,13 +1,18 @@
 "use client";
 
+import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { api } from "@packages/backend/convex/_generated/api";
 import { AlertTriangle, Lock } from "lucide-react";
 
 import { Badge, Card, CardContent, CardHeader, CardTitle } from "@inochi/ui";
 
-type ExerciseLevel = "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+type ExerciseLevel =
+  | "beginner"
+  | "intermediate"
+  | "advanced"
+  | "expert"
+  | "elite";
 type ExerciseCategory = "calisthenics" | "gym" | "stretch" | "mobility";
 type MuscleRole = "primary" | "secondary" | "tertiary" | "stabilizer";
 
@@ -30,10 +35,14 @@ interface SubmissionExercisePreviewProps {
 }
 
 const levelColors: Record<ExerciseLevel, string> = {
-  beginner: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  intermediate: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  advanced: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  expert: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
+  beginner:
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  intermediate:
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  advanced:
+    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  expert:
+    "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
   elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
 };
 
@@ -56,7 +65,9 @@ function MusclesList({ muscles }: { muscles: ExerciseData["muscles"] }) {
   const allMuscles = useQuery(api.functions.exercises.getMuscles);
 
   if (!muscles || muscles.length === 0) {
-    return <p className="text-muted-foreground text-sm">No muscles specified</p>;
+    return (
+      <p className="text-muted-foreground text-sm">No muscles specified</p>
+    );
   }
 
   if (allMuscles === undefined) {
@@ -76,7 +87,7 @@ function MusclesList({ muscles }: { muscles: ExerciseData["muscles"] }) {
       }
       return acc;
     },
-    {} as Record<MuscleRole, string[]>
+    {} as Record<MuscleRole, string[]>,
   );
 
   return (
@@ -98,7 +109,7 @@ function MusclesList({ muscles }: { muscles: ExerciseData["muscles"] }) {
               ))}
             </div>
           );
-        }
+        },
       )}
     </div>
   );
@@ -113,7 +124,7 @@ function ExerciseReferenceList({
 }) {
   const exerciseTitles = useQuery(
     api.functions.exercises.getExerciseTitlesByIds,
-    { exerciseIds }
+    { exerciseIds },
   );
 
   if (exerciseIds.length === 0) {
@@ -191,7 +202,7 @@ export function SubmissionExercisePreview({
             <h3 className="text-foreground mb-2 text-sm font-semibold">
               Description
             </h3>
-            <p className="text-muted-foreground whitespace-pre-wrap text-sm">
+            <p className="text-muted-foreground text-sm whitespace-pre-wrap">
               {exercise.description}
             </p>
           </div>

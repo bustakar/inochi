@@ -125,7 +125,7 @@ export function ExerciseVariantsReadonly({
               <h3 className="text-foreground mb-2 text-sm font-medium">
                 Description
               </h3>
-              <p className="text-muted-foreground whitespace-pre-wrap text-sm">
+              <p className="text-muted-foreground text-sm whitespace-pre-wrap">
                 {currentVariant.overriddenDescription}
               </p>
             </div>
@@ -202,4 +202,3 @@ export function ExerciseVariantsReadonly({
     </div>
   );
 }
-

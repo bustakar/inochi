@@ -1,8 +1,8 @@
 "use client";
 
+import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { api } from "@packages/backend/convex/_generated/api";
 import { Dumbbell, Video } from "lucide-react";
 
 import { Badge, Card, CardContent, CardHeader, CardTitle } from "@inochi/ui";
@@ -26,12 +26,18 @@ interface SubmissionVariantsPreviewProps {
   variants: VariantData[];
 }
 
-function EquipmentList({ equipmentIds }: { equipmentIds: Array<Id<"equipment">> }) {
+function EquipmentList({
+  equipmentIds,
+}: {
+  equipmentIds: Array<Id<"equipment">>;
+}) {
   const allEquipment = useQuery(api.functions.exercises.getEquipment);
 
   if (equipmentIds.length === 0) {
     return (
-      <span className="text-muted-foreground text-sm">No equipment (bodyweight)</span>
+      <span className="text-muted-foreground text-sm">
+        No equipment (bodyweight)
+      </span>
     );
   }
 
@@ -55,7 +61,13 @@ function EquipmentList({ equipmentIds }: { equipmentIds: Array<Id<"equipment">> 
   );
 }
 
-function VariantCard({ variant, index }: { variant: VariantData; index: number }) {
+function VariantCard({
+  variant,
+  index,
+}: {
+  variant: VariantData;
+  index: number;
+}) {
   const hasOverrides =
     variant.overriddenTitle ||
     variant.overriddenDescription ||
@@ -100,10 +112,7 @@ function VariantCard({ variant, index }: { variant: VariantData; index: number }
           </span>
           <ul className="space-y-2">
             {variant.tipsV2.map((tip, tipIndex) => (
-              <li
-                key={tipIndex}
-                className="bg-muted/50 rounded-md p-2 text-sm"
-              >
+              <li key={tipIndex} className="bg-muted/50 rounded-md p-2 text-sm">
                 <p>{tip.text}</p>
                 {tip.videoUrl && (
                   <a
@@ -135,9 +144,7 @@ export function SubmissionVariantsPreview({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">
-          Variants ({variants.length})
-        </CardTitle>
+        <CardTitle className="text-lg">Variants ({variants.length})</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {variants.map((variant, index) => (
@@ -147,4 +154,3 @@ export function SubmissionVariantsPreview({
     </Card>
   );
 }
-

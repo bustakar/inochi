@@ -9,8 +9,11 @@ import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@inochi/ui";
 
-import { getClientRole, isClientAdminOrModerator } from "../../../../utils/roles";
 import { ApproveRejectButtons } from "../_components/approve-reject-buttons";
+import {
+  getClientRole,
+  isClientAdminOrModerator,
+} from "../../../../utils/roles";
 import { SubmissionExercisePreview } from "./_components/submission-exercise-preview";
 import { SubmissionHeader } from "./_components/submission-header";
 import { SubmissionVariantsPreview } from "./_components/submission-variants-preview";
@@ -49,7 +52,10 @@ export default function SubmissionDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center space-y-4 p-8">
         <p className="text-muted-foreground">Submission not found.</p>
-        <Button variant="outline" onClick={() => router.push("/dashboard/submissions")}>
+        <Button
+          variant="outline"
+          onClick={() => router.push("/dashboard/submissions")}
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Submissions
         </Button>
@@ -65,7 +71,10 @@ export default function SubmissionDetailPage() {
         <p className="text-muted-foreground">
           You don&apos;t have permission to view this submission.
         </p>
-        <Button variant="outline" onClick={() => router.push("/dashboard/submissions")}>
+        <Button
+          variant="outline"
+          onClick={() => router.push("/dashboard/submissions")}
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Submissions
         </Button>
@@ -109,9 +118,7 @@ export default function SubmissionDetailPage() {
       )}
 
       {/* Exercise preview */}
-      {exerciseData && (
-        <SubmissionExercisePreview exercise={exerciseData} />
-      )}
+      {exerciseData && <SubmissionExercisePreview exercise={exerciseData} />}
 
       {/* Variants preview */}
       {variantsData.length > 0 && (
@@ -132,4 +139,3 @@ export default function SubmissionDetailPage() {
     </div>
   );
 }
-

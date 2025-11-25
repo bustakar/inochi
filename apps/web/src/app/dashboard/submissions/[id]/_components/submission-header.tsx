@@ -25,17 +25,20 @@ const statusConfig: Record<
 > = {
   pending: {
     label: "Pending Review",
-    className: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800",
+    className:
+      "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800",
     icon: Clock,
   },
   approved: {
     label: "Approved",
-    className: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800",
+    className:
+      "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800",
     icon: CheckCircle,
   },
   rejected: {
     label: "Rejected",
-    className: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800",
+    className:
+      "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800",
     icon: XCircle,
   },
 };
@@ -46,17 +49,17 @@ const typeConfig: Record<
 > = {
   create: {
     label: "New Exercise",
-    className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+    className:
+      "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   },
   edit: {
     label: "Edit Suggestion",
-    className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+    className:
+      "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   },
 };
 
-export function SubmissionHeader({
-  submission,
-}: SubmissionHeaderProps) {
+export function SubmissionHeader({ submission }: SubmissionHeaderProps) {
   const statusInfo = statusConfig[submission.status];
   const StatusIcon = statusInfo.icon;
   const typeInfo = typeConfig[submission.submissionType];
@@ -98,4 +101,3 @@ export function SubmissionHeader({
     </div>
   );
 }
-
