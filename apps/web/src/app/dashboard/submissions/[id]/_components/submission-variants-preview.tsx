@@ -1,7 +1,7 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { Dumbbell, Video } from "lucide-react";
 
@@ -15,7 +15,7 @@ interface TipV2 {
 
 interface VariantData {
   exercise: Id<"exercises"> | Id<"private_exercises">;
-  equipment: Array<Id<"equipment">>;
+  equipment: Id<"equipment">[];
   tipsV2?: TipV2[];
   overriddenTitle?: string;
   overriddenDescription?: string;
@@ -26,11 +26,7 @@ interface SubmissionVariantsPreviewProps {
   variants: VariantData[];
 }
 
-function EquipmentList({
-  equipmentIds,
-}: {
-  equipmentIds: Array<Id<"equipment">>;
-}) {
+function EquipmentList({ equipmentIds }: { equipmentIds: Id<"equipment">[] }) {
   const allEquipment = useQuery(api.functions.exercises.getEquipment);
 
   if (equipmentIds.length === 0) {
@@ -68,9 +64,9 @@ function VariantCard({
   variant: VariantData;
   index: number;
 }) {
-  const hasOverrides =
-    variant.overriddenTitle ||
-    variant.overriddenDescription ||
+  const _hasOverrides =
+    variant.overriddenTitle ??
+    variant.overriddenDescription ??
     variant.overriddenDifficulty;
 
   return (

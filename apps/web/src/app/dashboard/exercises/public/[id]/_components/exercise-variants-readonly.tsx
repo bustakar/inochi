@@ -1,9 +1,9 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
+import type { GetExerciseVariantResponse } from "@packages/backend/convex/functions/exerciseVariants";
 import * as React from "react";
 import Link from "next/link";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
-import { GetExerciseVariantResponse } from "@packages/backend/convex/functions/exerciseVariants";
 import { ChevronLeft, ChevronRight, Link as LinkIcon } from "lucide-react";
 
 import {
@@ -21,7 +21,7 @@ import {
 // ============================================================================
 
 interface ExerciseVariantsReadonlyProps {
-  variants: Array<GetExerciseVariantResponse>;
+  variants: GetExerciseVariantResponse[];
 }
 
 export function ExerciseVariantsReadonly({
@@ -29,10 +29,10 @@ export function ExerciseVariantsReadonly({
 }: ExerciseVariantsReadonlyProps) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
 
-  if (variants === undefined) {
+  if (variants.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading variants...</p>
+        <p className="text-muted-foreground">No variants available</p>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export function ExerciseVariantsReadonly({
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>
-              {currentVariant.overriddenTitle || "Default Variant"}
+              {currentVariant.overriddenTitle ?? "Default Variant"}
             </CardTitle>
             {hasMultipleVariants && (
               <span className="text-muted-foreground text-sm">
@@ -157,7 +157,7 @@ export function ExerciseVariantsReadonly({
             </div>
           )}
 
-          {currentVariant.tipsV2 && currentVariant.tipsV2.length > 0 && (
+          {currentVariant.tipsV2.length > 0 && (
             <div>
               <h3 className="text-foreground mb-3 text-sm font-medium">Tips</h3>
               <div className="space-y-3">

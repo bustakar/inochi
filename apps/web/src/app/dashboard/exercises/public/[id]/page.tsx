@@ -1,10 +1,10 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { Globe } from "lucide-react";
 
@@ -90,12 +90,12 @@ function DescriptionSection({ description }: DescriptionSectionProps) {
 // ============================================================================
 
 interface MusclesSectionProps {
-  muscles: Array<{
+  muscles: {
     _id: Id<"muscles">;
     name: string;
     muscleGroup?: string;
     role?: "primary" | "secondary" | "tertiary" | "stabilizer";
-  }>;
+  }[];
 }
 
 const roleLabels: Record<
@@ -112,7 +112,7 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
   const groupedMuscles = React.useMemo(() => {
     const grouped: Record<
       "primary" | "secondary" | "tertiary" | "stabilizer",
-      Map<string, Array<{ _id: Id<"muscles">; name: string }>>
+      Map<string, { _id: Id<"muscles">; name: string }[]>
     > = {
       primary: new Map(),
       secondary: new Map(),
@@ -121,16 +121,19 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
     };
 
     for (const muscle of muscles) {
-      const role = muscle.role || "primary";
-      const group = muscle.muscleGroup || "Other";
+      const role = muscle.role ?? "primary";
+      const group = muscle.muscleGroup ?? "Other";
 
       if (!grouped[role].has(group)) {
         grouped[role].set(group, []);
       }
-      grouped[role].get(group)!.push({
-        _id: muscle._id,
-        name: muscle.name,
-      });
+      const groupMuscles = grouped[role].get(group);
+      if (groupMuscles) {
+        groupMuscles.push({
+          _id: muscle._id,
+          name: muscle.name,
+        });
+      }
     }
 
     return grouped;
@@ -152,9 +155,12 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
       <h2 className="text-foreground mb-4 text-lg font-semibold">Muscles</h2>
       <div className="space-y-4">
         {(
-          ["primary", "secondary", "tertiary", "stabilizer"] as Array<
-            "primary" | "secondary" | "tertiary" | "stabilizer"
-          >
+          ["primary", "secondary", "tertiary", "stabilizer"] as (
+            | "primary"
+            | "secondary"
+            | "tertiary"
+            | "stabilizer"
+          )[]
         ).map((role) => {
           const roleGroups = groupedMuscles[role];
           if (roleGroups.size === 0) return null;
@@ -219,10 +225,10 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
 // ============================================================================
 
 interface ProgressionSectionProps {
-  exercises: Array<{
+  exercises: {
     _id: Id<"exercises">;
     title: string;
-  }>;
+  }[];
   title: string;
 }
 

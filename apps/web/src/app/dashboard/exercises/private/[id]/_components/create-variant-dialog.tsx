@@ -1,8 +1,8 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import * as React from "react";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useMutation, useQuery } from "convex/react";
 import {
@@ -57,17 +57,17 @@ const variantFormSchema = z.object({
   overriddenDifficulty: z.union([z.number(), z.undefined()]),
 });
 
-type VariantFormData = {
+interface VariantFormData {
   equipment: string[];
-  tipsV2: Array<{
+  tipsV2: {
     text: string;
     videoUrl?: string;
     exerciseReference?: string;
-  }>;
+  }[];
   overriddenTitle: string | undefined;
   overriddenDescription: string | undefined;
   overriddenDifficulty: number | undefined;
-};
+}
 
 interface Equipment {
   _id: Id<"equipment">;
@@ -84,7 +84,7 @@ const { fieldContext, formContext, useFieldContext } = createFormHookContexts();
 function EquipmentField({ equipment }: { equipment: Equipment[] | undefined }) {
   const field = useFieldContext<string[] | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-  const selectedEquipmentIds = field.state.value || [];
+  const selectedEquipmentIds = field.state.value ?? [];
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const handleToggleEquipment = (equipmentId: Id<"equipment">) => {
@@ -120,7 +120,10 @@ function EquipmentField({ equipment }: { equipment: Equipment[] | undefined }) {
       if (!groups.has(category)) {
         groups.set(category, []);
       }
-      groups.get(category)!.push(eq);
+      const categoryGroup = groups.get(category);
+      if (categoryGroup) {
+        categoryGroup.push(eq);
+      }
     }
 
     // Sort groups and equipment within groups
@@ -223,7 +226,7 @@ function EquipmentField({ equipment }: { equipment: Equipment[] | undefined }) {
 function TipV2Field() {
   const field =
     useFieldContext<
-      Array<{ text: string; videoUrl?: string; exerciseReference?: string }>
+      { text: string; videoUrl?: string; exerciseReference?: string }[]
     >();
   const tips =
     field.state.value.length > 0 ? field.state.value : [{ text: "" }];
@@ -246,15 +249,15 @@ function TipV2Field() {
     }>,
   ) => {
     const newTips = [...tips];
-    const currentTip = newTips[index] || { text: "" };
+    const currentTip = newTips[index] ?? { text: "" };
     newTips[index] = {
       ...currentTip,
       ...updates,
-      text: updates.text !== undefined ? updates.text : currentTip.text || "",
+      text: updates.text ?? currentTip.text,
     };
     // Remove empty tips except the last one (if text is empty)
     const filtered = newTips.filter(
-      (tip, i) => (tip.text || "").trim() !== "" || i === newTips.length - 1,
+      (tip, i) => tip.text.trim() !== "" || i === newTips.length - 1,
     );
     field.handleChange(filtered.length > 0 ? filtered : [{ text: "" }]);
   };
@@ -267,7 +270,7 @@ function TipV2Field() {
   // Filter exercises based on search query for each tip
   const getFilteredExercises = (index: number) => {
     if (!exercises) return [];
-    const searchQuery = searchQueries[index]?.toLowerCase() || "";
+    const searchQuery = searchQueries[index]?.toLowerCase() ?? "";
     if (!searchQuery.trim()) return exercises.slice(0, 10); // Limit to 10 without search
 
     return exercises
@@ -292,7 +295,7 @@ function TipV2Field() {
             >
               <div className="flex items-start gap-2">
                 <Input
-                  value={tip.text || ""}
+                  value={tip.text}
                   onChange={(e) =>
                     handleChange(index, { text: e.target.value })
                   }
@@ -316,7 +319,7 @@ function TipV2Field() {
                 <div className="relative">
                   <Input
                     type="url"
-                    value={tip.videoUrl || ""}
+                    value={tip.videoUrl ?? ""}
                     onChange={(e) =>
                       handleChange(index, {
                         videoUrl: e.target.value || undefined,
@@ -357,7 +360,7 @@ function TipV2Field() {
                         <Input
                           type="search"
                           placeholder="Search exercises..."
-                          value={searchQueries[index] || ""}
+                          value={searchQueries[index] ?? ""}
                           onChange={(e) =>
                             setSearchQueries({
                               ...searchQueries,
@@ -458,7 +461,7 @@ function ArrayStringField({
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
   const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleAdd = () => {
+  const _handleAdd = () => {
     field.handleChange([...items, ""]);
   };
 
@@ -542,7 +545,7 @@ function OverriddenTitleField() {
       <Input
         id={field.name}
         name={field.name}
-        value={field.state.value || ""}
+        value={field.state.value ?? ""}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value || undefined)}
         aria-invalid={isInvalid}
@@ -563,7 +566,7 @@ function OverriddenDescriptionField() {
       <Input
         id={field.name}
         name={field.name}
-        value={field.state.value || ""}
+        value={field.state.value ?? ""}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value || undefined)}
         aria-invalid={isInvalid}
@@ -578,7 +581,7 @@ function OverriddenDescriptionField() {
 function OverriddenDifficultyField() {
   const field = useFieldContext<number | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-  const selectedValue = field.state.value?.toString() || "";
+  const selectedValue = field.state.value?.toString() ?? "";
 
   return (
     <Field data-invalid={isInvalid}>
@@ -596,7 +599,7 @@ function OverriddenDifficultyField() {
                 : "Select difficulty"
             }
           >
-            {field.state.value || "Difficulty"}
+            {field.state.value ?? "Difficulty"}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
@@ -670,8 +673,8 @@ export function CreateVariantDialog({
 
   const form = useAppForm({
     defaultValues: {
-      equipment: existingVariant?.equipment.map((eq) => eq._id as string) || [],
-      tipsV2: existingVariant?.tipsV2?.length
+      equipment: existingVariant?.equipment.map((eq) => eq._id as string) ?? [],
+      tipsV2: existingVariant?.tipsV2.length
         ? existingVariant.tipsV2.map((tip) => ({
             text: tip.text,
             videoUrl: tip.videoUrl,
@@ -683,19 +686,19 @@ export function CreateVariantDialog({
       overriddenDifficulty: existingVariant?.overriddenDifficulty,
     },
     validators: {
-      onSubmit: variantFormSchema as any,
+      onSubmit: variantFormSchema,
     },
     onSubmit: async ({ value }: { value: VariantFormData }) => {
       await onSubmit(value);
     },
   });
 
-  const resetFormEffect = React.useEffect(() => {
+  React.useEffect(() => {
     if (open) {
       form.reset();
       setOverridesOpen(false);
     }
-  }, [open]);
+  }, [open, form]);
 
   const onSubmit = async (data: VariantFormData) => {
     try {
@@ -704,7 +707,7 @@ export function CreateVariantDialog({
         .filter((tip) => tip.text.trim() !== "")
         .map((tip) => ({
           text: tip.text,
-          videoUrl: tip.videoUrl?.trim() || undefined,
+          videoUrl: tip.videoUrl?.trim() ?? undefined,
           exerciseReference: tip.exerciseReference?.trim()
             ? (tip.exerciseReference as
                 | Id<"exercises">
@@ -719,8 +722,8 @@ export function CreateVariantDialog({
             exercise: exerciseId,
             equipment: data.equipment as Id<"equipment">[],
             tipsV2,
-            overriddenTitle: data.overriddenTitle || undefined,
-            overriddenDescription: data.overriddenDescription || undefined,
+            overriddenTitle: data.overriddenTitle ?? undefined,
+            overriddenDescription: data.overriddenDescription ?? undefined,
             overriddenDifficulty: data.overriddenDifficulty ?? undefined,
           },
         });
@@ -731,8 +734,8 @@ export function CreateVariantDialog({
             exercise: exerciseId,
             equipment: data.equipment as Id<"equipment">[],
             tipsV2,
-            overriddenTitle: data.overriddenTitle || undefined,
-            overriddenDescription: data.overriddenDescription || undefined,
+            overriddenTitle: data.overriddenTitle ?? undefined,
+            overriddenDescription: data.overriddenDescription ?? undefined,
             overriddenDifficulty: data.overriddenDifficulty ?? undefined,
           },
         });
@@ -762,7 +765,7 @@ export function CreateVariantDialog({
           id="variant-form"
           onSubmit={(e) => {
             e.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
         >
           <FieldGroup>

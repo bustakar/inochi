@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ClerkProvider, useAuth } from "@clerk/clerk-react";
 import { shadcn } from "@clerk/themes";
 import { ConvexReactClient } from "convex/react";

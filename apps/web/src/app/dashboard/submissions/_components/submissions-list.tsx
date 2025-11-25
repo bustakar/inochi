@@ -1,11 +1,11 @@
 "use client";
 
+import type { Doc } from "@packages/backend/convex/_generated/dataModel";
 import Link from "next/link";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 
-import { Roles } from "../../../../types/globals";
+import type { Roles } from "../../../../types/globals";
 import { SubmissionCard } from "./submission-card";
 
 type SubmissionStatus = "pending" | "approved" | "rejected";

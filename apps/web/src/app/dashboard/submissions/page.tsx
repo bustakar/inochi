@@ -1,10 +1,10 @@
 "use client";
 
+import type { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 
 import {
@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@inochi/ui";
 
-import { Roles } from "../../../types/globals";
+import type { Roles } from "../../../types/globals";
 import { getClientRole, isClientAdminOrModerator } from "../../../utils/roles";
 import { SubmissionCard } from "./_components/submission-card";
 

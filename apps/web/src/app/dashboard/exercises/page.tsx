@@ -1,10 +1,10 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import * as React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { Globe, Lock, Target } from "lucide-react";
 
@@ -27,13 +27,13 @@ interface ExerciseCardProps {
     level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
     difficulty: number;
     isPrivate: boolean;
-    musclesData: Array<{
+    musclesData: {
       _id: Id<"muscles">;
       name: string;
       muscleGroup?: string;
       role?: "primary" | "secondary" | "tertiary" | "stabilizer";
-    }>;
-    primaryMuscleGroups: Array<string>;
+    }[];
+    primaryMuscleGroups: string[];
   };
 }
 
@@ -98,7 +98,7 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <Badge
           className={
-            levelColors[exercise.level] ||
+            levelColors[exercise.level] ??
             "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
           }
         >
@@ -106,7 +106,7 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
         </Badge>
         <Badge
           className={
-            categoryColors[exercise.category] ||
+            categoryColors[exercise.category] ??
             "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
           }
         >

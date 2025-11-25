@@ -1,10 +1,10 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { Clock, Edit, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -44,7 +44,7 @@ const levelColors: Record<
   elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
 };
 
-const categoryColors: Record<
+const _categoryColors: Record<
   "calisthenics" | "gym" | "stretch" | "mobility",
   string
 > = {
@@ -151,12 +151,12 @@ function DescriptionSection({ description }: DescriptionSectionProps) {
 // ============================================================================
 
 interface MusclesSectionProps {
-  muscles: Array<{
+  muscles: {
     _id: Id<"muscles">;
     name: string;
     muscleGroup?: string;
     role?: "primary" | "secondary" | "tertiary" | "stabilizer";
-  }>;
+  }[];
 }
 
 const roleLabels: Record<
@@ -174,7 +174,7 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
   const groupedMuscles = React.useMemo(() => {
     const grouped: Record<
       "primary" | "secondary" | "tertiary" | "stabilizer",
-      Map<string, Array<{ _id: Id<"muscles">; name: string }>>
+      Map<string, { _id: Id<"muscles">; name: string }[]>
     > = {
       primary: new Map(),
       secondary: new Map(),
@@ -183,16 +183,19 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
     };
 
     for (const muscle of muscles) {
-      const role = muscle.role || "primary";
-      const group = muscle.muscleGroup || "Other";
+      const role = muscle.role ?? "primary";
+      const group = muscle.muscleGroup ?? "Other";
 
       if (!grouped[role].has(group)) {
         grouped[role].set(group, []);
       }
-      grouped[role].get(group)!.push({
-        _id: muscle._id,
-        name: muscle.name,
-      });
+      const groupMuscles = grouped[role].get(group);
+      if (groupMuscles) {
+        groupMuscles.push({
+          _id: muscle._id,
+          name: muscle.name,
+        });
+      }
     }
 
     return grouped;
@@ -214,9 +217,12 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
       <h2 className="text-foreground mb-4 text-lg font-semibold">Muscles</h2>
       <div className="space-y-4">
         {(
-          ["primary", "secondary", "tertiary", "stabilizer"] as Array<
-            "primary" | "secondary" | "tertiary" | "stabilizer"
-          >
+          ["primary", "secondary", "tertiary", "stabilizer"] as (
+            | "primary"
+            | "secondary"
+            | "tertiary"
+            | "stabilizer"
+          )[]
         ).map((role) => {
           const roleGroups = groupedMuscles[role];
           if (roleGroups.size === 0) return null;
@@ -281,10 +287,10 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
 // ============================================================================
 
 interface ProgressionSectionProps {
-  exercises: Array<{
+  exercises: {
     _id: Id<"exercises"> | Id<"private_exercises">;
     title: string;
-  }>;
+  }[];
   title: string;
 }
 
@@ -360,7 +366,7 @@ export default function PrivateExerciseDetailPage() {
       return;
     }
     try {
-      const submissionId = await createSubmission({
+      const _submissionId = await createSubmission({
         privateExerciseId: exerciseId,
         privateExerciseData: {
           exercise: {
@@ -385,7 +391,7 @@ export default function PrivateExerciseDetailPage() {
               | Id<"exercises">
               | Id<"private_exercises">,
             equipment: variant.equipment.map((equipment) => equipment._id),
-            tipsV2: variant.tipsV2?.map((tip) => ({
+            tipsV2: variant.tipsV2.map((tip) => ({
               text: tip.text,
               videoUrl: tip.videoUrl,
               exerciseReference: tip.exerciseReference?._id,

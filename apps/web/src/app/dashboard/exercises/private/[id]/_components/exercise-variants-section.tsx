@@ -1,9 +1,9 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
+import type { GetExerciseVariantResponse } from "@packages/backend/convex/functions/exerciseVariants";
 import * as React from "react";
 import Link from "next/link";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
-import { GetExerciseVariantResponse } from "@packages/backend/convex/functions/exerciseVariants";
 import {
   ChevronLeft,
   ChevronRight,
@@ -30,7 +30,7 @@ import { CreateVariantDialog } from "./create-variant-dialog";
 
 interface ExerciseVariantsSectionProps {
   exerciseId: Id<"private_exercises">;
-  variants: Array<GetExerciseVariantResponse>;
+  variants: GetExerciseVariantResponse[];
 }
 
 export function ExerciseVariantsSection({
@@ -43,10 +43,10 @@ export function ExerciseVariantsSection({
     Id<"exercise_variants"> | undefined
   >(undefined);
 
-  if (variants === undefined) {
+  if (variants.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading variants...</p>
+        <p className="text-muted-foreground">No variants available</p>
       </div>
     );
   }
@@ -163,7 +163,7 @@ export function ExerciseVariantsSection({
       <Card>
         <CardHeader>
           <CardTitle>
-            {currentVariant.overriddenTitle || "Default Variant"}
+            {currentVariant.overriddenTitle ?? "Default Variant"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -204,11 +204,11 @@ export function ExerciseVariantsSection({
             </div>
           )}
 
-          {currentVariant.tipsV2?.length > 0 && (
+          {currentVariant.tipsV2.length > 0 && (
             <div>
               <h3 className="text-foreground mb-3 text-sm font-medium">Tips</h3>
               <div className="space-y-3">
-                {currentVariant.tipsV2?.map((tip, index) => {
+                {currentVariant.tipsV2.map((tip, index) => {
                   return (
                     <div
                       key={index}

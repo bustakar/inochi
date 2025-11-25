@@ -1,11 +1,7 @@
 "use client";
 
+import type { Control, FieldPath, FieldValues } from "react-hook-form";
 import { Plus, X } from "lucide-react";
-import {
-  type Control,
-  type FieldPath,
-  type FieldValues,
-} from "react-hook-form";
 
 import {
   Button,
@@ -34,11 +30,11 @@ export function ArrayInputField<TFieldValues extends FieldValues>({
   addButtonText,
 }: ArrayInputFieldProps<TFieldValues>) {
   return (
-    <FormField
-      control={control as any}
-      name={name as any}
+    <FormField<TFieldValues, typeof name>
+      control={control}
+      name={name}
       render={({ field, fieldState }) => {
-        const items = field.value || [];
+        const items = (field.value as string[] | undefined) ?? [];
 
         return (
           <FormItem>
@@ -53,7 +49,7 @@ export function ArrayInputField<TFieldValues extends FieldValues>({
                         onChange={(e) => {
                           const newItems = [...items];
                           newItems[index] = e.target.value;
-                          field.onChange(newItems);
+                          field.onChange(newItems as TFieldValues[typeof name]);
                         }}
                         placeholder={placeholder}
                       />
@@ -65,7 +61,7 @@ export function ArrayInputField<TFieldValues extends FieldValues>({
                           const newItems = items.filter(
                             (_: string, i: number) => i !== index,
                           );
-                          field.onChange(newItems);
+                          field.onChange(newItems as TFieldValues[typeof name]);
                         }}
                       >
                         <X className="h-4 w-4" />
@@ -76,7 +72,10 @@ export function ArrayInputField<TFieldValues extends FieldValues>({
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      field.onChange([...items, ""]);
+                      field.onChange([
+                        ...items,
+                        "",
+                      ] as TFieldValues[typeof name]);
                     }}
                   >
                     <Plus className="mr-2 h-4 w-4" />

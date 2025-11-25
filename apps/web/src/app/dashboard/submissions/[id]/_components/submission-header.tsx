@@ -1,6 +1,6 @@
 "use client";
 
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import type { Doc } from "@packages/backend/convex/_generated/dataModel";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 
 import { Badge } from "@inochi/ui";
