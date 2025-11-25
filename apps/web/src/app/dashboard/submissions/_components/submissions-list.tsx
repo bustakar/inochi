@@ -39,8 +39,6 @@ export function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
     );
   }
 
-  const isAdminOrModerator = userRole === "admin" || userRole === "moderator";
-
   return (
     <div className="space-y-4">
       {submissions.map((submission: Doc<"user_submissions">) => (
@@ -49,10 +47,7 @@ export function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
           href={`/dashboard/submissions/${submission._id}`}
           className="block"
         >
-          <SubmissionCard
-            submission={submission}
-            showSubmitter={isAdminOrModerator}
-          />
+          <SubmissionCard submission={submission} />
         </Link>
       ))}
     </div>

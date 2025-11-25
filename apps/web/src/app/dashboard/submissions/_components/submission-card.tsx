@@ -21,7 +21,6 @@ function formatTimeAgo(timestamp: number): string {
 
 interface SubmissionCardProps {
   submission: Doc<"user_submissions">;
-  showSubmitter?: boolean;
 }
 
 const statusConfig: Record<
@@ -59,10 +58,7 @@ const typeConfig: Record<
   },
 };
 
-export function SubmissionCard({
-  submission,
-  showSubmitter = false,
-}: SubmissionCardProps) {
+export function SubmissionCard({ submission }: SubmissionCardProps) {
   const statusInfo = statusConfig[submission.status];
   const StatusIcon = statusInfo.icon;
   const typeInfo = typeConfig[submission.submissionType];
@@ -84,11 +80,6 @@ export function SubmissionCard({
               {statusInfo.label}
             </Badge>
           </div>
-          {showSubmitter && (
-            <p className="text-muted-foreground mb-2 text-xs">
-              Submitted by: {submission.submittedBy}
-            </p>
-          )}
           {submission.submissionType === "edit" &&
             submission.originalExerciseData && (
               <p className="text-muted-foreground mb-2 text-sm">

@@ -914,6 +914,55 @@ export const getEquipment = query({
   },
 });
 
+// Get exercise titles by IDs (for displaying prerequisites/progressions)
+// Returns title and whether it's a private exercise
+export const getExerciseTitlesByIds = query({
+  args: {
+    exerciseIds: v.array(v.union(v.id("exercises"), v.id("private_exercises"))),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.union(v.id("exercises"), v.id("private_exercises")),
+      title: v.string(),
+      isPrivate: v.boolean(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const results: Array<{
+      _id: Id<"exercises"> | Id<"private_exercises">;
+      title: string;
+      isPrivate: boolean;
+    }> = [];
+
+    for (const exerciseId of args.exerciseIds) {
+      // Try private_exercises first
+      const privateExercise = await ctx.db.get(
+        exerciseId as Id<"private_exercises">,
+      );
+      if (privateExercise) {
+        results.push({
+          _id: exerciseId,
+          title: privateExercise.title,
+          isPrivate: true,
+        });
+        continue;
+      }
+
+      // Try public exercises
+      const publicExercise = await ctx.db.get(exerciseId as Id<"exercises">);
+      if (publicExercise) {
+        results.push({
+          _id: exerciseId,
+          title: publicExercise.title,
+          isPrivate: false,
+        });
+      }
+    }
+
+    return results;
+  },
+});
+
 // Internal query for AI - returns simplified muscle data
 export const getAllMusclesForAI = internalQuery({
   args: {},
