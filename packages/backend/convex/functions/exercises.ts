@@ -974,6 +974,217 @@ export const getPrivateExerciseById = query({
   },
 });
 
+// Helper to check if an ID is a public exercise (exists in exercises table)
+async function isPublicExercise(
+  ctx: QueryCtx,
+  id: Id<"exercises"> | Id<"private_exercises">,
+): Promise<
+  { isPublic: true; exercise: Doc<"exercises"> } | { isPublic: false }
+> {
+  // Try to fetch from exercises table specifically
+  // ctx.db.get auto-detects table from ID, so we need to verify it's in exercises table
+  const doc = await ctx.db.get(id as Id<"exercises">);
+  if (!doc) return { isPublic: false };
+
+  // Check if the document has the shape of an exercise (not private_exercise)
+  // Private exercises have a userId field, public exercises don't
+  if ("userId" in doc) {
+    return { isPublic: false };
+  }
+
+  return { isPublic: true, exercise: doc as Doc<"exercises"> };
+}
+
+// Helper: Fetch prerequisites for a public exercise (only public exercises)
+async function getPublicExercisePrerequisites(
+  ctx: QueryCtx,
+  exerciseId: Id<"exercises">,
+): Promise<Array<{ _id: Id<"exercises">; title: string }>> {
+  const exercise = await ctx.db.get(exerciseId);
+  if (!exercise) return [];
+
+  const result: Array<{ _id: Id<"exercises">; title: string }> = [];
+
+  for (const prereqId of exercise.prerequisites) {
+    // Only include public exercises
+    const check = await isPublicExercise(ctx, prereqId);
+    if (check.isPublic) {
+      result.push({
+        _id: prereqId as Id<"exercises">,
+        title: check.exercise.title,
+      });
+    }
+    // Private exercises are intentionally excluded
+  }
+
+  return result;
+}
+
+// Helper: Fetch progressions for a public exercise (only public exercises)
+async function getPublicExerciseProgressions(
+  ctx: QueryCtx,
+  exerciseId: Id<"exercises">,
+): Promise<Array<{ _id: Id<"exercises">; title: string }>> {
+  // Query progressions where this exercise is the source (leads to)
+  const progressionToProgressions = await ctx.db
+    .query("exercise_progressions")
+    .withIndex("by_from_exercise", (q) => q.eq("fromExercise", exerciseId))
+    .collect();
+
+  // Query progressions where this exercise is the target (leads from)
+  const progressionFromProgressions = await ctx.db
+    .query("exercise_progressions")
+    .withIndex("by_to_exercise", (q) => q.eq("toExercise", exerciseId))
+    .collect();
+
+  const result: Array<{
+    _id: Id<"exercises">;
+    title: string;
+    type: "from" | "to";
+  }> = [];
+
+  // Process "to" progressions - only include public exercises
+  for (const prog of progressionToProgressions) {
+    const check = await isPublicExercise(ctx, prog.toExercise);
+    if (check.isPublic) {
+      result.push({
+        _id: prog.toExercise as Id<"exercises">,
+        title: check.exercise.title,
+        type: "to",
+      });
+    }
+  }
+
+  // Process "from" progressions - only include public exercises
+  for (const prog of progressionFromProgressions) {
+    const check = await isPublicExercise(ctx, prog.fromExercise);
+    if (check.isPublic) {
+      result.push({
+        _id: prog.fromExercise as Id<"exercises">,
+        title: check.exercise.title,
+        type: "from",
+      });
+    }
+  }
+
+  // Sort: from first, then to, then alphabetically by title
+  return result
+    .sort((a, b) => {
+      if (a.type !== b.type) {
+        return a.type === "from" ? -1 : 1;
+      }
+      return a.title.localeCompare(b.title);
+    })
+    .map(({ type, ...ex }) => ex);
+}
+
+// Helper: Fetch muscles for a public exercise
+async function getPublicExerciseMuscles(
+  ctx: QueryCtx,
+  exerciseId: Id<"exercises">,
+): Promise<
+  Array<{
+    _id: Id<"muscles">;
+    name: string;
+    muscleGroup?: string;
+    role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+  }>
+> {
+  const muscleRelations = await ctx.db
+    .query("exercises_muscles")
+    .withIndex("by_exercise", (q) => q.eq("exercise", exerciseId))
+    .collect();
+
+  const result: Array<{
+    _id: Id<"muscles">;
+    name: string;
+    muscleGroup?: string;
+    role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+  }> = [];
+
+  for (const rel of muscleRelations) {
+    const muscle = await ctx.db.get(rel.muscle);
+    if (muscle) {
+      result.push({
+        _id: muscle._id,
+        name: muscle.name,
+        muscleGroup: muscle.muscleGroup,
+        role: rel.role,
+      });
+    }
+  }
+
+  return result;
+}
+
+export const getPublicExerciseById = query({
+  args: {
+    exerciseId: v.id("exercises"),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("exercises"),
+      _creationTime: v.number(),
+      title: v.string(),
+      description: v.string(),
+      category: exerciseCategoryValidator,
+      level: exerciseLevelValidator,
+      difficulty: v.number(),
+      prerequisites: v.array(
+        v.object({
+          _id: v.id("exercises"),
+          title: v.string(),
+        }),
+      ),
+      progressions: v.array(
+        v.object({
+          _id: v.id("exercises"),
+          title: v.string(),
+        }),
+      ),
+      muscles: v.array(
+        v.object({
+          _id: v.id("muscles"),
+          name: v.string(),
+          muscleGroup: v.optional(v.string()),
+          role: v.optional(
+            v.union(
+              v.literal("primary"),
+              v.literal("secondary"),
+              v.literal("tertiary"),
+              v.literal("stabilizer"),
+            ),
+          ),
+        }),
+      ),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      createdBy: v.string(),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const exercise = await ctx.db.get(args.exerciseId);
+    if (!exercise) {
+      return null;
+    }
+
+    // Fetch all related data in parallel
+    const [prerequisites, progressions, muscles] = await Promise.all([
+      getPublicExercisePrerequisites(ctx, args.exerciseId),
+      getPublicExerciseProgressions(ctx, args.exerciseId),
+      getPublicExerciseMuscles(ctx, args.exerciseId),
+    ]);
+
+    return {
+      ...exercise,
+      prerequisites,
+      progressions,
+      muscles,
+    };
+  },
+});
+
 export const deletePrivateExercise = mutation({
   args: {
     id: v.id("private_exercises"),
