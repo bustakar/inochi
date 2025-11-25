@@ -1,0 +1,266 @@
+---
+description: React component patterns, hooks, and best practices
+globs: **/*.tsx
+---
+
+# React Guidelines
+
+## Component Size and Organization
+
+### Split Large Components
+
+Components over 150 lines should be split into smaller sub-components.
+
+```typescript
+// BAD: One massive component
+function ExercisesPage() {
+  // 300+ lines of mixed concerns
+}
+
+// GOOD: Split into focused components
+function ExercisesPage() {
+  return (
+    <div className="space-y-6">
+      <ExercisesHeader />
+      <ExerciseFilters />
+      <ExercisesList />
+    </div>
+  );
+}
+
+function ExercisesHeader() {/* 30 lines */}
+function ExerciseFilters() {/* 50 lines */}
+function ExercisesList() {/* 70 lines */}
+```
+
+### Single Responsibility
+
+Each component should do one thing well:
+
+```typescript
+// BAD: Component does too many things
+function ExerciseCard({ exercise }) {
+  // Fetches data, handles forms, renders UI, manages modals...
+}
+
+// GOOD: Focused components
+function ExerciseCard({ exercise }) {
+  // Only renders exercise card UI
+}
+
+function ExerciseEditDialog({ exercise, open, onOpenChange }) {
+  // Only handles edit dialog
+}
+
+function useExerciseActions(exerciseId) {
+  // Only handles exercise mutations
+}
+```
+
+## Props Interface Pattern
+
+Define props interface above the component:
+
+```typescript
+interface ExerciseCardProps {
+  exercise: {
+    _id: Id<"exercises">;
+    title: string;
+    level: ExerciseLevel;
+    difficulty: number;
+  };
+  onSelect?: (id: Id<"exercises">) => void;
+}
+
+function ExerciseCard({ exercise, onSelect }: ExerciseCardProps) {
+  return (/* ... */);
+}
+```
+
+### Props Naming
+
+- Boolean props: `isLoading`, `isOpen`, `hasError`
+- Event handlers: `onSelect`, `onChange`, `onSubmit`
+- Render props: `renderHeader`, `renderItem`
+
+## State Management
+
+### Use useMemo for Derived State
+
+```typescript
+// GOOD: Derived state with useMemo
+function ExercisesList({ exercises }) {
+  const sortedExercises = useMemo(
+    () => [...exercises].sort((a, b) => a.difficulty - b.difficulty),
+    [exercises]
+  );
+  
+  const exercisesByLevel = useMemo(
+    () => groupBy(exercises, "level"),
+    [exercises]
+  );
+  
+  return (/* ... */);
+}
+
+// BAD: useState + useEffect for derived state
+function ExercisesList({ exercises }) {
+  const [sortedExercises, setSortedExercises] = useState([]);
+  
+  useEffect(() => {
+    setSortedExercises([...exercises].sort((a, b) => a.difficulty - b.difficulty));
+  }, [exercises]);
+  // This causes unnecessary re-renders
+}
+```
+
+### Keep State Close to Where It's Used
+
+```typescript
+// GOOD: State in the component that needs it
+function ExerciseFilters() {
+  const [level, setLevel] = useState<ExerciseLevel | null>(null);
+  return <LevelSelect value={level} onChange={setLevel} />;
+}
+
+// BAD: Lifting state unnecessarily high
+function ExercisesPage() {
+  const [level, setLevel] = useState(null);  // Used only in filters
+  return <ExerciseFilters level={level} onLevelChange={setLevel} />;
+}
+```
+
+## Event Handler Naming
+
+Prefix event handlers with `handle`:
+
+```typescript
+function ExerciseCard({ exercise }) {
+  const handleClick = () => {
+    router.push(`/exercises/${exercise._id}`);
+  };
+  
+  const handleDelete = async () => {
+    await deleteExercise({ id: exercise._id });
+  };
+  
+  const handleEditSubmit = (data: FormData) => {
+    // ...
+  };
+  
+  return (
+    <Card onClick={handleClick}>
+      <Button onClick={handleDelete}>Delete</Button>
+    </Card>
+  );
+}
+```
+
+## Custom Hooks
+
+### Extract Reusable Logic
+
+```typescript
+// hooks/use-exercise-actions.ts
+export function useExerciseActions(exerciseId: Id<"exercises">) {
+  const deleteExercise = useMutation(api.exercises.delete);
+  const updateExercise = useMutation(api.exercises.update);
+  
+  const handleDelete = async () => {
+    await deleteExercise({ id: exerciseId });
+  };
+  
+  const handleUpdate = async (data: ExerciseUpdate) => {
+    await updateExercise({ id: exerciseId, ...data });
+  };
+  
+  return { handleDelete, handleUpdate };
+}
+
+// Usage
+function ExerciseCard({ exercise }) {
+  const { handleDelete, handleUpdate } = useExerciseActions(exercise._id);
+}
+```
+
+### Hook Naming Convention
+
+- Prefix with `use`
+- Name describes what it provides: `useExerciseActions`, `useSearchFilter`, `usePagination`
+
+## Keep Business Logic in Backend
+
+Components should NOT contain business logic. Call Convex functions instead.
+
+```typescript
+// BAD: Business logic in component
+function ExerciseStats({ exercises }) {
+  const averageDifficulty = exercises.reduce((sum, e) => sum + e.difficulty, 0) / exercises.length;
+  const byLevel = exercises.reduce((acc, e) => {
+    acc[e.level] = (acc[e.level] || 0) + 1;
+    return acc;
+  }, {});
+  // This logic should be in Convex
+}
+
+// GOOD: Convex does the computation
+function ExerciseStats({ userId }) {
+  const stats = useQuery(api.exercises.getStats, { userId });
+  if (stats === undefined) return <Skeleton />;
+  
+  return (
+    <div>
+      <p>Average Difficulty: {stats.averageDifficulty}</p>
+      <p>By Level: {JSON.stringify(stats.byLevel)}</p>
+    </div>
+  );
+}
+```
+
+## Component File Structure
+
+```typescript
+// 1. Imports
+"use client";
+
+import { useState, useMemo } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@packages/backend/convex/_generated/api";
+import { Button, Card } from "@inochi/ui";
+
+// 2. Types/Interfaces
+interface ExerciseCardProps {
+  exercise: Exercise;
+  onSelect?: (id: string) => void;
+}
+
+// 3. Constants (if any)
+const DIFFICULTY_COLORS = {
+  easy: "green",
+  medium: "yellow",
+  hard: "red",
+} as const;
+
+// 4. Component
+export function ExerciseCard({ exercise, onSelect }: ExerciseCardProps) {
+  // Hooks first
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Derived state
+  const difficultyColor = useMemo(
+    () => DIFFICULTY_COLORS[exercise.difficulty],
+    [exercise.difficulty]
+  );
+  
+  // Event handlers
+  const handleClick = () => onSelect?.(exercise._id);
+  
+  // Render
+  return (/* ... */);
+}
+
+// 5. Sub-components (if small and only used here)
+function DifficultyBadge({ level }: { level: number }) {
+  return <Badge>{level}/10</Badge>;
+}
+```

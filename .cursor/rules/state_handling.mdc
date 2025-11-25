@@ -1,0 +1,382 @@
+---
+description: Loading states, empty states, and error handling patterns
+globs: **/*.tsx
+---
+
+# State Handling Guidelines
+
+## Loading States
+
+### Convex Query Loading
+
+Convex queries return `undefined` while loading. Always check for this:
+
+```typescript
+function ExercisesList() {
+  const exercises = useQuery(api.exercises.list);
+  
+  // Loading state
+  if (exercises === undefined) {
+    return <ExercisesListSkeleton />;
+  }
+  
+  // Empty state
+  if (exercises.length === 0) {
+    return <ExercisesEmptyState />;
+  }
+  
+  // Data state
+  return (
+    <div className="grid gap-4">
+      {exercises.map((exercise) => (
+        <ExerciseCard key={exercise._id} exercise={exercise} />
+      ))}
+    </div>
+  );
+}
+```
+
+### Skeleton Components
+
+Use `Skeleton` from `@inochi/ui` for content placeholders:
+
+```typescript
+import { Skeleton } from "@inochi/ui";
+
+// Simple skeleton
+<Skeleton className="h-4 w-[200px]" />
+
+// Card skeleton
+function ExerciseCardSkeleton() {
+  return (
+    <Card className="p-4">
+      <Skeleton className="h-6 w-3/4 mb-2" />      {/* Title */}
+      <Skeleton className="h-4 w-1/2 mb-4" />      {/* Subtitle */}
+      <Skeleton className="h-20 w-full mb-2" />    {/* Description */}
+      <div className="flex gap-2">
+        <Skeleton className="h-6 w-16" />          {/* Badge */}
+        <Skeleton className="h-6 w-20" />          {/* Badge */}
+      </div>
+    </Card>
+  );
+}
+
+// List skeleton
+function ExercisesListSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <ExerciseCardSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
+```
+
+### Spinner for Actions
+
+Use `Spinner` for button loading states and inline actions:
+
+```typescript
+import { Button, Spinner } from "@inochi/ui";
+
+function DeleteButton({ exerciseId }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteExercise = useMutation(api.exercises.delete);
+  
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteExercise({ id: exerciseId });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  
+  return (
+    <Button onClick={handleDelete} disabled={isDeleting}>
+      {isDeleting ? <Spinner className="mr-2" /> : null}
+      Delete
+    </Button>
+  );
+}
+```
+
+## Empty States
+
+Use `Empty` components from `@inochi/ui`:
+
+```typescript
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+  Button,
+} from "@inochi/ui";
+import { Dumbbell, Plus } from "lucide-react";
+
+function ExercisesEmptyState({ onCreateClick }) {
+  return (
+    <Empty className="border">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Dumbbell className="h-6 w-6" />
+        </EmptyMedia>
+        <EmptyTitle>No exercises yet</EmptyTitle>
+        <EmptyDescription>
+          Get started by creating your first exercise.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button onClick={onCreateClick}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Exercise
+        </Button>
+      </EmptyContent>
+    </Empty>
+  );
+}
+```
+
+### Empty State with Search
+
+```typescript
+function ExercisesEmptyState({ searchQuery, onClearSearch }) {
+  if (searchQuery) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Search className="h-6 w-6" />
+          </EmptyMedia>
+          <EmptyTitle>No results found</EmptyTitle>
+          <EmptyDescription>
+            No exercises match "{searchQuery}". Try a different search term.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button variant="outline" onClick={onClearSearch}>
+            Clear search
+          </Button>
+        </EmptyContent>
+      </Empty>
+    );
+  }
+  
+  return (
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle>No exercises</EmptyTitle>
+        <EmptyDescription>
+          You haven't created any exercises yet.
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  );
+}
+```
+
+## Error Handling
+
+### Query Error Pattern
+
+```typescript
+function ExercisesList() {
+  const exercises = useQuery(api.exercises.list);
+  
+  if (exercises === undefined) {
+    return <ExercisesListSkeleton />;
+  }
+  
+  // Convex throws on errors, so if we get here, data is valid
+  // But we can still handle edge cases
+  
+  if (exercises.length === 0) {
+    return <ExercisesEmptyState />;
+  }
+  
+  return (/* render list */);
+}
+```
+
+### Mutation Error Handling
+
+```typescript
+import { toast } from "sonner";
+
+function CreateExerciseForm() {
+  const createExercise = useMutation(api.exercises.create);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const handleSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      await createExercise(data);
+      toast.success("Exercise created successfully");
+    } catch (error) {
+      toast.error("Failed to create exercise");
+      console.error("Create exercise error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (/* form */);
+}
+```
+
+### Error Boundary Pattern
+
+For unexpected errors, use error boundaries:
+
+```typescript
+// app/dashboard/exercises/error.tsx
+"use client";
+
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, Button } from "@inochi/ui";
+import { AlertCircle } from "lucide-react";
+
+export default function ExercisesError({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  return (
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <AlertCircle className="h-6 w-6 text-destructive" />
+        </EmptyMedia>
+        <EmptyTitle>Something went wrong</EmptyTitle>
+        <EmptyDescription>
+          We couldn't load the exercises. Please try again.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button onClick={reset}>Try again</Button>
+      </EmptyContent>
+    </Empty>
+  );
+}
+```
+
+## Complete State Handling Example
+
+```typescript
+"use client";
+
+import { useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@packages/backend/convex/_generated/api";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+  Button,
+  Skeleton,
+  Card,
+} from "@inochi/ui";
+import { Dumbbell, Plus, Search } from "lucide-react";
+
+interface ExercisesListProps {
+  searchQuery: string;
+  onCreateClick: () => void;
+}
+
+export function ExercisesList({ searchQuery, onCreateClick }: ExercisesListProps) {
+  const exercises = useQuery(api.exercises.list, {
+    searchQuery: searchQuery || undefined,
+  });
+  
+  // Loading state
+  if (exercises === undefined) {
+    return (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Card key={i} className="p-4">
+            <Skeleton className="h-6 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-1/2 mb-4" />
+            <Skeleton className="h-16 w-full" />
+          </Card>
+        ))}
+      </div>
+    );
+  }
+  
+  // Empty state (with search)
+  if (exercises.length === 0 && searchQuery) {
+    return (
+      <Empty className="border">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Search className="h-6 w-6" />
+          </EmptyMedia>
+          <EmptyTitle>No results found</EmptyTitle>
+          <EmptyDescription>
+            No exercises match "{searchQuery}".
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+  
+  // Empty state (no data)
+  if (exercises.length === 0) {
+    return (
+      <Empty className="border">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Dumbbell className="h-6 w-6" />
+          </EmptyMedia>
+          <EmptyTitle>No exercises yet</EmptyTitle>
+          <EmptyDescription>
+            Create your first exercise to get started.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button onClick={onCreateClick}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Exercise
+          </Button>
+        </EmptyContent>
+      </Empty>
+    );
+  }
+  
+  // Data state
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {exercises.map((exercise) => (
+        <ExerciseCard key={exercise._id} exercise={exercise} />
+      ))}
+    </div>
+  );
+}
+```
+
+## Optimistic Updates
+
+For better UX, use optimistic updates when appropriate:
+
+```typescript
+const deleteExercise = useMutation(api.exercises.delete).withOptimisticUpdate(
+  (localStore, args) => {
+    const exercises = localStore.getQuery(api.exercises.list, {});
+    if (exercises) {
+      localStore.setQuery(
+        api.exercises.list,
+        {},
+        exercises.filter((e) => e._id !== args.id)
+      );
+    }
+  }
+);
+```

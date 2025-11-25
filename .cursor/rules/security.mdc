@@ -1,0 +1,269 @@
+---
+description: Security best practices for authentication, secrets, and data access
+globs: **/*.ts,**/*.tsx
+---
+
+# Security Guidelines
+
+## Environment Variables and Secrets
+
+### Never Hardcode Secrets
+
+```typescript
+// BAD: Hardcoded secret
+const API_KEY = "sk-1234567890abcdef";
+
+// GOOD: Use environment variables
+const API_KEY = process.env.OPENAI_API_KEY;
+```
+
+### Never Log Sensitive Data
+
+```typescript
+// BAD: Logging sensitive info
+console.log("User credentials:", { email, password });
+console.log("API response:", response);  // May contain tokens
+
+// GOOD: Log only safe identifiers
+console.log("Processing user:", userId);
+console.log("API call completed for:", endpoint);
+```
+
+### Environment Variable Patterns
+
+```typescript
+// In Convex actions (server-side)
+const apiKey = process.env.OPENAI_API_KEY;
+if (!apiKey) {
+  throw new Error("OPENAI_API_KEY not configured");
+}
+
+// In Next.js (client-side variables must be prefixed)
+const publicKey = process.env.NEXT_PUBLIC_CONVEX_URL;  // OK for client
+const secretKey = process.env.SECRET_KEY;  // Server-only
+```
+
+## Convex Authentication
+
+### Every User Data Access Needs Auth Check
+
+```typescript
+import { getUserId } from "./auth";
+
+// REQUIRED pattern for any function accessing user data
+export const getUserExercises = query({
+  args: {},
+  returns: v.array(exerciseValidator),
+  handler: async (ctx, args) => {
+    // 1. ALWAYS get and check userId first
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+    
+    // 2. Only then access data
+    return ctx.db
+      .query("private_exercises")
+      .withIndex("by_user", (q) => q.eq("createdBy", userId))
+      .collect();
+  },
+});
+```
+
+### Verify Resource Ownership
+
+```typescript
+export const updateExercise = mutation({
+  args: { id: v.id("private_exercises"), title: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+    
+    // ALWAYS verify the resource belongs to the user
+    const exercise = await ctx.db.get(args.id);
+    if (!exercise) {
+      throw new Error("Exercise not found");
+    }
+    if (exercise.createdBy !== userId) {
+      throw new Error("Forbidden");  // Don't reveal it exists
+    }
+    
+    await ctx.db.patch(args.id, { title: args.title });
+    return null;
+  },
+});
+```
+
+### Auth Check Checklist
+
+For EVERY Convex function that accesses user data:
+
+- [ ] Call `getUserId(ctx)` at the start
+- [ ] Check `if (!userId)` and throw "Unauthorized"
+- [ ] For owned resources, verify ownership before access
+- [ ] Use generic errors ("Not found") to avoid leaking info
+
+## Public vs Internal Functions
+
+### Minimize Public Surface
+
+```typescript
+// PUBLIC: Only expose what clients need
+export const getExercise = query({
+  args: { id: v.id("exercises") },
+  returns: exerciseValidator,
+  handler: async (ctx, args) => {
+    // Public functions can be called by anyone
+  },
+});
+
+// INTERNAL: Use for server-to-server logic
+export const processExerciseInternal = internalMutation({
+  args: { id: v.id("exercises") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    // Only callable from other Convex functions
+    // NOT exposed to clients
+  },
+});
+```
+
+### When to Use Internal Functions
+
+- Scheduled job handlers (crons)
+- Functions called from actions
+- Administrative operations
+- Any logic that shouldn't be client-callable
+
+## Input Validation
+
+### Always Use Validators
+
+```typescript
+// Convex validators automatically validate input
+export const createExercise = mutation({
+  args: {
+    title: v.string(),
+    difficulty: v.number(),
+    level: exerciseLevelValidator,  // Enum validation
+  },
+  returns: v.id("exercises"),
+  handler: async (ctx, args) => {
+    // args is already validated by Convex
+    // Additional business validation if needed:
+    if (args.difficulty < 1 || args.difficulty > 10) {
+      throw new Error("Difficulty must be between 1 and 10");
+    }
+    
+    return ctx.db.insert("exercises", args);
+  },
+});
+```
+
+### Validate in Convex, Not React
+
+```typescript
+// BAD: Relying on frontend validation only
+function CreateExercise() {
+  const handleSubmit = (data) => {
+    if (data.difficulty < 1) return;  // Can be bypassed
+    createExercise(data);
+  };
+}
+
+// GOOD: Validation in Convex (authoritative)
+export const createExercise = mutation({
+  args: { difficulty: v.number() },
+  handler: async (ctx, args) => {
+    if (args.difficulty < 1 || args.difficulty > 10) {
+      throw new Error("Invalid difficulty");
+    }
+    // ...
+  },
+});
+```
+
+## Error Messages
+
+### Don't Expose Internal Details
+
+```typescript
+// BAD: Reveals internal structure
+throw new Error(`Database query failed: ${query} with error ${err.message}`);
+throw new Error(`User ${userId} not found in users table`);
+
+// GOOD: Generic user-facing errors
+throw new Error("Unable to load data. Please try again.");
+throw new Error("User not found");
+throw new Error("Not authorized");
+```
+
+### Log Details Server-Side Only
+
+```typescript
+export const getExercise = query({
+  handler: async (ctx, args) => {
+    try {
+      // ... operation
+    } catch (error) {
+      // Log full details server-side
+      console.error("Failed to get exercise:", {
+        exerciseId: args.id,
+        error: error.message,
+        stack: error.stack,
+      });
+      
+      // Return generic error to client
+      throw new Error("Unable to load exercise");
+    }
+  },
+});
+```
+
+## Data Access Patterns
+
+### Filter Data by User
+
+```typescript
+// Always scope queries to the current user
+const userId = await getUserId(ctx);
+if (!userId) throw new Error("Unauthorized");
+
+// Use index to filter by user
+const userExercises = await ctx.db
+  .query("private_exercises")
+  .withIndex("by_user", (q) => q.eq("createdBy", userId))
+  .collect();
+```
+
+### Don't Return More Than Needed
+
+```typescript
+// BAD: Returns all fields including internal ones
+export const getUser = query({
+  handler: async (ctx, args) => {
+    return ctx.db.get(args.id);  // Might include sensitive fields
+  },
+});
+
+// GOOD: Return only what's needed
+export const getUser = query({
+  returns: v.object({
+    _id: v.id("users"),
+    name: v.string(),
+    avatar: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.id);
+    if (!user) throw new Error("Not found");
+    return {
+      _id: user._id,
+      name: user.name,
+      avatar: user.avatar,
+    };
+  },
+});
+```

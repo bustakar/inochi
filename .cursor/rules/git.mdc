@@ -1,0 +1,244 @@
+---
+description: Git commit conventions, PR guidelines, and version control best practices
+globs: **/*
+---
+
+# Git Guidelines
+
+## Commit Message Format
+
+Use **Conventional Commits** format:
+
+```
+<type>: <description>
+
+[optional body]
+
+[optional footer]
+```
+
+### Types
+
+| Type       | Description                              |
+| ---------- | ---------------------------------------- |
+| `feat`     | New feature or functionality             |
+| `fix`      | Bug fix                                  |
+| `chore`    | Maintenance tasks, dependencies, configs |
+| `docs`     | Documentation changes                    |
+| `style`    | Code formatting (no logic changes)       |
+| `refactor` | Code restructuring (no behavior change)  |
+| `perf`     | Performance improvements                 |
+| `test`     | Adding or updating tests                 |
+| `ci`       | CI/CD configuration changes              |
+| `build`    | Build system or external dependencies    |
+
+### Examples
+
+```bash
+# Features
+feat: add exercise search functionality
+feat: implement muscle group filtering
+feat: add dark mode toggle
+
+# Bug fixes
+fix: correct difficulty calculation for compound exercises
+fix: resolve auth redirect loop on login
+fix: handle empty exercise list gracefully
+
+# Chores
+chore: update convex to v1.18
+chore: remove unused dependencies
+chore: configure eslint rules
+
+# Refactoring
+refactor: extract exercise card into separate component
+refactor: simplify auth helper functions
+refactor: move validators to dedicated file
+
+# Documentation
+docs: update README with setup instructions
+docs: add JSDoc comments to exercise functions
+```
+
+### Commit Message Rules
+
+- **Lowercase**: Start description with lowercase letter
+- **No period**: Don't end with a period
+- **Imperative mood**: "add feature" not "added feature"
+- **50 char limit**: Keep first line under 50 characters
+- **Present tense**: "fix bug" not "fixed bug"
+
+## Small, Atomic Commits
+
+### One Logical Change Per Commit
+
+Each commit should represent ONE logical change that could be reverted independently.
+
+```bash
+# GOOD: Separate, atomic commits
+git commit -m "feat: add exercise level enum to schema"
+git commit -m "feat: implement level filter in exercises query"
+git commit -m "feat: add level filter UI to exercises page"
+
+# BAD: One massive commit
+git commit -m "feat: add exercise filtering with schema changes and UI"
+```
+
+### When to Split Commits
+
+Split when you have:
+
+- Schema changes AND function changes
+- Backend changes AND frontend changes
+- Multiple unrelated fixes
+- Refactoring AND new features
+
+### Logical Grouping
+
+Keep related changes together:
+
+```bash
+# GOOD: Related changes in one commit
+# - Adding a new Convex query + its validator = one commit
+
+# GOOD: Separate concerns
+# - Schema migration = one commit
+# - Functions using new schema = separate commit
+# - UI using new functions = separate commit
+```
+
+## Pre-Commit Checklist
+
+**Before every commit, ensure:**
+
+1. **TypeScript compiles**: `pnpm typecheck`
+2. **Code is formatted**: `pnpm format`
+3. **Linting passes**: `pnpm lint`
+
+```bash
+# Run all checks before committing
+pnpm typecheck && pnpm format && pnpm lint
+
+# Or use the combined command if available
+pnpm check
+```
+
+### Fix Issues Before Committing
+
+```bash
+# Auto-fix formatting
+pnpm format
+
+# Check for type errors
+pnpm typecheck
+
+# Fix linting issues
+pnpm lint --fix
+```
+
+## Branch Naming
+
+```bash
+# Feature branches
+feature/add-exercise-search
+feature/muscle-group-filter
+
+# Bug fix branches
+fix/auth-redirect-loop
+fix/difficulty-calculation
+
+# Chore branches
+chore/update-dependencies
+chore/eslint-config
+```
+
+## Pull Request Guidelines
+
+### PR Title Format
+
+Same as commit format:
+
+```
+feat: add exercise search functionality
+fix: resolve auth redirect on mobile
+```
+
+### PR Description Template
+
+```markdown
+## What
+
+Brief description of what this PR does.
+
+## Why
+
+Why is this change needed?
+
+## How
+
+How was this implemented? Any notable decisions?
+
+## Testing
+
+How was this tested?
+
+## Screenshots (if UI changes)
+
+Before/After screenshots if applicable.
+```
+
+### PR Best Practices
+
+- **Keep PRs small**: Easier to review, less risk
+- **One feature per PR**: Don't mix unrelated changes
+- **Update PR title**: If scope changes during review
+- **Squash if needed**: Clean up messy commit history before merge
+
+## Commit Workflow Example
+
+```bash
+# 1. Make changes to schema
+git add packages/backend/convex/schema.ts
+git commit -m "feat: add exerciseLevel field to exercises table"
+
+# 2. Make changes to backend functions
+git add packages/backend/convex/functions/exercises.ts
+git commit -m "feat: implement level filtering in getExercises query"
+
+# 3. Make changes to frontend
+git add apps/web/src/app/dashboard/exercises/
+git commit -m "feat: add level filter dropdown to exercises page"
+
+# 4. Before pushing, verify everything works
+pnpm typecheck && pnpm lint && pnpm format
+```
+
+## Interactive Staging
+
+Use interactive staging for precise commits:
+
+```bash
+# Stage specific hunks
+git add -p
+
+# Review what's staged
+git diff --staged
+
+# Commit only what's staged
+git commit -m "feat: add specific change"
+```
+
+## Amending Commits
+
+If you need to fix the last commit (before pushing):
+
+```bash
+# Add forgotten files to last commit
+git add forgotten-file.ts
+git commit --amend --no-edit
+
+# Fix commit message
+git commit --amend -m "feat: corrected message"
+```
+
+**Never amend commits that have been pushed to shared branches.**

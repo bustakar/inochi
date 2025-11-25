@@ -1,0 +1,229 @@
+---
+description: Next.js App Router patterns and conventions for the web application
+globs: **/apps/web/**/*.tsx,**/apps/web/**/*.ts
+---
+
+# Next.js Guidelines
+
+## App Router Structure
+
+Use Next.js App Router with file-based routing in `app/` directory.
+
+```
+app/
+  layout.tsx          # Root layout (providers, global UI)
+  page.tsx            # Home page (/)
+  dashboard/
+    layout.tsx        # Dashboard layout (sidebar, etc.)
+    page.tsx          # Dashboard home (/dashboard)
+    exercises/
+      page.tsx        # Exercises list (/dashboard/exercises)
+      [id]/
+        page.tsx      # Exercise detail (/dashboard/exercises/[id])
+        _components/  # Page-specific components (not routed)
+  _components/        # Shared app components (not routed)
+```
+
+### Naming Conventions
+
+- `page.tsx` - Route pages
+- `layout.tsx` - Layouts that wrap child routes
+- `loading.tsx` - Loading UI (optional)
+- `error.tsx` - Error UI (optional)
+- `_components/` - Co-located components (underscore prefix = not routed)
+
+## Server vs Client Components
+
+### Default to Server Components
+
+Server components are the default. Only use client components when needed.
+
+```typescript
+// Server component (default) - no directive needed
+import { api } from "@packages/backend/convex/_generated/api";
+
+export default function ExercisesPage() {
+  // Can use async/await directly
+  // Cannot use hooks or browser APIs
+  return <ExercisesList />;
+}
+```
+
+### Use Client Components When Needed
+
+Add `"use client"` at the top when you need:
+- React hooks (`useState`, `useEffect`, `useMemo`, etc.)
+- Convex hooks (`useQuery`, `useMutation`)
+- Event handlers
+- Browser APIs
+
+```typescript
+"use client";
+
+import { useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@packages/backend/convex/_generated/api";
+
+export function ExercisesList() {
+  const [filter, setFilter] = useState("");
+  const exercises = useQuery(api.functions.exercises.list, { filter });
+  
+  return (/* ... */);
+}
+```
+
+### Component Placement Strategy
+
+```typescript
+// page.tsx - Server component (thin wrapper)
+import { ExercisesList } from "./_components/exercises-list";
+
+export default function ExercisesPage() {
+  return (
+    <div className="container">
+      <h1>Exercises</h1>
+      <ExercisesList />  {/* Client component handles interactivity */}
+    </div>
+  );
+}
+
+// _components/exercises-list.tsx - Client component
+"use client";
+export function ExercisesList() {
+  const data = useQuery(api.exercises.list);
+  // Interactive logic here
+}
+```
+
+## Metadata and SEO
+
+Export `metadata` from page and layout files:
+
+```typescript
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Exercises | Inochi",
+  description: "Browse and manage your exercise library",
+  openGraph: {
+    title: "Exercises | Inochi",
+    description: "Browse and manage your exercise library",
+  },
+};
+
+export default function ExercisesPage() {
+  return (/* ... */);
+}
+```
+
+### Dynamic Metadata
+
+```typescript
+import type { Metadata } from "next";
+
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  return {
+    title: `Exercise ${id} | Inochi`,
+  };
+}
+```
+
+## Layouts
+
+### Root Layout Pattern
+
+```typescript
+// app/layout.tsx
+import type { Metadata } from "next";
+import { cn, Toaster } from "@inochi/ui";
+import ConvexClientProvider from "./_components/ConvexClientProvider";
+import { ThemeProvider } from "./_components/theme-provider";
+import "~/app/styles.css";
+
+export const metadata: Metadata = {
+  title: "Inochi App",
+  description: "Your fitness companion",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn("bg-background min-h-screen font-sans antialiased")}>
+        <ThemeProvider>
+          <ConvexClientProvider>
+            {children}
+          </ConvexClientProvider>
+          <Toaster />
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Nested Layout Pattern
+
+```typescript
+// app/dashboard/layout.tsx
+import { Sidebar } from "./_components/sidebar";
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <main className="flex-1 p-6">{children}</main>
+    </div>
+  );
+}
+```
+
+## Import Conventions
+
+```typescript
+// Convex API
+import { api } from "@packages/backend/convex/_generated/api";
+import { Doc, Id } from "@packages/backend/convex/_generated/dataModel";
+
+// UI components
+import { Button, Card, Skeleton } from "@inochi/ui";
+
+// App-local imports (use ~ alias)
+import { Search } from "~/components/search";
+import { formatDate } from "~/utils/format";
+```
+
+## Route Handlers
+
+For API routes that need server-side logic:
+
+```typescript
+// app/api/webhook/route.ts
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  // Handle webhook
+  return NextResponse.json({ success: true });
+}
+```
+
+## Navigation
+
+Use Next.js `Link` for client-side navigation:
+
+```typescript
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+// Declarative navigation
+<Link href="/dashboard/exercises">Exercises</Link>
+
+// Programmatic navigation (in client components)
+const router = useRouter();
+router.push("/dashboard/exercises");
+```
