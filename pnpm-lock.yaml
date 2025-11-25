@@ -51,6 +51,13 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      '@t3-oss/env-core':
+        specifier: ^0.13.8
+        version: 0.13.8(typescript@5.9.3)(zod@4.1.13)
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.13
     devDependencies:
       '@inochi/prettier-config':
         specifier: workspace:*
@@ -82,6 +89,9 @@ importers:
       '@react-native/virtualized-lists':
         specifier: ^0.82.1
         version: 0.82.1(@types/react@19.2.7)(react-native@0.82.1(@babel/core@7.28.5)(@types/react@19.2.7)(react@19.2.0))(react@19.2.0)
+      '@t3-oss/env-core':
+        specifier: ^0.13.8
+        version: 0.13.8(typescript@5.9.3)(zod@3.25.76)
       expo:
         specifier: ~54.0.25
         version: 54.0.25(@babel/core@7.28.5)(@expo/metro-runtime@6.1.2)(expo-router@6.0.15)(react-native-webview@13.16.0(react-native@0.82.1(@babel/core@7.28.5)(@types/react@19.2.7)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(@types/react@19.2.7)(react@19.2.0))(react@19.2.0)
@@ -197,6 +207,9 @@ importers:
       '@inochi/analytics':
         specifier: workspace:*
         version: link:../../packages/analytics
+      '@t3-oss/env-nextjs':
+        specifier: ^0.13.8
+        version: 0.13.8(typescript@5.9.3)(zod@4.1.13)
       '@tanstack/react-form':
         specifier: 'catalog:'
         version: 1.26.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -282,12 +295,18 @@ importers:
 
   packages/analytics:
     dependencies:
+      '@t3-oss/env-core':
+        specifier: ^0.13.8
+        version: 0.13.8(typescript@5.9.3)(zod@4.1.13)
       posthog-js:
         specifier: ^1.298.0
         version: 1.298.0
       posthog-node:
         specifier: ^5.14.0
         version: 5.14.0
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.13
     devDependencies:
       '@inochi/eslint-config':
         specifier: workspace:*
@@ -319,12 +338,18 @@ importers:
 
   packages/backend:
     dependencies:
+      '@t3-oss/env-core':
+        specifier: ^0.13.8
+        version: 0.13.8(typescript@5.9.3)(zod@4.1.13)
       convex:
         specifier: ^1.29.3
         version: 1.29.3(@clerk/clerk-react@5.57.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
       openai:
         specifier: ^6.9.1
         version: 6.9.1(ws@8.18.3)(zod@4.1.13)
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.13
     devDependencies:
       typescript:
         specifier: 5.9.3
@@ -3040,6 +3065,40 @@ packages:
 
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
+
+  '@t3-oss/env-core@0.13.8':
+    resolution: {integrity: sha512-L1inmpzLQyYu4+Q1DyrXsGJYCXbtXjC4cICw1uAKv0ppYPQv656lhZPU91Qd1VS6SO/bou1/q5ufVzBGbNsUpw==}
+    peerDependencies:
+      arktype: ^2.1.0
+      typescript: '>=5.0.0'
+      valibot: ^1.0.0-beta.7 || ^1.0.0
+      zod: ^3.24.0 || ^4.0.0-beta.0
+    peerDependenciesMeta:
+      arktype:
+        optional: true
+      typescript:
+        optional: true
+      valibot:
+        optional: true
+      zod:
+        optional: true
+
+  '@t3-oss/env-nextjs@0.13.8':
+    resolution: {integrity: sha512-QmTLnsdQJ8BiQad2W2nvV6oUpH4oMZMqnFEjhVpzU0h3sI9hn8zb8crjWJ1Amq453mGZs6A4v4ihIeBFDOrLeQ==}
+    peerDependencies:
+      arktype: ^2.1.0
+      typescript: '>=5.0.0'
+      valibot: ^1.0.0-beta.7 || ^1.0.0
+      zod: ^3.24.0 || ^4.0.0-beta.0
+    peerDependenciesMeta:
+      arktype:
+        optional: true
+      typescript:
+        optional: true
+      valibot:
+        optional: true
+      zod:
+        optional: true
 
   '@tailwindcss/node@4.1.17':
     resolution: {integrity: sha512-csIkHIgLb3JisEFQ0vxr2Y57GUNYh447C8xzwj89U/8fdW8LhProdxvnVH6U8M2Y73QKiTIH+LWbK3V2BBZsAg==}
@@ -10809,6 +10868,23 @@ snapshots:
   '@swc/helpers@0.5.17':
     dependencies:
       tslib: 2.8.1
+
+  '@t3-oss/env-core@0.13.8(typescript@5.9.3)(zod@3.25.76)':
+    optionalDependencies:
+      typescript: 5.9.3
+      zod: 3.25.76
+
+  '@t3-oss/env-core@0.13.8(typescript@5.9.3)(zod@4.1.13)':
+    optionalDependencies:
+      typescript: 5.9.3
+      zod: 4.1.13
+
+  '@t3-oss/env-nextjs@0.13.8(typescript@5.9.3)(zod@4.1.13)':
+    dependencies:
+      '@t3-oss/env-core': 0.13.8(typescript@5.9.3)(zod@4.1.13)
+    optionalDependencies:
+      typescript: 5.9.3
+      zod: 4.1.13
 
   '@tailwindcss/node@4.1.17':
     dependencies:

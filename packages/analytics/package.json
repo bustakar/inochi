@@ -16,8 +16,10 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
+    "@t3-oss/env-core": "^0.13.8",
     "posthog-js": "^1.298.0",
-    "posthog-node": "^5.14.0"
+    "posthog-node": "^5.14.0",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@inochi/eslint-config": "workspace:*",

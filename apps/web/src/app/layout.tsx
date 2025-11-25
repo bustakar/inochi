@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { cn, Toaster } from "@inochi/ui";
 
+import { env } from "~/env";
 import ConvexClientProvider from "./_components/ConvexClientProvider";
 import { ThemeProvider } from "./_components/theme-provider";
 
@@ -10,7 +11,7 @@ import "~/app/styles.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.VERCEL_ENV === "production"
+    env.VERCEL_ENV === "production"
       ? "https://inochi.app"
       : "http://localhost:3000",
   ),
