@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@t3-oss/env-core": "^0.13.8",
     "convex": "^1.29.3",
-    "openai": "^6.9.1"
+    "openai": "^6.9.1",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "typescript": "5.9.3"

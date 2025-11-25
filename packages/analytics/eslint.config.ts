@@ -1,3 +1,3 @@
-import { baseConfig } from "@inochi/eslint-config/base";
+import { baseConfig, restrictEnvAccess } from "@inochi/eslint-config/base";
 
-export default [baseConfig];
+export default [baseConfig, restrictEnvAccess];

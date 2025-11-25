@@ -3,18 +3,9 @@ import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ReactNode } from "react";
 
-const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
-const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+import { env } from "./env";
 
-if (!convexUrl) {
-  throw new Error("EXPO_PUBLIC_CONVEX_URL is not set");
-}
-
-if (!clerkPublishableKey) {
-  throw new Error("EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is not set");
-}
-
-const convex = new ConvexReactClient(convexUrl);
+const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL);
 
 function ConvexProvider({ children }: { children: ReactNode }) {
   return (
@@ -30,7 +21,7 @@ export default function ConvexClientProvider({
   children: ReactNode;
 }) {
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey}>
+    <ClerkProvider publishableKey={env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <ConvexProvider>{children}</ConvexProvider>
     </ClerkProvider>
   );

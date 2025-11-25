@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import OpenAI from "openai";
 import { internal } from "../_generated/api";
 import { action, query } from "../_generated/server";
+import { env } from "../env";
 import { missingEnvVariableUrl } from "../utils";
 import {
   exerciseCategoryValidator,
@@ -12,7 +13,7 @@ import {
 export const openaiKeySet = query({
   args: {},
   handler: async () => {
-    return !!process.env.OPENROUTER_API_KEY;
+    return !!env.OPENROUTER_API_KEY;
   },
 });
 
@@ -37,7 +38,7 @@ export const generateExerciseData = action({
     ),
   }),
   handler: async (ctx, { exerciseName }) => {
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = env.OPENROUTER_API_KEY;
     if (!apiKey) {
       throw new Error(
         missingEnvVariableUrl(
