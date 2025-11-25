@@ -41,9 +41,7 @@ export default defineSchema({
     category: exerciseCategoryValidator,
     level: exerciseLevelValidator,
     difficulty: v.number(),
-    prerequisites: v.array(
-      v.union(v.id("exercises"), v.id("private_exercises")),
-    ),
+    prerequisites: v.array(v.id("exercises")),
     createdAt: v.number(),
     updatedAt: v.number(),
     createdBy: v.string(),
