@@ -1,0 +1,119 @@
+---
+description: Monorepo structure, pnpm workspace, and core architecture principles for the Inochi project
+globs: **/*
+---
+
+# Architecture Guidelines
+
+## Monorepo Structure
+
+This is a pnpm monorepo with the following structure:
+
+```
+apps/
+  web/          # Next.js web application
+  native/       # React Native (Expo) mobile app
+packages/
+  backend/      # Convex backend (shared between web and native)
+  ui/           # Shared UI components (@inochi/ui)
+  analytics/    # Analytics package
+tooling/
+  eslint/       # Shared ESLint configs
+  prettier/     # Shared Prettier config
+  typescript/   # Shared TypeScript configs
+  tailwind/     # Shared Tailwind config and theme
+```
+
+## Package Management
+
+- **Use pnpm exclusively** - never use npm or yarn
+- Run `pnpm install` from the repository root
+- Use workspace protocol for internal dependencies: `"@inochi/ui": "workspace:*"`
+- Add new dependencies from root: `pnpm add <package> --filter <app-or-package>`
+
+## Core Architecture Principle: Backend-First Logic
+
+**Put as much business logic as possible in Convex functions.**
+
+The Convex backend is shared between the web and native apps. This means:
+
+- All data transformations belong in Convex
+- All business rules belong in Convex
+- All calculations belong in Convex
+- All validation logic belongs in Convex
+
+### Frontend = Thin UI Layer
+
+Web and native apps should primarily be:
+
+- UI rendering
+- Calling Convex queries/mutations
+- Handling user interactions
+- Managing local UI state only
+
+### Example - Good Pattern
+
+```typescript
+// In Convex: complex logic lives here
+export const getExerciseWithDetails = query({
+  args: { exerciseId: v.id("exercises") },
+  returns: exerciseWithDetailsValidator,
+  handler: async (ctx, args) => {
+    const exercise = await ctx.db.get(args.exerciseId);
+    const muscles = await fetchMusclesForExercise(ctx, args.exerciseId);
+    const variants = await fetchVariants(ctx, args.exerciseId);
+    // All transformation logic here
+    return { ...exercise, muscles, variants, computedDifficulty: calculateDifficulty(exercise) };
+  },
+});
+
+// In React: just render what Convex returns
+function ExerciseDetails({ exerciseId }) {
+  const data = useQuery(api.exercises.getExerciseWithDetails, { exerciseId });
+  if (data === undefined) return <Skeleton />;
+  return <ExerciseCard data={data} />;
+}
+```
+
+### Example - Bad Pattern
+
+```typescript
+// DON'T do this - logic in React that should be in Convex
+function ExerciseDetails({ exerciseId }) {
+  const exercise = useQuery(api.exercises.get, { exerciseId });
+  const muscles = useQuery(api.muscles.getForExercise, { exerciseId });
+  const variants = useQuery(api.variants.getForExercise, { exerciseId });
+
+  // BAD: This transformation should be in Convex
+  const computedDifficulty = useMemo(() => {
+    if (!exercise || !muscles) return 0;
+    return muscles.reduce((acc, m) => acc + m.weight, exercise.baseDifficulty);
+  }, [exercise, muscles]);
+
+  // BAD: Multiple queries that could be one
+  // BAD: Business logic in component
+}
+```
+
+## Import Conventions
+
+- `@packages/backend` - Convex backend imports
+- `@inochi/ui` - Shared UI components
+- `~` or `~/` - App-local imports (configured per app)
+
+```typescript
+// Correct import patterns
+import { api } from "@packages/backend/convex/_generated/api";
+import { Button, Card, Skeleton } from "@inochi/ui";
+import { SomeLocalComponent } from "~/components/SomeLocalComponent";
+```
+
+## Shared Tooling
+
+All shared configuration lives in `tooling/`:
+
+- Extend base configs rather than duplicating
+- TypeScript: extend from `tooling/typescript/base.json`
+- ESLint: import from `@inochi/eslint-config`
+- Prettier: use `@inochi/prettier-config`
+- Tailwind: import theme from `@inochi/tailwind-config`

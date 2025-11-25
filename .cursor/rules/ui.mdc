@@ -1,0 +1,308 @@
+---
+description: UI component library usage, shadcn patterns, and styling conventions
+globs: **/apps/web/**/*.tsx,**/apps/native/**/*.tsx
+---
+
+# UI Guidelines
+
+## Component Library: @inochi/ui
+
+**Always check if a component exists in @inochi/ui before creating a new one.**
+
+### Available Components
+
+The following components are available in `@inochi/ui`:
+
+**Layout & Structure:**
+- `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`
+- `Separator`
+- `AspectRatio`
+- `ScrollArea`
+- `Resizable`
+- `Collapsible`
+
+**Navigation:**
+- `NavigationMenu`
+- `Menubar`
+- `Breadcrumb`
+- `Tabs`
+- `Sidebar` (with SidebarProvider, SidebarTrigger, etc.)
+- `Pagination`
+
+**Forms & Inputs:**
+- `Button`, `ButtonGroup`
+- `Input`, `InputGroup`
+- `Textarea`
+- `Select`
+- `Checkbox`
+- `Switch`
+- `RadioGroup`
+- `Slider`
+- `InputOTP`
+- `Form`, `Field` (react-hook-form integration)
+- `Label`
+- `Calendar`
+
+**Feedback & Overlay:**
+- `Dialog`
+- `AlertDialog`
+- `Sheet`
+- `Drawer`
+- `Popover`
+- `HoverCard`
+- `Tooltip`
+- `DropdownMenu`
+- `ContextMenu`
+- `Command` (command palette)
+- `Alert`
+- `Toaster` (sonner)
+
+**Data Display:**
+- `Table`
+- `Badge`
+- `Avatar`
+- `Progress`
+- `Carousel`
+- `Chart`
+- `Accordion`
+
+**Loading & Empty States:**
+- `Skeleton`
+- `Spinner`
+- `Empty`, `EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`, `EmptyContent`
+
+**Utilities:**
+- `Toggle`, `ToggleGroup`
+- `Kbd`
+- `AnimatedGroup`
+- `TextEffect`
+
+### Import Pattern
+
+```typescript
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Skeleton,
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  cn,
+} from "@inochi/ui";
+```
+
+## Styling with Tailwind
+
+### Use cn() for Conditional Classes
+
+```typescript
+import { cn } from "@inochi/ui";
+
+function ExerciseCard({ isSelected, className }) {
+  return (
+    <Card
+      className={cn(
+        "transition-shadow hover:shadow-md",
+        isSelected && "ring-2 ring-primary",
+        className
+      )}
+    >
+      {/* ... */}
+    </Card>
+  );
+}
+```
+
+### Common Patterns
+
+```typescript
+// Flex layouts
+<div className="flex items-center gap-2">
+<div className="flex flex-col gap-4">
+
+// Grid layouts
+<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+// Spacing
+<div className="space-y-4">  {/* Vertical spacing between children */}
+<div className="p-4">         {/* Padding */}
+<div className="mb-4">        {/* Margin bottom */}
+
+// Text styling
+<p className="text-muted-foreground text-sm">
+<h1 className="text-foreground text-2xl font-bold">
+
+// Responsive
+<div className="hidden md:block">  {/* Hidden on mobile */}
+<div className="text-sm md:text-base">
+```
+
+## Icons: lucide-react
+
+```typescript
+import { Plus, Trash2, Edit, Search, ChevronRight } from "lucide-react";
+
+<Button>
+  <Plus className="mr-2 h-4 w-4" />
+  Add Exercise
+</Button>
+
+<Button variant="ghost" size="icon">
+  <Trash2 className="h-4 w-4" />
+</Button>
+```
+
+## Forms with react-hook-form
+
+```typescript
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Form,
+  Field,
+  Input,
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@inochi/ui";
+
+const schema = z.object({
+  title: z.string().min(1, "Title is required"),
+  level: z.enum(["beginner", "intermediate", "advanced"]),
+});
+
+function ExerciseForm() {
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: { title: "", level: "beginner" },
+  });
+
+  const handleSubmit = form.handleSubmit((data) => {
+    createExercise(data);
+  });
+
+  return (
+    <Form {...form}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field
+          control={form.control}
+          name="title"
+          label="Title"
+          render={({ field }) => <Input {...field} />}
+        />
+        
+        <Field
+          control={form.control}
+          name="level"
+          label="Level"
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="beginner">Beginner</SelectItem>
+                <SelectItem value="intermediate">Intermediate</SelectItem>
+                <SelectItem value="advanced">Advanced</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
+        
+        <Button type="submit">Create</Button>
+      </form>
+    </Form>
+  );
+}
+```
+
+## Dialog Pattern
+
+```typescript
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  Button,
+} from "@inochi/ui";
+
+function CreateExerciseDialog({ open, onOpenChange }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Exercise</DialogTitle>
+          <DialogDescription>
+            Add a new exercise to your library.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <ExerciseForm onSuccess={() => onOpenChange(false)} />
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## Toast Notifications
+
+```typescript
+import { toast } from "sonner";
+
+// Success
+toast.success("Exercise created successfully");
+
+// Error
+toast.error("Failed to create exercise");
+
+// With action
+toast("Exercise created", {
+  action: {
+    label: "View",
+    onClick: () => router.push(`/exercises/${id}`),
+  },
+});
+```
+
+## Badge Variants
+
+```typescript
+import { Badge } from "@inochi/ui";
+
+// Level badges with custom colors
+const levelColors = {
+  beginner: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  intermediate: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  advanced: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+};
+
+<Badge className={levelColors[exercise.level]}>
+  {exercise.level}
+</Badge>
+
+// Standard variants
+<Badge variant="default">Default</Badge>
+<Badge variant="secondary">Secondary</Badge>
+<Badge variant="outline">Outline</Badge>
+<Badge variant="destructive">Destructive</Badge>
+```
