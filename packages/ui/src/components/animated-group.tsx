@@ -1,7 +1,9 @@
 "use client";
 
-import React, { ReactNode } from "react";
-import { motion, Variants } from "motion/react";
+import type { Variants } from "motion/react";
+import type { ReactNode } from "react";
+import React from "react";
+import { motion } from "motion/react";
 
 export type PresetType =
   | "fade"
@@ -15,7 +17,7 @@ export type PresetType =
   | "rotate"
   | "swing";
 
-export type AnimatedGroupProps = {
+export interface AnimatedGroupProps {
   children: ReactNode;
   className?: string;
   variants?: {
@@ -25,7 +27,7 @@ export type AnimatedGroupProps = {
   preset?: PresetType;
   as?: React.ElementType;
   asChild?: React.ElementType;
-};
+}
 
 const defaultContainerVariants: Variants = {
   visible: {
@@ -112,17 +114,17 @@ function AnimatedGroup({
     item: addDefaultVariants(preset ? presetVariants[preset] : {}),
     container: addDefaultVariants(defaultContainerVariants),
   };
-  const containerVariants = variants?.container || selectedVariants.container;
-  const itemVariants = variants?.item || selectedVariants.item;
+  const containerVariants = variants?.container ?? selectedVariants.container;
+  const itemVariants = variants?.item ?? selectedVariants.item;
 
-  const MotionComponent = React.useMemo(
-    () => motion.create(typeof as === "string" ? as : "div"),
-    [as],
-  );
-  const MotionChild = React.useMemo(
-    () => motion.create(typeof asChild === "string" ? asChild : "div"),
-    [asChild],
-  );
+  const [MotionComponent] = React.useState(() => {
+    const elementType = typeof as === "string" ? as : "div";
+    return motion.create(elementType);
+  });
+  const [MotionChild] = React.useState(() => {
+    const elementType = typeof asChild === "string" ? asChild : "div";
+    return motion.create(elementType);
+  });
 
   return (
     <MotionComponent

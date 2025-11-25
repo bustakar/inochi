@@ -15,7 +15,7 @@ export type PresetType = "blur" | "fade-in-blur" | "scale" | "fade" | "slide";
 
 export type PerType = "word" | "char" | "line";
 
-export type TextEffectProps = {
+export interface TextEffectProps {
   children: string;
   per?: PerType;
   as?: keyof React.JSX.IntrinsicElements;
@@ -35,7 +35,7 @@ export type TextEffectProps = {
   containerTransition?: Transition;
   segmentTransition?: Transition;
   style?: React.CSSProperties;
-};
+}
 
 const defaultStaggerTimes: Record<PerType, number> = {
   char: 0.03,
@@ -56,7 +56,7 @@ const defaultContainerVariants: Variants = {
   },
 };
 
-const defaultItemVariants: Variants = {
+const _defaultItemVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -224,9 +224,7 @@ export function TextEffect({
   const segments = splitText(children, per);
   const MotionTag = motion[as as keyof typeof motion] as typeof motion.div;
 
-  const baseVariants = preset
-    ? presetVariants[preset]
-    : { container: defaultContainerVariants, item: defaultItemVariants };
+  const baseVariants = presetVariants[preset];
 
   const stagger = defaultStaggerTimes[per] / speedReveal;
 
@@ -244,7 +242,7 @@ export function TextEffect({
 
   const computedVariants = {
     container: createVariantsWithTransition(
-      variants?.container || baseVariants.container,
+      variants?.container ?? baseVariants.container,
       {
         staggerChildren: customStagger ?? stagger,
         delayChildren: customDelay ?? delay,
@@ -255,7 +253,7 @@ export function TextEffect({
         },
       },
     ),
-    item: createVariantsWithTransition(variants?.item || baseVariants.item, {
+    item: createVariantsWithTransition(variants?.item ?? baseVariants.item, {
       duration: baseDuration,
       ...segmentTransition,
     }),
