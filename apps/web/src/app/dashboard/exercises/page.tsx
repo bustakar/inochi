@@ -4,9 +4,9 @@ import * as React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Doc } from "@packages/backend/convex/_generated/dataModel";
+import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { Dumbbell, Target } from "lucide-react";
+import { Globe, Lock, Target } from "lucide-react";
 
 import { Badge } from "@inochi/ui";
 
@@ -19,26 +19,21 @@ import { CreateExerciseDialog } from "./_components/create-exercise-dialog";
 
 interface ExerciseCardProps {
   exercise: {
-    _id: Doc<"private_exercises">["_id"];
+    _id: Id<"exercises"> | Id<"private_exercises">;
     _creationTime: number;
-    userId: string;
     title: string;
     description: string;
     category: "calisthenics" | "gym" | "stretch" | "mobility";
     level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
     difficulty: number;
+    isPrivate: boolean;
     musclesData: Array<{
-      _id: Doc<"muscles">["_id"];
+      _id: Id<"muscles">;
       name: string;
       muscleGroup?: string;
       role?: "primary" | "secondary" | "tertiary" | "stabilizer";
     }>;
     primaryMuscleGroups: Array<string>;
-    equipmentData: Array<{
-      _id: Doc<"equipment">["_id"];
-      name: string;
-      category: string;
-    }>;
   };
 }
 
@@ -66,7 +61,11 @@ const categoryColors: Record<string, string> = {
 
 function ExerciseCard({ exercise }: ExerciseCardProps) {
   const router = useRouter();
-  const detailUrl = `/dashboard/exercises/private/${exercise._id}`;
+
+  // Route to private or public detail page based on exercise type
+  const detailUrl = exercise.isPrivate
+    ? `/dashboard/exercises/private/${exercise._id}`
+    : `/dashboard/exercises/public/${exercise._id}`;
 
   const handleCardClick = () => {
     router.push(detailUrl);
@@ -88,15 +87,15 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
       className="bg-card relative cursor-pointer rounded-lg border p-4 transition-shadow hover:shadow-md"
       onClick={handleCardClick}
     >
-      {/* Header with title and more button */}
+      {/* Header with title */}
       <div className="mb-2 flex items-start justify-between">
         <h3 className="text-card-foreground flex-1 pr-8 text-lg font-semibold">
           {exercise.title}
         </h3>
       </div>
 
-      {/* Level and category badges */}
-      <div className="mb-2 flex items-center gap-2">
+      {/* Level, category, and visibility badges */}
+      <div className="mb-2 flex flex-wrap items-center gap-2">
         <Badge
           className={
             levelColors[exercise.level] ||
@@ -113,9 +112,23 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
         >
           {exercise.category}
         </Badge>
-        <Badge variant="outline" className="text-xs">
-          Private
-        </Badge>
+        {exercise.isPrivate ? (
+          <Badge
+            variant="outline"
+            className="border-amber-500 bg-amber-50 text-amber-700 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
+          >
+            <Lock className="mr-1 h-3 w-3" />
+            Private
+          </Badge>
+        ) : (
+          <Badge
+            variant="outline"
+            className="border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400"
+          >
+            <Globe className="mr-1 h-3 w-3" />
+            Public
+          </Badge>
+        )}
       </div>
 
       <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
@@ -141,8 +154,7 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
         </span>
       </div>
 
-      {exercise.primaryMuscleGroups.length > 0 ||
-      (exercise.equipmentData && exercise.equipmentData.length > 0) ? (
+      {exercise.primaryMuscleGroups.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {exercise.primaryMuscleGroups.map((groupName, index) => (
             <Badge
@@ -154,18 +166,8 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
               {groupName}
             </Badge>
           ))}
-          {exercise.equipmentData?.map((equip) => (
-            <Badge
-              key={equip._id}
-              variant="outline"
-              className="flex items-center gap-1 text-xs"
-            >
-              <Dumbbell className="h-3 w-3" />
-              {equip.name}
-            </Badge>
-          ))}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
@@ -179,7 +181,7 @@ interface ExercisesListProps {
 }
 
 function ExercisesList({ searchQuery }: ExercisesListProps) {
-  const exercises = useQuery(api.functions.exercises.getPrivateExercises, {
+  const exercises = useQuery(api.functions.exercises.getAllExercises, {
     searchQuery: searchQuery.trim() || undefined,
   });
 

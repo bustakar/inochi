@@ -228,6 +228,20 @@ export const approveSubmission = mutation({
         throw new Error(`Private exercise not found`);
       }
 
+      // Filter out private exercise references from prerequisites
+      // Only keep references to public exercises
+      const allPrerequisites =
+        submission.originalExerciseData.exercise.prerequisites ?? [];
+      const publicPrerequisites: Id<"exercises">[] = [];
+      for (const prereqId of allPrerequisites) {
+        // Check if it's a public exercise (exists in exercises table)
+        const publicExercise = await ctx.db.get(prereqId as Id<"exercises">);
+        if (publicExercise) {
+          publicPrerequisites.push(prereqId as Id<"exercises">);
+        }
+        // Private exercises are intentionally excluded
+      }
+
       const publicExerciseId = await ctx.db.insert("exercises", {
         title: submission.originalExerciseData.exercise.title,
         description: submission.originalExerciseData.exercise.description ?? "",
@@ -235,8 +249,7 @@ export const approveSubmission = mutation({
           submission.originalExerciseData.exercise.category ?? "calisthenics",
         level: submission.originalExerciseData.exercise.level ?? "beginner",
         difficulty: submission.originalExerciseData.exercise.difficulty ?? 1,
-        prerequisites:
-          submission.originalExerciseData.exercise.prerequisites ?? [],
+        prerequisites: publicPrerequisites,
         createdAt: now,
         updatedAt: now,
         createdBy: submission.submittedBy,
@@ -264,15 +277,21 @@ export const approveSubmission = mutation({
         });
       }
 
+      // Only create progressions to public exercises (skip private ones)
       for (const progressionId of submission.originalExerciseData.exercise
         ?.progressions ?? []) {
-        if (progressionId as Id<"exercises">) {
+        // Check if it's a public exercise
+        const publicProgression = await ctx.db.get(
+          progressionId as Id<"exercises">,
+        );
+        if (publicProgression) {
           await ctx.db.insert("exercise_progressions", {
             fromExercise: publicExerciseId,
-            toExercise: progressionId,
+            toExercise: progressionId as Id<"exercises">,
             createdAt: now,
           });
         }
+        // Private exercises are intentionally excluded from progressions
       }
     }
 

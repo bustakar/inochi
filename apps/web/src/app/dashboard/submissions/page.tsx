@@ -97,11 +97,7 @@ function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
   });
 
   const handleSubmissionClick = (submission: Doc<"user_submissions">) => {
-    if (submission.originalExerciseId) {
-      router.push(
-        `/dashboard/exercises/private/${submission.originalExerciseId}`,
-      );
-    }
+    router.push(`/dashboard/submissions/${submission._id}`);
   };
 
   if (submissions === undefined) {
@@ -124,8 +120,6 @@ function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
     );
   }
 
-  const isAdminOrModerator = userRole === "admin" || userRole === "moderator";
-
   return (
     <div className="space-y-4">
       {submissions.map((submission: Doc<"user_submissions">) => (
@@ -134,10 +128,7 @@ function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {
           onClick={() => handleSubmissionClick(submission)}
           className="cursor-pointer"
         >
-          <SubmissionCard
-            submission={submission}
-            showSubmitter={isAdminOrModerator}
-          />
+          <SubmissionCard submission={submission} />
         </div>
       ))}
     </div>
