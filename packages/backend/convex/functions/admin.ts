@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 import {
   exerciseCategoryValidator,
@@ -123,7 +124,7 @@ export const batchInsertMuscles = internalMutation({
     ),
   },
   handler: async (ctx, args) => {
-    const insertedIds = [];
+    const insertedIds: Id<"muscles">[] = [];
 
     for (const muscleData of args.muscles) {
       // Check if muscle with same slug already exists
@@ -189,5 +190,50 @@ export const batchUpdateExercisePrerequisites = internalMutation({
     }
 
     return updatedIds;
+  },
+});
+
+export const batchUpdateExerciseMuscles = internalMutation({
+  args: {
+    updates: v.array(
+      v.object({
+        exerciseId: v.id("exercises"),
+        muscles: v.array(
+          v.object({
+            muscleId: v.id("muscles"),
+            role: muscleRoleValidator,
+          }),
+        ),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    for (const update of args.updates) {
+      const exercise = await ctx.db.get(update.exerciseId);
+      if (!exercise) {
+        throw new Error(`Exercise not found: ${update.exerciseId}`);
+      }
+
+      const existing = await ctx.db
+        .query("exercises_muscles")
+        .withIndex("by_exercise", (q) => q.eq("exercise", update.exerciseId))
+        .collect();
+
+      for (const row of existing) {
+        await ctx.db.delete(row._id);
+      }
+
+      for (const target of update.muscles) {
+        const muscle = await ctx.db.get(target.muscleId);
+        if (!muscle) {
+          throw new Error(`Muscle not found: ${target.muscleId}`);
+        }
+        await ctx.db.insert("exercises_muscles", {
+          exercise: update.exerciseId,
+          muscle: target.muscleId,
+          role: target.role,
+        });
+      }
+    }
   },
 });
