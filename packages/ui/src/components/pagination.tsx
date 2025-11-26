@@ -1,10 +1,11 @@
-import * as React from "react";
+import type * as React from "react";
+import type { Button } from "src/components/button";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   MoreHorizontalIcon,
 } from "lucide-react";
-import { Button, buttonVariants } from "src/components/button";
+import { buttonVariants } from "src/components/button";
 
 import { cn } from "../lib/utils";
 

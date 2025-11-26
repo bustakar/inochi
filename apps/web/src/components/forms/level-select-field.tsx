@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  type Control,
-  type FieldPath,
-  type FieldValues,
-} from "react-hook-form";
+import type { Control, FieldPath, FieldValues } from "react-hook-form";
 
 import {
   Field,
@@ -26,9 +22,9 @@ export function LevelSelectField<TFieldValues extends FieldValues>({
   name,
 }: LevelSelectFieldProps<TFieldValues>) {
   return (
-    <FormField
-      control={control as any}
-      name={name as any}
+    <FormField<TFieldValues, typeof name>
+      control={control}
+      name={name}
       render={({ field, fieldState }) => (
         <FormItem>
           <Field data-invalid={!!fieldState.error}>

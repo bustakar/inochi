@@ -1,7 +1,7 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { AlertTriangle, Lock } from "lucide-react";
 
@@ -22,12 +22,12 @@ interface ExerciseData {
   category?: ExerciseCategory;
   level?: ExerciseLevel;
   difficulty?: number;
-  muscles?: Array<{
+  muscles?: {
     muscleId: Id<"muscles">;
     role: MuscleRole;
-  }>;
-  prerequisites?: Array<Id<"exercises"> | Id<"private_exercises">>;
-  progressions?: Array<Id<"exercises"> | Id<"private_exercises">>;
+  }[];
+  prerequisites?: (Id<"exercises"> | Id<"private_exercises">)[];
+  progressions?: (Id<"exercises"> | Id<"private_exercises">)[];
 }
 
 interface SubmissionExercisePreviewProps {
@@ -78,7 +78,7 @@ function MusclesList({ muscles }: { muscles: ExerciseData["muscles"] }) {
   const musclesByRole = muscles.reduce(
     (acc, muscle) => {
       const role = muscle.role;
-      if (!acc[role]) {
+      if (!(role in acc)) {
         acc[role] = [];
       }
       const muscleInfo = allMuscles.find((m) => m._id === muscle.muscleId);
@@ -95,7 +95,7 @@ function MusclesList({ muscles }: { muscles: ExerciseData["muscles"] }) {
       {(["primary", "secondary", "tertiary", "stabilizer"] as MuscleRole[]).map(
         (role) => {
           const roleMuscles = musclesByRole[role];
-          if (!roleMuscles || roleMuscles.length === 0) return null;
+          if (roleMuscles.length === 0) return null;
 
           return (
             <div key={role} className="flex flex-wrap items-center gap-2">
@@ -119,7 +119,7 @@ function ExerciseReferenceList({
   exerciseIds,
   title,
 }: {
-  exerciseIds: Array<Id<"exercises"> | Id<"private_exercises">>;
+  exerciseIds: (Id<"exercises"> | Id<"private_exercises">)[];
   title: string;
 }) {
   const exerciseTitles = useQuery(

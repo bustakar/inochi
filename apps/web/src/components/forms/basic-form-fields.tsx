@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  type Control,
-  type FieldPath,
-  type FieldValues,
-} from "react-hook-form";
+import type { Control, FieldPath, FieldValues } from "react-hook-form";
 
 import {
   Field,
@@ -37,9 +33,9 @@ export function BasicFormFields<TFieldValues extends FieldValues>({
 }: BasicFormFieldsProps<TFieldValues>) {
   return (
     <>
-      <FormField
-        control={control as any}
-        name={titleFieldName as any}
+      <FormField<TFieldValues, typeof titleFieldName>
+        control={control}
+        name={titleFieldName}
         render={({ field, fieldState }) => (
           <FormItem>
             <Field data-invalid={!!fieldState.error}>
@@ -57,9 +53,9 @@ export function BasicFormFields<TFieldValues extends FieldValues>({
         )}
       />
 
-      <FormField
-        control={control as any}
-        name={descriptionFieldName as any}
+      <FormField<TFieldValues, typeof descriptionFieldName>
+        control={control}
+        name={descriptionFieldName}
         render={({ field, fieldState }) => (
           <FormItem>
             <Field data-invalid={!!fieldState.error}>
@@ -84,9 +80,9 @@ export function BasicFormFields<TFieldValues extends FieldValues>({
       <div className="grid grid-cols-2 gap-4">
         <LevelSelectField control={control} name={levelFieldName} />
 
-        <FormField
-          control={control as any}
-          name={difficultyFieldName as any}
+        <FormField<TFieldValues, typeof difficultyFieldName>
+          control={control}
+          name={difficultyFieldName}
           render={({ field, fieldState }) => (
             <FormItem>
               <Field data-invalid={!!fieldState.error}>

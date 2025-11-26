@@ -1,7 +1,7 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import * as React from "react";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { Layers, Search, Sparkles, Target } from "lucide-react";
 import * as z from "zod";
@@ -110,7 +110,7 @@ function DescriptionField() {
       <Input
         id={field.name}
         name={field.name}
-        value={field.state.value || ""}
+        value={field.state.value ?? ""}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value || undefined)}
         aria-invalid={isInvalid}
@@ -138,7 +138,7 @@ function LevelField() {
     "beginner" | "intermediate" | "advanced" | "expert" | "elite" | undefined
   >();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-  const selectedValue = field.state.value || "beginner";
+  const selectedValue = field.state.value ?? "beginner";
 
   return (
     <Field data-invalid={isInvalid}>
@@ -191,7 +191,7 @@ function LevelField() {
 function DifficultyField() {
   const field = useFieldContext<number | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-  const selectedValue = field.state.value?.toString() || "1";
+  const selectedValue = field.state.value?.toString() ?? "1";
 
   return (
     <Field data-invalid={isInvalid}>
@@ -237,7 +237,7 @@ function PrerequisitesField({
 }) {
   const field = useFieldContext<string[] | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-  const selectedExerciseIds = field.state.value || [];
+  const selectedExerciseIds = field.state.value ?? [];
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const handleToggleExercise = (exerciseId: Id<"private_exercises">) => {
@@ -338,12 +338,12 @@ interface MuscleWithRole {
 function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
   const field = useFieldContext<MuscleWithRole[] | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-  const selectedMuscles = field.state.value || [];
+  const selectedMuscles = field.state.value ?? [];
   const [searchQuery, setSearchQuery] = React.useState("");
   const [currentRole, setCurrentRole] = React.useState<MuscleRole>("primary");
 
   // Get muscle IDs for a specific role
-  const getMuscleIdsForRole = (role: MuscleRole): string[] => {
+  const _getMuscleIdsForRole = (role: MuscleRole): string[] => {
     return selectedMuscles
       .filter((m) => m.role === role)
       .map((m) => m.muscleId);
@@ -426,11 +426,14 @@ function MusclesField({ muscles }: { muscles: Muscle[] | undefined }) {
 
     const groups = new Map<string, Muscle[]>();
     for (const muscle of muscles) {
-      const group = muscle.muscleGroup || "Other";
+      const group = muscle.muscleGroup ?? "Other";
       if (!groups.has(group)) {
         groups.set(group, []);
       }
-      groups.get(group)!.push(muscle);
+      const groupMuscles = groups.get(group);
+      if (groupMuscles) {
+        groupMuscles.push(muscle);
+      }
     }
 
     // Sort groups and muscles within groups
@@ -617,7 +620,8 @@ export const { useAppForm } = createFormHook({
 // ============================================================================
 
 interface ExerciseFormProps {
-  form: any; // Using any to avoid complex type issues with tanstack form
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: any;
   isGenerating: boolean;
   onFillWithAI: () => void;
 }
@@ -651,7 +655,8 @@ export function ExerciseForm({
 }
 
 interface ExerciseFormFieldsProps {
-  form: any; // Using any to avoid complex type issues with tanstack form
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: any;
   muscles: Muscle[] | undefined;
   exercises: Exercise[] | undefined;
 }

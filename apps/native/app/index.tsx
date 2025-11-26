@@ -5,7 +5,9 @@ import { useEffect } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 
-const getOAuthStrategy = (authType: string) => {
+const getOAuthStrategy = (
+  authType: string,
+): "oauth_google" | "oauth_apple" | "oauth_github" => {
   switch (authType) {
     case "google":
       return "oauth_google";
@@ -13,6 +15,8 @@ const getOAuthStrategy = (authType: string) => {
       return "oauth_apple";
     case "github":
       return "oauth_github";
+    default:
+      throw new Error(`Unknown auth type: ${authType}`);
   }
 };
 
@@ -32,8 +36,8 @@ export default function LoginScreen() {
       const { createdSessionId, setActive } = await startSSOFlow({
         strategy: getOAuthStrategy(authType),
       });
-      if (createdSessionId) {
-        setActive({ session: createdSessionId });
+      if (createdSessionId && setActive) {
+        void setActive({ session: createdSessionId });
         router.replace("/skills");
       }
     } catch (err) {
@@ -49,6 +53,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <View style={styles.card}>
         <Image
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           source={require("../src/assets/icons/logo.png")}
           style={styles.logo}
         />
@@ -73,6 +78,7 @@ export default function LoginScreen() {
         >
           <Image
             style={styles.googleIcon}
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             source={require("../src/assets/icons/google.png")}
           />
           <Text style={{ ...styles.buttonText, color: "#344054" }}>

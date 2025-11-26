@@ -1,13 +1,12 @@
 import { defineConfig } from "eslint/config";
 
-import { baseConfig, restrictEnvAccess } from "@inochi/eslint-config/base";
+import { baseConfig } from "@inochi/eslint-config/base";
 import { reactConfig } from "@inochi/eslint-config/react";
 
 export default defineConfig(
   {
-    ignores: [".next/**"],
+    ignores: ["dist/**"],
   },
   baseConfig,
   reactConfig,
-  restrictEnvAccess,
 );

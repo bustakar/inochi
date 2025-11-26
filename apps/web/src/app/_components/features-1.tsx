@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Settings2, Sparkles, Zap } from "lucide-react";
 
 import { Card, CardContent, CardHeader } from "@inochi/ui";

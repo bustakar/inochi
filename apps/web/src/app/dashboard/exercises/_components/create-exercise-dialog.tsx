@@ -1,8 +1,8 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import * as React from "react";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { CopyPlus } from "lucide-react";
 import { toast } from "sonner";
@@ -18,9 +18,9 @@ import {
   Toggle,
 } from "@inochi/ui";
 
+import type { ExerciseFormData } from "./exercise-form";
 import {
   ExerciseForm,
-  ExerciseFormData,
   ExerciseFormFields,
   exerciseFormSchema,
   useAppForm,
@@ -71,11 +71,11 @@ export function CreateExerciseDialog({
     },
   });
 
-  const resetFormEffect = React.useEffect(() => {
+  React.useEffect(() => {
     if (open) {
       form.reset();
     }
-  }, [open]);
+  }, [open, form]);
 
   const handleFillWithAI = async () => {
     const exerciseName = form.state.values.title;
@@ -91,23 +91,28 @@ export function CreateExerciseDialog({
       });
 
       // Update form fields with AI data
-      form.setFieldValue("description", aiData.description);
-      form.setFieldValue("level", aiData.level);
-      form.setFieldValue("difficulty", aiData.difficulty);
-      form.setFieldValue("category", aiData.category);
+      interface AIDataMuscle {
+        muscleId: Id<"muscles">;
+        role: "primary" | "secondary" | "tertiary" | "stabilizer";
+      }
+      const musclesData: ExerciseFormData["muscles"] = (
+        aiData.muscles as AIDataMuscle[]
+      ).map((m) => ({
+        muscleId: m.muscleId as string,
+        role: m.role,
+      }));
+      const prerequisitesData: ExerciseFormData["prerequisites"] =
+        aiData.prerequisites as string[];
+
+      form.setFieldValue("description", aiData.description as string);
+      form.setFieldValue("level", aiData.level as ExerciseFormData["level"]);
+      form.setFieldValue("difficulty", aiData.difficulty as number);
       form.setFieldValue(
-        "muscles",
-        aiData.muscles.map(
-          (m: {
-            muscleId: Id<"muscles">;
-            role: "primary" | "secondary" | "tertiary" | "stabilizer";
-          }) => ({
-            muscleId: m.muscleId as string,
-            role: m.role,
-          }),
-        ),
+        "category",
+        aiData.category as ExerciseFormData["category"],
       );
-      form.setFieldValue("prerequisites", aiData.prerequisites);
+      form.setFieldValue("muscles", musclesData);
+      form.setFieldValue("prerequisites", prerequisitesData);
 
       toast.success("Exercise data filled with AI!");
     } catch (error) {
@@ -166,18 +171,18 @@ export function CreateExerciseDialog({
           id="exercise-form"
           onSubmit={(e) => {
             e.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
         >
           <ExerciseForm
-            form={form as any}
+            form={form}
             onFillWithAI={handleFillWithAI}
             isGenerating={isGenerating}
           />
 
           <DialogFooter className="flex w-full flex-row justify-between gap-2 sm:justify-between">
             <ExerciseFormFields
-              form={form as any}
+              form={form}
               muscles={
                 muscles as
                   | { _id: Id<"muscles">; name: string; muscleGroup?: string }[]

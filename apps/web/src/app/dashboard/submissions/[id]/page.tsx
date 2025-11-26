@@ -1,9 +1,9 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
-import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { ArrowLeft } from "lucide-react";
 
