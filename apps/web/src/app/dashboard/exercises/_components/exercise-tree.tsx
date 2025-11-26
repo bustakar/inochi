@@ -207,7 +207,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
 
   if (exercises === undefined) {
     return (
-      <div className="flex h-[600px] items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <p className="text-muted-foreground">Loading exercises...</p>
       </div>
     );
@@ -215,7 +215,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
 
   if (exercises.length === 0) {
     return (
-      <div className="flex h-[600px] items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <p className="text-muted-foreground">
           {searchQuery?.trim()
             ? "No exercises found matching your search."
@@ -226,7 +226,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
   }
 
   return (
-    <div className="h-[600px] w-full rounded-lg border">
+    <div className="h-full w-full">
       <ReactFlow
         nodes={flowNodes}
         edges={flowEdges}

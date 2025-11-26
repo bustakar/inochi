@@ -1,5 +1,11 @@
 "use client";
 
+import { ExerciseTree } from "./_components/exercise-tree";
+
+// ============================================================================
+// COMMENTED OUT: Original page with list view, search, tabs, etc.
+// ============================================================================
+/*
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import * as React from "react";
 import { useState } from "react";
@@ -12,7 +18,6 @@ import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from "@inochi/ui";
 
 import { Search } from "../../../components/search";
 import { CreateExerciseDialog } from "./_components/create-exercise-dialog";
-import { ExerciseTree } from "./_components/exercise-tree";
 
 // ============================================================================
 // Exercise Card Component
@@ -88,14 +93,12 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
       className="bg-card relative cursor-pointer rounded-lg border p-4 transition-shadow hover:shadow-md"
       onClick={handleCardClick}
     >
-      {/* Header with title */}
       <div className="mb-2 flex items-start justify-between">
         <h3 className="text-card-foreground flex-1 pr-8 text-lg font-semibold">
           {exercise.title}
         </h3>
       </div>
 
-      {/* Level, category, and visibility badges */}
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <Badge
           className={
@@ -219,7 +222,7 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
 // Main Page Component
 // ============================================================================
 
-export default function ExercisesPage() {
+export default function ExercisesPage_OLD() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -233,7 +236,6 @@ export default function ExercisesPage() {
         />
       </div>
 
-      {/* Search */}
       <div className="max-w-md">
         <Search
           initialValue={searchQuery}
@@ -242,7 +244,6 @@ export default function ExercisesPage() {
         />
       </div>
 
-      {/* View Tabs */}
       <Tabs defaultValue="list" className="w-full">
         <TabsList>
           <TabsTrigger value="list">List</TabsTrigger>
@@ -255,6 +256,22 @@ export default function ExercisesPage() {
           <ExerciseTree searchQuery={searchQuery} />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+*/
+// ============================================================================
+// END COMMENTED OUT SECTION
+// ============================================================================
+
+// ============================================================================
+// New Minimal Page: Full Screen Exercise Tree
+// ============================================================================
+
+export default function ExercisesPage() {
+  return (
+    <div className="h-screen w-full">
+      <ExerciseTree />
     </div>
   );
 }
