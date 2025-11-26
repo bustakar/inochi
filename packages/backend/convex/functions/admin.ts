@@ -110,3 +110,45 @@ export const batchInsertExercises = internalMutation({
   },
 });
 
+export const batchInsertMuscles = internalMutation({
+  args: {
+    muscles: v.array(
+      v.object({
+        name: v.string(),
+        slug: v.string(),
+        commonName: v.optional(v.string()),
+        recommendedRestHours: v.number(),
+        muscleGroup: v.string(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const insertedIds = [];
+
+    for (const muscleData of args.muscles) {
+      // Check if muscle with same slug already exists
+      const existingMuscle = await ctx.db
+        .query("muscles")
+        .withIndex("by_slug", (q) => q.eq("slug", muscleData.slug))
+        .first();
+
+      if (existingMuscle) {
+        throw new Error(
+          `Muscle with slug "${muscleData.slug}" already exists: ${existingMuscle._id}`,
+        );
+      }
+
+      const muscleId = await ctx.db.insert("muscles", {
+        name: muscleData.name,
+        slug: muscleData.slug,
+        commonName: muscleData.commonName,
+        recommendedRestHours: muscleData.recommendedRestHours,
+        muscleGroup: muscleData.muscleGroup,
+      });
+
+      insertedIds.push(muscleId);
+    }
+
+    return insertedIds;
+  },
+});

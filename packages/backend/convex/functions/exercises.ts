@@ -1268,13 +1268,8 @@ export const getMuscles = query({
       _creationTime: v.number(),
       name: v.string(),
       slug: v.string(),
+      commonName: v.optional(v.string()),
       recommendedRestHours: v.number(),
-      parts: v.array(
-        v.object({
-          name: v.string(),
-          slug: v.string(),
-        }),
-      ),
       muscleGroup: v.optional(v.string()),
     }),
   ),
