@@ -152,3 +152,42 @@ export const batchInsertMuscles = internalMutation({
     return insertedIds;
   },
 });
+
+export const batchUpdateExercisePrerequisites = internalMutation({
+  args: {
+    updates: v.array(
+      v.object({
+        exerciseId: v.id("exercises"),
+        prerequisites: v.array(v.id("exercises")),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const updatedIds = [];
+    const now = Date.now();
+
+    for (const update of args.updates) {
+      const exercise = await ctx.db.get(update.exerciseId);
+      if (!exercise) {
+        throw new Error(`Exercise not found: ${update.exerciseId}`);
+      }
+
+      for (const prereqId of update.prerequisites) {
+        const prereq = await ctx.db.get(prereqId);
+        if (!prereq) {
+          throw new Error(
+            `Prerequisite exercise not found: ${prereqId} for exercise ${exercise.title}`,
+          );
+        }
+      }
+
+      await ctx.db.patch(update.exerciseId, {
+        prerequisites: update.prerequisites,
+        updatedAt: now,
+      });
+      updatedIds.push(update.exerciseId);
+    }
+
+    return updatedIds;
+  },
+});
