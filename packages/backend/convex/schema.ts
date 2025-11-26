@@ -15,14 +15,9 @@ export default defineSchema({
   muscles: defineTable({
     name: v.string(),
     slug: v.string(),
+    commonName: v.optional(v.string()),
     recommendedRestHours: v.number(),
-    parts: v.array(
-      v.object({
-        name: v.string(),
-        slug: v.string(),
-      }),
-    ),
-    muscleGroup: v.optional(v.string()),
+    muscleGroup: v.string(),
   })
     .index("by_slug", ["slug"])
     .index("by_muscle_group", ["muscleGroup"]),
