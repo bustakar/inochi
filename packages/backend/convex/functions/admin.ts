@@ -237,3 +237,68 @@ export const batchUpdateExerciseMuscles = internalMutation({
     }
   },
 });
+
+export const batchUpdateExerciseVariants = internalMutation({
+  args: {
+    updates: v.array(
+      v.object({
+        exerciseId: v.id("exercises"),
+        variants: v.array(
+          v.object({
+            equipmentIds: v.array(v.id("equipment")),
+            tipsV2: v.optional(v.array(tipV2Validator)),
+            overriddenTitle: v.optional(v.string()),
+            overriddenDescription: v.optional(v.string()),
+            overriddenDifficulty: v.optional(v.number()),
+          }),
+        ),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const updatedIds = [];
+    const now = Date.now();
+
+    for (const update of args.updates) {
+      const exercise = await ctx.db.get(update.exerciseId);
+      if (!exercise) {
+        throw new Error(`Exercise not found: ${update.exerciseId}`);
+      }
+
+      const existingVariants = await ctx.db
+        .query("exercise_variants")
+        .withIndex("by_exercise", (q) => q.eq("exercise", update.exerciseId))
+        .collect();
+
+      for (const variant of existingVariants) {
+        await ctx.db.delete(variant._id);
+      }
+
+      for (const variantData of update.variants) {
+        for (const eqId of variantData.equipmentIds) {
+          const equipment = await ctx.db.get(eqId);
+          if (!equipment) {
+            throw new Error(
+              `Equipment not found: ${eqId} for exercise ${exercise.title}`,
+            );
+          }
+        }
+
+        await ctx.db.insert("exercise_variants", {
+          exercise: update.exerciseId,
+          equipment: variantData.equipmentIds,
+          tipsV2: variantData.tipsV2,
+          overriddenTitle: variantData.overriddenTitle,
+          overriddenDescription: variantData.overriddenDescription,
+          overriddenDifficulty: variantData.overriddenDifficulty,
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+
+      updatedIds.push(update.exerciseId);
+    }
+
+    return updatedIds;
+  },
+});
