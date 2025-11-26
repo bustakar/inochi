@@ -8,10 +8,11 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Globe, Lock, Target } from "lucide-react";
 
-import { Badge } from "@inochi/ui";
+import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from "@inochi/ui";
 
 import { Search } from "../../../components/search";
 import { CreateExerciseDialog } from "./_components/create-exercise-dialog";
+import { ExerciseTree } from "./_components/exercise-tree";
 
 // ============================================================================
 // Exercise Card Component
@@ -241,8 +242,19 @@ export default function ExercisesPage() {
         />
       </div>
 
-      {/* Exercises List */}
-      <ExercisesList searchQuery={searchQuery} />
+      {/* View Tabs */}
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList>
+          <TabsTrigger value="list">List</TabsTrigger>
+          <TabsTrigger value="tree">Tree</TabsTrigger>
+        </TabsList>
+        <TabsContent value="list" className="mt-4">
+          <ExercisesList searchQuery={searchQuery} />
+        </TabsContent>
+        <TabsContent value="tree" className="mt-4">
+          <ExerciseTree searchQuery={searchQuery} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -26,6 +26,7 @@ export * from "./components/skeleton";
 export * from "./components/sonner";
 export * from "./components/spinner";
 export * from "./components/switch";
+export * from "./components/tabs";
 export * from "./components/text-effect";
 export * from "./components/textarea";
 export * from "./components/toggle";
