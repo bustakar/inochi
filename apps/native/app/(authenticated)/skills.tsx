@@ -18,7 +18,11 @@ export default function SkillsScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>Skills</Text>
         <Text style={styles.subtitle}>
-          Welcome, {user?.firstName || user?.emailAddresses[0]?.emailAddress}!
+          Welcome,{" "}
+          {user
+            ? (user.firstName ?? user.emailAddresses[0]?.emailAddress)
+            : "User"}
+          !
         </Text>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutButtonText}>Logout</Text>
