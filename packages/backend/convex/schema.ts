@@ -36,7 +36,7 @@ export default defineSchema({
     category: exerciseCategoryValidator,
     level: exerciseLevelValidator,
     difficulty: v.number(),
-    prerequisites: v.array(v.id("exercises")),
+    prerequisites: v.optional(v.array(v.id("exercises"))), // Deprecated: TODO: Remove in future versions
     createdAt: v.number(),
     updatedAt: v.number(),
     createdBy: v.string(),
@@ -52,6 +52,19 @@ export default defineSchema({
       searchField: "description",
       filterFields: ["level", "difficulty", "category"],
     }),
+
+  exercise_trees: defineTable({
+    title: v.string(),
+    connections: v.array(
+      v.object({
+        fromExercise: v.id("exercises"),
+        toExercise: v.id("exercises"),
+        type: v.union(v.literal("required"), v.literal("optional")),
+      }),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
 
   private_exercises: defineTable({
     userId: v.string(),

@@ -3,7 +3,8 @@
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { NodeProps } from "@xyflow/react";
 import { useRouter } from "next/navigation";
-import { Globe, Lock } from "lucide-react";
+import { Handle, Position } from "@xyflow/react";
+import { Lock } from "lucide-react";
 
 import { Badge } from "@inochi/ui";
 
@@ -17,16 +18,6 @@ const levelColors: Record<string, string> = {
   expert:
     "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
   elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-};
-
-const categoryColors: Record<string, string> = {
-  calisthenics:
-    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  gym: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  stretch:
-    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  mobility:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
 };
 
 export interface ExerciseNodeData extends Record<string, unknown> {
@@ -56,6 +47,12 @@ export function ExerciseNode({ data }: NodeProps) {
       className="bg-card max-w-[250px] min-w-[200px] cursor-pointer rounded-lg border p-3 shadow-sm transition-shadow hover:shadow-md"
       onClick={handleClick}
     >
+      {/* Target handle at top - receives edges from prerequisites below */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{ visibility: "hidden", width: 0, height: 0 }}
+      />
       {/* Title */}
       <h3 className="text-card-foreground mb-2 line-clamp-2 text-sm font-semibold">
         {nodeData.title}
@@ -71,29 +68,13 @@ export function ExerciseNode({ data }: NodeProps) {
         >
           <span className="text-xs">{nodeData.level}</span>
         </Badge>
-        <Badge
-          className={
-            categoryColors[nodeData.category] ??
-            "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-          }
-        >
-          <span className="text-xs">{nodeData.category}</span>
-        </Badge>
-        {nodeData.isPrivate ? (
+        {nodeData.isPrivate && (
           <Badge
             variant="outline"
             className="border-amber-500 bg-amber-50 text-amber-700 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
           >
             <Lock className="mr-1 h-2.5 w-2.5" />
             <span className="text-xs">Private</span>
-          </Badge>
-        ) : (
-          <Badge
-            variant="outline"
-            className="border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400"
-          >
-            <Globe className="mr-1 h-2.5 w-2.5" />
-            <span className="text-xs">Public</span>
           </Badge>
         )}
       </div>
@@ -117,6 +98,12 @@ export function ExerciseNode({ data }: NodeProps) {
           {nodeData.difficulty}/10
         </span>
       </div>
+      {/* Source handle at bottom - sends edges upward to harder exercises above */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{ visibility: "hidden", width: 0, height: 0 }}
+      />
     </div>
   );
 }

@@ -2,9 +2,10 @@
 
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { Edge, Node } from "@xyflow/react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Background,
+  BackgroundVariant,
   Controls,
   MiniMap,
   ReactFlow,
@@ -12,244 +13,534 @@ import {
   useNodesState,
 } from "@xyflow/react";
 import { useQuery } from "convex/react";
+import { Dumbbell, Star, Target, Trophy } from "lucide-react";
+
+import {
+  Badge,
+  Separator,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  Skeleton,
+} from "@inochi/ui";
 
 import "@xyflow/react/dist/style.css";
 
 import { api } from "@packages/backend/convex/_generated/api";
 
-import type { ExerciseNodeData } from "./exercise-node";
-import { ExerciseNode } from "./exercise-node";
+import { layoutElements } from "~/utils/tree-layout";
+import { ExerciseOrb, ExerciseStatus } from "./exercise-orb";
 
+// Register node types
 const nodeTypes = {
-  exercise: ExerciseNode,
+  exercise: ExerciseOrb,
 };
 
-// Level order for sorting (higher = harder)
-const levelOrder: Record<string, number> = {
-  beginner: 1,
-  intermediate: 2,
-  advanced: 3,
-  expert: 4,
-  elite: 5,
-};
+// --- Mock Status Logic ---
+function getMockStatus(difficulty: number): ExerciseStatus {
+  if (difficulty <= 2) return "mastered";
+  if (difficulty <= 4) return "unlocked";
+  return "locked";
+}
 
+// --- Detail Sheet Component ---
+function ExerciseDetailSheet({
+  exerciseId,
+  isPrivate,
+  isOpen,
+  onClose,
+}: {
+  exerciseId: Id<"exercises"> | Id<"private_exercises"> | null;
+  isPrivate: boolean;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const publicData = useQuery(
+    api.functions.exercises.getPublicExerciseById,
+    !isPrivate && exerciseId
+      ? { exerciseId: exerciseId as Id<"exercises"> }
+      : "skip",
+  );
+
+  const privateData = useQuery(
+    api.functions.exercises.getPrivateExerciseById,
+    isPrivate && exerciseId
+      ? { exerciseId: exerciseId as Id<"private_exercises"> }
+      : "skip",
+  );
+
+  const data = isPrivate ? privateData : publicData;
+  const isLoading = data === undefined && exerciseId !== null;
+
+  if (!exerciseId) return null;
+
+  return (
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="w-full sm:max-w-md">
+        <SheetHeader className="mb-6">
+          <SheetTitle className="flex items-center gap-2 text-2xl font-bold">
+            {isLoading ? <Skeleton className="h-8 w-3/4" /> : data?.title}
+            {data && getMockStatus(data.difficulty) === "mastered" && (
+              <Star className="h-5 w-5 fill-amber-500 text-amber-500" />
+            )}
+          </SheetTitle>
+          <SheetDescription>
+            {isLoading ? (
+              <Skeleton className="h-4 w-1/2" />
+            ) : (
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Badge variant="outline">{data?.level}</Badge>
+                <Badge variant="secondary">{data?.category}</Badge>
+                <Badge variant="outline">
+                  Difficulty: {data?.difficulty}/10
+                </Badge>
+              </div>
+            )}
+          </SheetDescription>
+        </SheetHeader>
+
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-40 w-full" />
+          </div>
+        ) : data ? (
+          <div className="h-[calc(100vh-200px)] overflow-y-auto pr-4">
+            <div className="space-y-6">
+              {/* Description */}
+              <div>
+                <h4 className="mb-2 flex items-center gap-2 font-semibold">
+                  <Target className="h-4 w-4" /> Description
+                </h4>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {data.description || "No description provided."}
+                </p>
+              </div>
+
+              <Separator />
+
+              {/* Muscles */}
+              {data.muscles && data.muscles.length > 0 && (
+                <div>
+                  <h4 className="mb-2 flex items-center gap-2 font-semibold">
+                    <Dumbbell className="h-4 w-4" /> Targeted Muscles
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {data.muscles.map((m) => (
+                      <Badge
+                        key={m._id}
+                        variant="secondary"
+                        className="capitalize"
+                      >
+                        {m.name}{" "}
+                        {m.role && (
+                          <span className="ml-1 text-[10px] opacity-50">
+                            ({m.role})
+                          </span>
+                        )}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Progressions */}
+              {(data.prerequisites?.length > 0 ||
+                data.progressions?.length > 0) && (
+                <div>
+                  <h4 className="mb-2 flex items-center gap-2 font-semibold">
+                    <Trophy className="h-4 w-4" /> Progression Path
+                  </h4>
+                  <div className="space-y-4 text-sm">
+                    {data.prerequisites?.length > 0 && (
+                      <div>
+                        <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                          Prerequisites
+                        </span>
+                        <ul className="text-muted-foreground mt-1 list-inside list-disc space-y-1">
+                          {data.prerequisites.map((p) => (
+                            <li key={p._id}>{p.title}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {data.progressions?.length > 0 && (
+                      <div>
+                        <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                          Unlocks
+                        </span>
+                        <ul className="text-primary mt-1 list-inside list-disc space-y-1 font-medium">
+                          {data.progressions.map((p) => (
+                            <li key={p._id}>{p.title}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="text-muted-foreground flex h-40 items-center justify-center">
+            Exercise not found.
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+// --- Main Component ---
 interface ExerciseTreeProps {
   searchQuery?: string;
 }
 
 export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
-  const exercises = useQuery(api.functions.exercises.getExercisesForTree, {
-    searchQuery: searchQuery?.trim() ?? undefined,
-  });
+  // Fetch all exercise trees
+  const exerciseTrees = useQuery(api.functions.exerciseTrees.list, {});
 
-  // Transform exercises to nodes and edges
-  const { nodes, edges } = useMemo(() => {
-    if (!exercises || exercises.length === 0) {
-      return { nodes: [], edges: [] };
+  // State for layouted graph
+  const [layoutedNodes, setLayoutedNodes, onNodesChange] = useNodesState<Node>(
+    [],
+  );
+  const [layoutedEdges, setLayoutedEdges, onEdgesChange] = useEdgesState<Edge>(
+    [],
+  );
+
+  // State for detail sheet
+  const [selectedNode, setSelectedNode] = useState<{
+    id: Id<"exercises"> | Id<"private_exercises">;
+    isPrivate: boolean;
+  } | null>(null);
+
+  // Transform trees into flat exercise list with prerequisites
+  const exercises = useMemo(() => {
+    if (!exerciseTrees || exerciseTrees.length === 0) {
+      return [];
     }
 
-    // Create a map of exercise IDs to exercises for quick lookup
+    // Collect all unique exercises from all trees
     const exerciseMap = new Map<
-      Id<"exercises"> | Id<"private_exercises">,
-      (typeof exercises)[0]
+      Id<"exercises">,
+      {
+        _id: Id<"exercises">;
+        title: string;
+        description: string;
+        category: "calisthenics" | "gym" | "stretch" | "mobility";
+        level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+        difficulty: number;
+        prerequisites: Id<"exercises">[];
+        isPrivate: false;
+      }
     >();
-    exercises.forEach((ex) => exerciseMap.set(ex._id, ex));
 
-    // Calculate depth for each exercise using topological sort
-    // Depth represents how many prerequisite levels deep an exercise is
-    const depthMap = new Map<
-      Id<"exercises"> | Id<"private_exercises">,
-      number
-    >();
-    const visited = new Set<Id<"exercises"> | Id<"private_exercises">>();
+    // Build prerequisites map from all connections across all trees
+    const prerequisitesMap = new Map<Id<"exercises">, Id<"exercises">[]>();
 
-    const calculateDepth = (
-      exerciseId: Id<"exercises"> | Id<"private_exercises">,
-    ): number => {
-      if (visited.has(exerciseId)) {
-        return depthMap.get(exerciseId) ?? 0;
-      }
-      visited.add(exerciseId);
-
-      const exercise = exerciseMap.get(exerciseId);
-      if (!exercise || exercise.prerequisites.length === 0) {
-        depthMap.set(exerciseId, 0);
-        return 0;
-      }
-
-      const maxPrereqDepth = Math.max(
-        ...exercise.prerequisites.map((prereqId) => calculateDepth(prereqId)),
-      );
-      const depth = maxPrereqDepth + 1;
-      depthMap.set(exerciseId, depth);
-      return depth;
-    };
-
-    // Calculate depth for all exercises
-    exercises.forEach((ex) => calculateDepth(ex._id));
-
-    // Sort exercises by:
-    // 1. Depth (deeper = harder, goes to top)
-    // 2. Difficulty (higher = harder)
-    // 3. Level (higher level = harder)
-    // 4. Title (alphabetical for consistency)
-    const sortedExercises = [...exercises].sort((a, b) => {
-      const depthA = depthMap.get(a._id) ?? 0;
-      const depthB = depthMap.get(b._id) ?? 0;
-
-      if (depthA !== depthB) {
-        return depthB - depthA; // Deeper (harder) first
-      }
-
-      if (a.difficulty !== b.difficulty) {
-        return b.difficulty - a.difficulty; // Higher difficulty first
-      }
-
-      const levelA = levelOrder[a.level] ?? 0;
-      const levelB = levelOrder[b.level] ?? 0;
-      if (levelA !== levelB) {
-        return levelB - levelA; // Higher level first
-      }
-
-      return a.title.localeCompare(b.title);
-    });
-
-    // Group exercises by depth for horizontal positioning
-    const exercisesByDepth = new Map<number, typeof sortedExercises>();
-    sortedExercises.forEach((ex) => {
-      const depth = depthMap.get(ex._id) ?? 0;
-      if (!exercisesByDepth.has(depth)) {
-        exercisesByDepth.set(depth, []);
-      }
-      const depthArray = exercisesByDepth.get(depth);
-      if (depthArray) {
-        depthArray.push(ex);
-      }
-    });
-
-    // Create nodes with positions
-    const horizontalSpacing = 300;
-    const verticalSpacing = 200;
-    const startX = 100;
-    const startY = 100;
-
-    const flowNodes: Node<ExerciseNodeData>[] = sortedExercises.map(
-      (exercise) => {
-        const depth = depthMap.get(exercise._id) ?? 0;
-        const depthExercises = exercisesByDepth.get(depth) ?? [];
-        const positionInDepth = depthExercises.indexOf(exercise);
-
-        // Calculate horizontal position within depth layer
-        const totalInDepth = depthExercises.length;
-        const layerWidth = (totalInDepth - 1) * horizontalSpacing;
-        const layerStartX = startX - layerWidth / 2;
-        const x = layerStartX + positionInDepth * horizontalSpacing;
-
-        // Calculate vertical position based on depth
-        const y = startY + depth * verticalSpacing;
-
-        return {
-          id: exercise._id,
-          type: "exercise",
-          position: { x, y },
-          data: {
+    // First pass: collect all exercises and build prerequisites map
+    for (const tree of exerciseTrees) {
+      for (const exercise of tree.exercises) {
+        if (!exerciseMap.has(exercise._id)) {
+          exerciseMap.set(exercise._id, {
             _id: exercise._id,
             title: exercise.title,
             description: exercise.description,
             category: exercise.category,
             level: exercise.level,
             difficulty: exercise.difficulty,
-            isPrivate: exercise.isPrivate,
-          },
-        };
-      },
-    );
+            prerequisites: [],
+            isPrivate: false,
+          });
+        }
+      }
 
-    // Create edges from prerequisites
-    const flowEdges: Edge[] = [];
-    exercises.forEach((exercise) => {
-      exercise.prerequisites.forEach((prereqId) => {
-        // Only create edge if both exercises are in the current set
-        if (exerciseMap.has(prereqId)) {
-          flowEdges.push({
-            id: `${prereqId}-${exercise._id}`,
-            source: prereqId,
-            target: exercise._id,
-            type: "smoothstep",
-            animated: false,
+      // Build prerequisites from connections
+      for (const connection of tree.connections) {
+        if (!prerequisitesMap.has(connection.toExercise)) {
+          prerequisitesMap.set(connection.toExercise, []);
+        }
+        prerequisitesMap
+          .get(connection.toExercise)!
+          .push(connection.fromExercise);
+      }
+    }
+
+    // Second pass: assign prerequisites to exercises
+    const exercisesList = Array.from(exerciseMap.values()).map((ex) => ({
+      ...ex,
+      prerequisites: prerequisitesMap.get(ex._id) ?? [],
+    }));
+
+    // Apply search filter if provided
+    if (searchQuery?.trim()) {
+      const searchLower = searchQuery.toLowerCase().trim();
+      return exercisesList.filter((ex) => {
+        return (
+          ex.title.toLowerCase().includes(searchLower) ||
+          ex.description.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    return exercisesList;
+  }, [exerciseTrees, searchQuery]);
+
+  // Layout calculation
+  const { nodes, edges } = useMemo(() => {
+    if (!exerciseTrees || exerciseTrees.length === 0) {
+      return { nodes: [], edges: [] };
+    }
+
+    let allNodes: Node[] = [];
+    let allEdges: Edge[] = [];
+    let currentXOffset = 0;
+    const TREE_GAP = 400; // Gap between trees
+
+    // Process each tree independently
+    for (const tree of exerciseTrees) {
+      // 1. Prepare data for this tree
+      const treeExercisesMap = new Map<Id<"exercises">, any>();
+      const treeEdgesMap = new Map<string, Edge>();
+
+      // Collect exercises for this tree
+      tree.exercises.forEach((ex) => {
+        treeExercisesMap.set(ex._id, {
+          ...ex,
+          prerequisites: [], // Will be filled from connections
+          status: getMockStatus(ex.difficulty),
+        });
+      });
+
+      // Build local prerequisites map to create edges
+      // We only care about connections within this tree
+      const treeConnections: {
+        source: Id<"exercises">;
+        target: Id<"exercises">;
+      }[] = [];
+
+      tree.connections.forEach((conn) => {
+        // Only add connection if both nodes exist in this tree (sanity check)
+        if (
+          treeExercisesMap.has(conn.fromExercise) &&
+          treeExercisesMap.has(conn.toExercise)
+        ) {
+          treeConnections.push({
+            source: conn.fromExercise,
+            target: conn.toExercise,
           });
         }
       });
-    });
 
-    return { nodes: flowNodes, edges: flowEdges };
-  }, [exercises]);
+      // Create raw nodes for layout
+      const rawNodes: Node[] = Array.from(treeExercisesMap.values()).map(
+        (ex) => ({
+          id: ex._id, // Use original ID for layout calculation
+          type: "exercise",
+          position: { x: 0, y: 0 },
+          data: ex,
+        }),
+      );
 
-  const [flowNodes, setNodes, onNodesChange] = useNodesState(nodes);
-  const [flowEdges, setEdges, onEdgesChange] = useEdgesState(edges);
+      // Create raw edges for layout
+      const rawEdges: Edge[] = treeConnections.map((conn) => ({
+        id: `${conn.source}-${conn.target}`,
+        source: conn.source,
+        target: conn.target,
+        type: "smoothstep",
+      }));
 
-  // Update nodes and edges when data changes
-  useEffect(() => {
-    setNodes(nodes);
-    setEdges(edges);
-  }, [nodes, edges, setNodes, setEdges]);
+      // 2. Layout this tree
+      const { nodes: layoutedTreeNodes, edges: layoutedTreeEdges } =
+        layoutElements(rawNodes, rawEdges, { direction: "BT" });
 
-  const onInit = useCallback(() => {
-    // Fit view after initial render
-    setTimeout(() => {
-      const reactFlowInstance = document.querySelector(".react-flow");
-      if (reactFlowInstance) {
-        // Trigger fit view through React Flow's internal API
-        // This will be handled by the Controls component's fit view button
+      // 3. Calculate bounding box to shift next tree
+      let minX = Infinity;
+      let maxX = -Infinity;
+
+      if (layoutedTreeNodes.length > 0) {
+        layoutedTreeNodes.forEach((node) => {
+          if (node.position.x < minX) minX = node.position.x;
+          if (node.position.x > maxX) maxX = node.position.x;
+        });
+      } else {
+        minX = 0;
+        maxX = 0;
       }
-    }, 100);
+
+      const treeWidth = maxX - minX;
+
+      // 4. Shift nodes and add to global collection with namespaced IDs
+      // Namespaced ID format: `${tree._id}__${exercise._id}`
+
+      layoutedTreeNodes.forEach((node) => {
+        const originalId = node.id;
+        const namespacedId = `${tree._id}__${originalId}`;
+
+        // Shift X position
+        // We also need to normalize the X position relative to the tree's minX so it starts at 0 locally, then add currentXOffset
+        const normalizedX = node.position.x - minX;
+
+        const finalNode: Node = {
+          ...node,
+          id: namespacedId,
+          position: {
+            x: currentXOffset + normalizedX,
+            y: node.position.y,
+          },
+          data: {
+            ...node.data,
+            originalId: originalId, // Keep original ID for easy access
+            treeId: tree._id,
+          },
+        };
+        allNodes.push(finalNode);
+      });
+
+      // Add edges with namespaced IDs
+      // We need to recreate edges because IDs changed
+      treeConnections.forEach((conn) => {
+        const sourceId = `${tree._id}__${conn.source}`;
+        const targetId = `${tree._id}__${conn.target}`;
+
+        // Find source node to determine lock status
+        const sourceNode = treeExercisesMap.get(conn.source);
+        // Find target node to determine lock status
+        const targetNode = treeExercisesMap.get(conn.target);
+
+        // In the previous logic, edge style depended on target node's status (or similar logic)
+        // Let's stick to the existing logic: animate if !locked
+
+        // Logic from previous implementation:
+        // ex.prerequisites.forEach(prereqId => ... target: ex._id ...)
+        // so 'ex' is the target.
+        // const status = getMockStatus(ex.difficulty);
+        // const isLocked = status === "locked";
+
+        const targetStatus = targetNode
+          ? getMockStatus(targetNode.difficulty)
+          : "locked";
+        const isLocked = targetStatus === "locked";
+
+        allEdges.push({
+          id: `${sourceId}-${targetId}`,
+          source: sourceId,
+          target: targetId,
+          type: "smoothstep",
+          animated: !isLocked,
+          style: {
+            stroke: isLocked ? "var(--muted-foreground)" : "var(--primary)",
+            strokeWidth: isLocked ? 1 : 2,
+            opacity: isLocked ? 0.3 : 0.8,
+          },
+        });
+      });
+
+      // Update offset for next tree
+      // Add width of this tree + gap
+      // If tree was empty, width is 0
+      if (layoutedTreeNodes.length > 0) {
+        currentXOffset += treeWidth + TREE_GAP;
+      }
+    }
+
+    return { nodes: allNodes, edges: allEdges };
+  }, [exerciseTrees]);
+
+  // Update layout when calculation changes
+  useEffect(() => {
+    setLayoutedNodes(nodes);
+    setLayoutedEdges(edges);
+  }, [nodes, edges, setLayoutedNodes, setLayoutedEdges]);
+
+  // Handle node click
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    if (node.type === "exercise") {
+      const data = node.data as any; // Using any for simplicity here, typed in component
+      setSelectedNode({
+        id: data._id,
+        isPrivate: data.isPrivate,
+      });
+    }
   }, []);
 
-  if (exercises === undefined) {
+  if (exerciseTrees === undefined) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Loading exercises...</p>
+        <p className="text-muted-foreground animate-pulse">
+          Loading skill tree...
+        </p>
       </div>
     );
   }
 
   if (exercises.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <div className="bg-muted rounded-full p-6">
+          <Dumbbell className="text-muted-foreground h-10 w-10" />
+        </div>
         <p className="text-muted-foreground">
           {searchQuery?.trim()
             ? "No exercises found matching your search."
-            : "No exercises found."}
+            : "No exercises found. Start your journey!"}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="bg-background/50 relative h-full w-full">
       <ReactFlow
-        nodes={flowNodes}
-        edges={flowEdges}
+        nodes={layoutedNodes}
+        edges={layoutedEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
+        onNodeClick={onNodeClick}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
-        onInit={onInit}
+        minZoom={0.2}
+        maxZoom={4}
+        defaultEdgeOptions={{ type: "smoothstep" }}
+        proOptions={{ hideAttribution: true }}
       >
-        <Background />
-        <Controls />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={20}
+          size={1}
+          color="currentColor"
+          className="text-muted-foreground/20"
+        />
+        <Controls
+          showInteractive={false}
+          className="bg-background border-border"
+        />
         <MiniMap
-          nodeColor={(node) => {
-            const data = node.data as ExerciseNodeData | undefined;
-            if (data?.isPrivate) {
-              return "#f59e0b"; // amber
-            }
-            return "#10b981"; // emerald
+          nodeColor={(n) => {
+            const status = (n.data as any).status;
+            return status === "locked"
+              ? "#52525b"
+              : status === "mastered"
+                ? "#f59e0b"
+                : "#10b981";
           }}
-          className="bg-background"
+          className="!bg-background !border-border overflow-hidden rounded-lg"
+          maskColor="rgba(0, 0, 0, 0.1)"
         />
       </ReactFlow>
+
+      {/* Detail Sheet */}
+      <ExerciseDetailSheet
+        exerciseId={selectedNode?.id ?? null}
+        isPrivate={selectedNode?.isPrivate ?? false}
+        isOpen={selectedNode !== null}
+        onClose={() => setSelectedNode(null)}
+      />
     </div>
   );
 }

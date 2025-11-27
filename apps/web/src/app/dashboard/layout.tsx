@@ -1,11 +1,12 @@
-import {
-  Separator,
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@inochi/ui";
-
-import { AppSidebar } from "./_components/app-sidebar";
+// Commented out unused imports for now
+// import {
+//   Separator,
+//   SidebarInset,
+//   SidebarProvider,
+//   SidebarTrigger,
+// } from "@inochi/ui";
+//
+// import { AppSidebar } from "./_components/app-sidebar";
 
 export default function DashboardLayout({
   children,

@@ -542,88 +542,6 @@ export const getAllExercises = query({
   },
 });
 
-// Get all exercises with prerequisites for tree visualization
-export const getExercisesForTree = query({
-  args: {
-    searchQuery: v.optional(v.string()),
-  },
-  returns: v.array(
-    v.object({
-      _id: v.union(v.id("exercises"), v.id("private_exercises")),
-      title: v.string(),
-      description: v.string(),
-      category: exerciseCategoryValidator,
-      level: exerciseLevelValidator,
-      difficulty: v.number(),
-      prerequisites: v.array(
-        v.union(v.id("exercises"), v.id("private_exercises")),
-      ),
-      isPrivate: v.boolean(),
-    }),
-  ),
-  handler: async (ctx, args) => {
-    const userId = await getUserId(ctx);
-
-    // Fetch all public exercises
-    let publicExercises = await ctx.db.query("exercises").collect();
-
-    // Fetch user's private exercises (if authenticated)
-    let privateExercises: Array<Doc<"private_exercises">> = [];
-    if (userId) {
-      privateExercises = await ctx.db
-        .query("private_exercises")
-        .withIndex("by_user", (q) => q.eq("createdBy", userId))
-        .collect();
-    }
-
-    // Filter by search query if provided
-    if (args.searchQuery && args.searchQuery.trim().length > 0) {
-      const searchLower = args.searchQuery.toLowerCase().trim();
-      publicExercises = publicExercises.filter((exercise) => {
-        const titleMatch = exercise.title.toLowerCase().includes(searchLower);
-        const descriptionMatch = exercise.description
-          .toLowerCase()
-          .includes(searchLower);
-        return titleMatch || descriptionMatch;
-      });
-      privateExercises = privateExercises.filter((exercise) => {
-        const titleMatch = exercise.title.toLowerCase().includes(searchLower);
-        const descriptionMatch = exercise.description
-          .toLowerCase()
-          .includes(searchLower);
-        return titleMatch || descriptionMatch;
-      });
-    }
-
-    // Map public exercises
-    const enrichedPublic = publicExercises.map((exercise) => ({
-      _id: exercise._id as Id<"exercises"> | Id<"private_exercises">,
-      title: exercise.title,
-      description: exercise.description,
-      category: exercise.category,
-      level: exercise.level,
-      difficulty: exercise.difficulty,
-      prerequisites: exercise.prerequisites,
-      isPrivate: false as const,
-    }));
-
-    // Map private exercises
-    const enrichedPrivate = privateExercises.map((exercise) => ({
-      _id: exercise._id as Id<"exercises"> | Id<"private_exercises">,
-      title: exercise.title,
-      description: exercise.description,
-      category: exercise.category,
-      level: exercise.level,
-      difficulty: exercise.difficulty,
-      prerequisites: exercise.prerequisites,
-      isPrivate: true as const,
-    }));
-
-    // Combine all exercises
-    return [...enrichedPublic, ...enrichedPrivate];
-  },
-});
-
 // Create a new private exercise
 export const createPrivateExercise = mutation({
   args: {
@@ -1087,7 +1005,7 @@ async function getPublicExercisePrerequisites(
 
   const result: Array<{ _id: Id<"exercises">; title: string }> = [];
 
-  for (const prereqId of exercise.prerequisites) {
+  for (const prereqId of exercise.prerequisites ?? []) {
     // Only include public exercises
     const check = await isPublicExercise(ctx, prereqId);
     if (check.isPublic) {
