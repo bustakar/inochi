@@ -3,7 +3,8 @@
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
-import { Lock, Check, Star, Dumbbell } from "lucide-react";
+import { Dumbbell, Lock, Star } from "lucide-react";
+
 import { cn } from "@inochi/ui";
 
 export type ExerciseStatus = "locked" | "unlocked" | "mastered";
@@ -26,8 +27,10 @@ export function ExerciseOrb({ data }: NodeProps) {
   // Visual variants based on status
   const statusStyles = {
     locked: "bg-muted/50 text-muted-foreground border-muted-foreground/30",
-    unlocked: "bg-background border-primary/50 hover:border-primary hover:shadow-lg hover:shadow-primary/20",
-    mastered: "bg-amber-500/10 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)] text-amber-600",
+    unlocked:
+      "bg-background border-primary/50 hover:border-primary hover:shadow-lg hover:shadow-primary/20",
+    mastered:
+      "bg-amber-500/10 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)] text-amber-600",
   };
 
   // Difficulty colors for locked nodes (subtle borders/bgs)
@@ -39,7 +42,7 @@ export function ExerciseOrb({ data }: NodeProps) {
     if (diff <= 8) return "border-purple-500/20 text-purple-700/50";
     return "border-red-500/20 text-red-700/50";
   };
-  
+
   const lockedDifficultyStyle = difficultyColor(difficulty);
 
   const iconStyles = {
@@ -49,31 +52,31 @@ export function ExerciseOrb({ data }: NodeProps) {
   };
 
   return (
-    <div className="relative group">
+    <div className="group relative">
       {/* Glow for mastered */}
       {status === "mastered" && (
-        <div className="absolute -inset-1 rounded-full bg-amber-500/20 blur-md animate-pulse" />
+        <div className="absolute -inset-1 animate-pulse rounded-full bg-amber-500/20 blur-md" />
       )}
-      
+
       {/* Orb Container */}
       <div
         className={cn(
           "relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-4 transition-all duration-300",
           statusStyles[status],
-          lockedDifficultyStyle // Apply subtle color to locked nodes
+          lockedDifficultyStyle, // Apply subtle color to locked nodes
         )}
       >
         {/* Handles */}
         <Handle
           type="target"
           position={Position.Bottom}
-          className="!bg-muted-foreground/50 !w-3 !h-3 !-bottom-1.5"
+          className="!bg-muted-foreground/50 !-bottom-1.5 !h-3 !w-3"
         />
-        
+
         <Handle
           type="source"
           position={Position.Top}
-          className="!bg-muted-foreground/50 !w-3 !h-3 !-top-1.5"
+          className="!bg-muted-foreground/50 !-top-1.5 !h-3 !w-3"
         />
 
         {/* Icon / Content */}
@@ -83,11 +86,11 @@ export function ExerciseOrb({ data }: NodeProps) {
           ) : status === "mastered" ? (
             <Star className={cn("h-6 w-6 fill-current", iconStyles.mastered)} />
           ) : (
-             // Default icon based on category could go here, for now generic
-             <Dumbbell className={cn("h-6 w-6", iconStyles.unlocked)} />
+            // Default icon based on category could go here, for now generic
+            <Dumbbell className={cn("h-6 w-6", iconStyles.unlocked)} />
           )}
-          
-          <span className="text-[10px] font-bold leading-none">
+
+          <span className="text-[10px] leading-none font-bold">
             {difficulty}/10
           </span>
         </div>
@@ -95,15 +98,16 @@ export function ExerciseOrb({ data }: NodeProps) {
 
       {/* Label (Tooltip-ish, visible on hover or always for unlocked?) */}
       {/* Always visible label below node for better map feel */}
-      <div className={cn(
-        "absolute -bottom-8 left-1/2 -translate-x-1/2 w-32 text-center transition-opacity",
-        status === "locked" ? "opacity-50" : "opacity-100 font-medium"
-      )}>
-        <span className="text-xs text-foreground bg-background/80 px-2 py-0.5 rounded backdrop-blur-sm shadow-sm border truncate block">
+      <div
+        className={cn(
+          "absolute -bottom-8 left-1/2 w-32 -translate-x-1/2 text-center transition-opacity",
+          status === "locked" ? "opacity-50" : "font-medium opacity-100",
+        )}
+      >
+        <span className="text-foreground bg-background/80 block truncate rounded border px-2 py-0.5 text-xs shadow-sm backdrop-blur-sm">
           {title}
         </span>
       </div>
     </div>
   );
 }
-

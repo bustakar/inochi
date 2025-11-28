@@ -30,7 +30,7 @@ import {
 
 const treeSettingsSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
+  description: z.string(),
 });
 
 type TreeSettingsData = z.infer<typeof treeSettingsSchema>;
@@ -129,7 +129,7 @@ export function TreeToolbar({
   const form = useAppForm({
     defaultValues: {
       title: initialTitle,
-      description: initialDescription,
+      description: initialDescription ?? "",
     },
     validators: {
       onSubmit: treeSettingsSchema,
@@ -138,7 +138,7 @@ export function TreeToolbar({
       await updateTree({
         id: treeId,
         title: value.title,
-        description: value.description,
+        description: value.description || undefined,
       });
       setSettingsOpen(false);
     },
@@ -149,7 +149,7 @@ export function TreeToolbar({
     if (settingsOpen) {
       form.reset({
         title: initialTitle,
-        description: initialDescription,
+        description: initialDescription ?? "",
       });
     }
   }, [settingsOpen, initialTitle, initialDescription, form]);

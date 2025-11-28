@@ -36,7 +36,7 @@ export default function NewExerciseTreePage() {
       }
     };
 
-    createAndRedirect();
+    void createAndRedirect();
   }, [isLoaded, sessionClaims, createTree, router]);
 
   return (

@@ -30,8 +30,9 @@ import "@xyflow/react/dist/style.css";
 
 import { api } from "@packages/backend/convex/_generated/api";
 
+import type { ExerciseStatus } from "./exercise-orb";
 import { layoutElements } from "~/utils/tree-layout";
-import { ExerciseOrb, ExerciseStatus } from "./exercise-orb";
+import { ExerciseOrb } from "./exercise-orb";
 
 // Register node types
 const nodeTypes = {
@@ -122,7 +123,7 @@ function ExerciseDetailSheet({
               <Separator />
 
               {/* Muscles */}
-              {data.muscles && data.muscles.length > 0 && (
+              {data.muscles.length > 0 && (
                 <div>
                   <h4 className="mb-2 flex items-center gap-2 font-semibold">
                     <Dumbbell className="h-4 w-4" /> Targeted Muscles
@@ -149,14 +150,14 @@ function ExerciseDetailSheet({
               <Separator />
 
               {/* Progressions */}
-              {(data.prerequisites?.length > 0 ||
-                data.progressions?.length > 0) && (
+              {(data.prerequisites.length > 0 ||
+                data.progressions.length > 0) && (
                 <div>
                   <h4 className="mb-2 flex items-center gap-2 font-semibold">
                     <Trophy className="h-4 w-4" /> Progression Path
                   </h4>
                   <div className="space-y-4 text-sm">
-                    {data.prerequisites?.length > 0 && (
+                    {data.prerequisites.length > 0 && (
                       <div>
                         <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
                           Prerequisites
@@ -169,7 +170,7 @@ function ExerciseDetailSheet({
                       </div>
                     )}
 
-                    {data.progressions?.length > 0 && (
+                    {data.progressions.length > 0 && (
                       <div>
                         <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
                           Unlocks
@@ -265,9 +266,10 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
         if (!prerequisitesMap.has(connection.toExercise)) {
           prerequisitesMap.set(connection.toExercise, []);
         }
-        prerequisitesMap
-          .get(connection.toExercise)!
-          .push(connection.fromExercise);
+        const prereqs = prerequisitesMap.get(connection.toExercise);
+        if (prereqs) {
+          prereqs.push(connection.fromExercise);
+        }
       }
     }
 
@@ -297,16 +299,25 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
       return { nodes: [], edges: [] };
     }
 
-    let allNodes: Node[] = [];
-    let allEdges: Edge[] = [];
+    const allNodes: Node[] = [];
+    const allEdges: Edge[] = [];
     let currentXOffset = 0;
     const TREE_GAP = 400; // Gap between trees
 
     // Process each tree independently
     for (const tree of exerciseTrees) {
       // 1. Prepare data for this tree
-      const treeExercisesMap = new Map<Id<"exercises">, any>();
-      const treeEdgesMap = new Map<string, Edge>();
+      interface ExerciseWithStatus extends Record<string, unknown> {
+        _id: Id<"exercises">;
+        title: string;
+        description: string;
+        category: "calisthenics" | "gym" | "stretch" | "mobility";
+        level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+        difficulty: number;
+        prerequisites: Id<"exercises">[];
+        status: ExerciseStatus;
+      }
+      const treeExercisesMap = new Map<Id<"exercises">, ExerciseWithStatus>();
 
       // Collect exercises for this tree
       tree.exercises.forEach((ex) => {
@@ -356,8 +367,9 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
       }));
 
       // 2. Layout this tree
-      const { nodes: layoutedTreeNodes, edges: layoutedTreeEdges } =
-        layoutElements(rawNodes, rawEdges, { direction: "BT" });
+      const { nodes: layoutedTreeNodes } = layoutElements(rawNodes, rawEdges, {
+        direction: "BT",
+      });
 
       // 3. Calculate bounding box to shift next tree
       let minX = Infinity;
@@ -408,8 +420,6 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
         const sourceId = `${tree._id}__${conn.source}`;
         const targetId = `${tree._id}__${conn.target}`;
 
-        // Find source node to determine lock status
-        const sourceNode = treeExercisesMap.get(conn.source);
         // Find target node to determine lock status
         const targetNode = treeExercisesMap.get(conn.target);
 
@@ -461,7 +471,10 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
   // Handle node click
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     if (node.type === "exercise") {
-      const data = node.data as any; // Using any for simplicity here, typed in component
+      const data = node.data as {
+        _id: Id<"exercises"> | Id<"private_exercises">;
+        isPrivate: boolean;
+      };
       setSelectedNode({
         id: data._id,
         isPrivate: data.isPrivate,
@@ -522,7 +535,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
         />
         <MiniMap
           nodeColor={(n) => {
-            const status = (n.data as any).status;
+            const status = (n.data as { status?: ExerciseStatus }).status;
             return status === "locked"
               ? "#52525b"
               : status === "mastered"

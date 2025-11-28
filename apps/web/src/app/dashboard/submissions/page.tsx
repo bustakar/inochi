@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@inochi/ui";
 
-import type { Roles } from "../../../types/globals";
+import type { Role } from "../../../types/globals";
 import { getClientRole, isClientAdminOrModerator } from "../../../utils/roles";
 import { SubmissionCard } from "./_components/submission-card";
 
@@ -82,7 +82,7 @@ function StatusFilterDropdown({
 
 interface SubmissionsListProps {
   statuses: SubmissionStatus[];
-  userRole: Roles;
+  userRole: Role;
 }
 
 function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {

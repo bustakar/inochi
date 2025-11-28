@@ -20,7 +20,7 @@ interface ExercisePickerSidebarProps {
 }
 
 export function ExercisePickerSidebar({
-  onExerciseSelect,
+  onExerciseSelect: _onExerciseSelect,
 }: ExercisePickerSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");

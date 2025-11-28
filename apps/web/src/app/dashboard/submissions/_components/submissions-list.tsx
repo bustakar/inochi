@@ -5,14 +5,14 @@ import Link from "next/link";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 
-import type { Roles } from "../../../../types/globals";
+import type { Role } from "../../../../types/globals";
 import { SubmissionCard } from "./submission-card";
 
 type SubmissionStatus = "pending" | "approved" | "rejected";
 
 interface SubmissionsListProps {
   statuses: SubmissionStatus[];
-  userRole: Roles;
+  userRole: Role;
 }
 
 export function SubmissionsList({ statuses, userRole }: SubmissionsListProps) {

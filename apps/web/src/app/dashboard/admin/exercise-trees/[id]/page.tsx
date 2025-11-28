@@ -27,8 +27,9 @@ import { useMutation, useQuery } from "convex/react";
 
 import "@xyflow/react/dist/style.css";
 
+import type { EditorNodeData } from "./_components/editor-node";
 import { isClientAdminOrModerator } from "../../../../../utils/roles";
-import { EditorNode, EditorNodeData } from "./_components/editor-node";
+import { EditorNode } from "./_components/editor-node";
 import { ExercisePickerSidebar } from "./_components/exercise-picker-sidebar";
 import { TreeToolbar } from "./_components/tree-toolbar";
 
@@ -58,7 +59,7 @@ const TreeEditorCanvas = React.forwardRef<
 
   // Load tree data into React Flow state
   useEffect(() => {
-    if (!tree || !exercises) return;
+    // tree and exercises are guaranteed to be defined by parent component
 
     // Create exercise map for quick lookup
     const exerciseMap = new Map(exercises.map((ex) => [ex._id, ex]));
@@ -124,7 +125,7 @@ const TreeEditorCanvas = React.forwardRef<
 
       const exerciseData = JSON.parse(
         event.dataTransfer.getData("application/exercise"),
-      );
+      ) as EditorNodeData;
 
       // Check if node already exists
       if (nodes.some((n) => n.id === exerciseData._id)) {
@@ -140,7 +141,7 @@ const TreeEditorCanvas = React.forwardRef<
         id: exerciseData._id,
         type: "exercise",
         position,
-        data: exerciseData as EditorNodeData,
+        data: exerciseData,
       };
 
       setNodes((nds) => [...nds, newNode]);
@@ -168,8 +169,6 @@ const TreeEditorCanvas = React.forwardRef<
 
   // Save tree handler
   const handleSave = useCallback(async () => {
-    if (!tree) return;
-
     try {
       const nodesData = nodes.map((n) => ({
         exerciseId: n.id as Id<"exercises">,
@@ -180,13 +179,13 @@ const TreeEditorCanvas = React.forwardRef<
       const connectionsData = edges.map((e) => ({
         fromExercise: e.source as Id<"exercises">,
         toExercise: e.target as Id<"exercises">,
-        type: (e.data?.type || "required") as "required" | "optional",
-        sourceHandle: (e.sourceHandle || "bottom") as
+        type: (e.data?.type ?? "required") as "required" | "optional",
+        sourceHandle: (e.sourceHandle ?? "bottom") as
           | "top"
           | "bottom"
           | "left"
           | "right",
-        targetHandle: (e.targetHandle || "top") as
+        targetHandle: (e.targetHandle ?? "top") as
           | "top"
           | "bottom"
           | "left"
@@ -202,7 +201,7 @@ const TreeEditorCanvas = React.forwardRef<
       console.error("Failed to save tree:", error);
       throw error;
     }
-  }, [tree, nodes, edges, treeId, updateTree]);
+  }, [nodes, edges, treeId, updateTree]);
 
   // Expose save function via ref
   useImperativeHandle(ref, () => ({
@@ -324,21 +323,20 @@ export default function ExerciseTreeEditorPage() {
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <ExercisePickerSidebar
-          onExerciseSelect={(exercise) => {
+          onExerciseSelect={(_exercise) => {
             // This is handled by drag-drop, but we keep it for API consistency
           }}
         />
 
-        {tree && exercises && (
-          <ReactFlowProvider>
-            <TreeEditorCanvas
-              ref={canvasRef}
-              tree={tree}
-              exercises={exercises}
-              treeId={treeId}
-            />
-          </ReactFlowProvider>
-        )}
+        {/* tree and exercises are guaranteed to be defined at this point */}
+        <ReactFlowProvider>
+          <TreeEditorCanvas
+            ref={canvasRef}
+            tree={tree}
+            exercises={exercises}
+            treeId={treeId}
+          />
+        </ReactFlowProvider>
       </div>
     </div>
   );

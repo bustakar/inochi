@@ -1,10 +1,11 @@
-import { Edge, Node, Position } from "@xyflow/react";
+import type { Edge, Node } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 
 const GRID_X_SPACING = 250; // Wider horizontal spacing for clarity
 const GRID_Y_SPACING = 160; // Vertical spacing
 
 // Internal type for layout calculation
-type LayoutNode = {
+interface LayoutNode {
   id: string;
   node?: Node;
   rank: number;
@@ -12,7 +13,7 @@ type LayoutNode = {
   x: number;
   sources: string[]; // IDs of connected nodes from lower ranks
   targets: string[]; // IDs of connected nodes from higher ranks
-};
+}
 
 /**
  * layoutElements
@@ -24,7 +25,7 @@ export const layoutElements = (
   edges: Edge[],
   options: { direction?: "TB" | "BT" } = {},
 ) => {
-  const direction = options.direction || "BT";
+  const direction = options.direction ?? "BT";
 
   // --- 1. Initialize Layout Graph ---
   const rows = new Map<number, LayoutNode[]>();
@@ -32,13 +33,15 @@ export const layoutElements = (
 
   const getRow = (r: number) => {
     if (!rows.has(r)) rows.set(r, []);
-    return rows.get(r)!;
+    const row = rows.get(r);
+    if (!row) throw new Error(`Row ${r} not found`);
+    return row;
   };
 
   // Initialize real nodes
   nodes.forEach((node) => {
     // Fallback to 1 if difficulty is missing
-    const rank = (node.data as any).difficulty || 1;
+    const rank = (node.data as { difficulty?: number }).difficulty ?? 1;
     const entry: LayoutNode = {
       id: node.id,
       node,
@@ -130,11 +133,12 @@ export const layoutElements = (
     // Note: In 'BT' (Bottom-Top), "targets" are usually visually above.
     // We iterate High Rank -> Low Rank to align lower nodes with their upper parents
     [...ranks].reverse().forEach((r) => {
-      const row = rows.get(r)!;
+      const row = rows.get(r);
+      if (!row) return;
       row.forEach((n) => {
         if (n.targets.length > 0) {
           const sum = n.targets.reduce(
-            (acc, id) => acc + (nodeMap.get(id)?.x || 0),
+            (acc, id) => acc + (nodeMap.get(id)?.x ?? 0),
             0,
           );
           n.x = sum / n.targets.length;
@@ -145,11 +149,12 @@ export const layoutElements = (
 
     // Up Sweep (Align with children/sources)
     ranks.forEach((r) => {
-      const row = rows.get(r)!;
+      const row = rows.get(r);
+      if (!row) return;
       row.forEach((n) => {
         if (n.sources.length > 0) {
           const sum = n.sources.reduce(
-            (acc, id) => acc + (nodeMap.get(id)?.x || 0),
+            (acc, id) => acc + (nodeMap.get(id)?.x ?? 0),
             0,
           );
           n.x = sum / n.sources.length;
@@ -210,7 +215,7 @@ function resolveOverlaps(row: LayoutNode[]) {
   for (let i = 0; i < row.length - 1; i++) {
     const curr = row[i];
     const next = row[i + 1];
-    if (next.x < curr.x + GRID_X_SPACING) {
+    if (curr && next && next.x < curr.x + GRID_X_SPACING) {
       next.x = curr.x + GRID_X_SPACING;
     }
   }
