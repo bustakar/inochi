@@ -19,6 +19,7 @@ export * from "./components/form";
 export * from "./components/input";
 export * from "./components/input-group";
 export * from "./components/label";
+export * from "./components/scroll-area";
 export * from "./components/select";
 export * from "./components/separator";
 export * from "./components/sheet";

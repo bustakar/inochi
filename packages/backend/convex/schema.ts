@@ -55,16 +55,40 @@ export default defineSchema({
 
   exercise_trees: defineTable({
     title: v.string(),
+    description: v.optional(v.string()),
+    status: v.union(v.literal("draft"), v.literal("published")),
+    createdBy: v.string(),
+    nodes: v.array(
+      v.object({
+        exerciseId: v.id("exercises"),
+        x: v.number(),
+        y: v.number(),
+      }),
+    ),
     connections: v.array(
       v.object({
         fromExercise: v.id("exercises"),
         toExercise: v.id("exercises"),
         type: v.union(v.literal("required"), v.literal("optional")),
+        sourceHandle: v.union(
+          v.literal("top"),
+          v.literal("bottom"),
+          v.literal("left"),
+          v.literal("right"),
+        ),
+        targetHandle: v.union(
+          v.literal("top"),
+          v.literal("bottom"),
+          v.literal("left"),
+          v.literal("right"),
+        ),
       }),
     ),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }),
+  })
+    .index("by_status", ["status"])
+    .index("by_user", ["createdBy"]),
 
   private_exercises: defineTable({
     userId: v.string(),

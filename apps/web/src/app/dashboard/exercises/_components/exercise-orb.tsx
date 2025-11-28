@@ -25,13 +25,25 @@ export function ExerciseOrb({ data }: NodeProps) {
 
   // Visual variants based on status
   const statusStyles = {
-    locked: "bg-muted text-muted-foreground border-muted-foreground/20 opacity-80 grayscale",
+    locked: "bg-muted/50 text-muted-foreground border-muted-foreground/30",
     unlocked: "bg-background border-primary/50 hover:border-primary hover:shadow-lg hover:shadow-primary/20",
     mastered: "bg-amber-500/10 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)] text-amber-600",
   };
 
+  // Difficulty colors for locked nodes (subtle borders/bgs)
+  const difficultyColor = (diff: number) => {
+    if (status !== "locked") return "";
+    // Map difficulty to subtle border/text colors
+    if (diff <= 3) return "border-green-500/20 text-green-700/50";
+    if (diff <= 6) return "border-blue-500/20 text-blue-700/50";
+    if (diff <= 8) return "border-purple-500/20 text-purple-700/50";
+    return "border-red-500/20 text-red-700/50";
+  };
+  
+  const lockedDifficultyStyle = difficultyColor(difficulty);
+
   const iconStyles = {
-    locked: "text-muted-foreground",
+    locked: "text-muted-foreground/50",
     unlocked: "text-primary",
     mastered: "text-amber-500",
   };
@@ -47,7 +59,8 @@ export function ExerciseOrb({ data }: NodeProps) {
       <div
         className={cn(
           "relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-4 transition-all duration-300",
-          statusStyles[status]
+          statusStyles[status],
+          lockedDifficultyStyle // Apply subtle color to locked nodes
         )}
       >
         {/* Handles */}
