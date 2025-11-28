@@ -1,11 +1,13 @@
 "use client";
 
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
+import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useMutation } from "convex/react";
-import { Save, Eye, EyeOff, Settings, ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Save, Settings, Trash2 } from "lucide-react";
+import * as z from "zod";
 
 import {
   Button,
@@ -15,10 +17,88 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Field,
+  FieldError,
+  FieldLabel,
   Input,
-  Label,
   Textarea,
 } from "@inochi/ui";
+
+// ============================================================================
+// Form Schema and Types
+// ============================================================================
+
+const treeSettingsSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+});
+
+type TreeSettingsData = z.infer<typeof treeSettingsSchema>;
+
+// ============================================================================
+// Form Components
+// ============================================================================
+
+const { fieldContext, formContext, useFieldContext } = createFormHookContexts();
+
+function TitleField() {
+  const field = useFieldContext<string>();
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  return (
+    <Field data-invalid={isInvalid}>
+      <FieldLabel htmlFor={field.name}>Title</FieldLabel>
+      <Input
+        id={field.name}
+        name={field.name}
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={(e) => field.handleChange(e.target.value)}
+        aria-invalid={isInvalid}
+        placeholder="Exercise Tree Title"
+        autoComplete="off"
+      />
+      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+    </Field>
+  );
+}
+
+function DescriptionField() {
+  const field = useFieldContext<string | undefined>();
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  return (
+    <Field data-invalid={isInvalid}>
+      <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+      <Textarea
+        id={field.name}
+        name={field.name}
+        value={field.state.value ?? ""}
+        onBlur={field.handleBlur}
+        onChange={(e) => field.handleChange(e.target.value || undefined)}
+        aria-invalid={isInvalid}
+        placeholder="Optional description"
+        rows={3}
+        autoComplete="off"
+      />
+      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+    </Field>
+  );
+}
+
+export const { useAppForm } = createFormHook({
+  fieldContext,
+  formContext,
+  fieldComponents: {
+    TitleField,
+    DescriptionField,
+  },
+  formComponents: {},
+});
+
+// ============================================================================
+// Tree Toolbar Component
+// ============================================================================
 
 interface TreeToolbarProps {
   treeId: Id<"exercise_trees">;
@@ -38,8 +118,6 @@ export function TreeToolbar({
   isSaving = false,
 }: TreeToolbarProps) {
   const router = useRouter();
-  const [title, setTitle] = useState(initialTitle);
-  const [description, setDescription] = useState(initialDescription || "");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -48,14 +126,33 @@ export function TreeToolbar({
   const unpublishTree = useMutation(api.functions.exerciseTrees.unpublish);
   const deleteTree = useMutation(api.functions.exerciseTrees.delete_);
 
-  const handleSaveSettings = async () => {
-    await updateTree({
-      id: treeId,
-      title,
-      description: description || undefined,
-    });
-    setSettingsOpen(false);
-  };
+  const form = useAppForm({
+    defaultValues: {
+      title: initialTitle,
+      description: initialDescription,
+    },
+    validators: {
+      onSubmit: treeSettingsSchema,
+    },
+    onSubmit: async ({ value }: { value: TreeSettingsData }) => {
+      await updateTree({
+        id: treeId,
+        title: value.title,
+        description: value.description,
+      });
+      setSettingsOpen(false);
+    },
+  });
+
+  // Reset form when dialog opens or initial values change
+  useEffect(() => {
+    if (settingsOpen) {
+      form.reset({
+        title: initialTitle,
+        description: initialDescription,
+      });
+    }
+  }, [settingsOpen, initialTitle, initialDescription, form]);
 
   const handleTogglePublish = async () => {
     if (status === "draft") {
@@ -71,7 +168,7 @@ export function TreeToolbar({
   };
 
   return (
-    <div className="bg-background border-b flex items-center gap-2 p-2">
+    <div className="bg-background flex items-center gap-2 border-b p-2">
       <Button
         variant="ghost"
         size="sm"
@@ -83,20 +180,12 @@ export function TreeToolbar({
 
       <div className="flex-1" />
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setSettingsOpen(true)}
-      >
+      <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
         <Settings className="mr-2 h-4 w-4" />
         Settings
       </Button>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleTogglePublish}
-      >
+      <Button variant="outline" size="sm" onClick={handleTogglePublish}>
         {status === "published" ? (
           <>
             <EyeOff className="mr-2 h-4 w-4" />
@@ -110,12 +199,7 @@ export function TreeToolbar({
         )}
       </Button>
 
-      <Button
-        variant="default"
-        size="sm"
-        onClick={onSave}
-        disabled={isSaving}
-      >
+      <Button variant="default" size="sm" onClick={onSave} disabled={isSaving}>
         <Save className="mr-2 h-4 w-4" />
         {isSaving ? "Saving..." : "Save"}
       </Button>
@@ -138,33 +222,33 @@ export function TreeToolbar({
               Update the title and description of this exercise tree.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Exercise Tree Title"
+          <form
+            id="tree-settings-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void form.handleSubmit();
+            }}
+          >
+            <div className="space-y-4 py-4">
+              <form.AppField name="title" children={() => <TitleField />} />
+              <form.AppField
+                name="description"
+                children={() => <DescriptionField />}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional description"
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSettingsOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveSettings}>Save Changes</Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSettingsOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" form="tree-settings-form">
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -194,4 +278,3 @@ export function TreeToolbar({
     </div>
   );
 }
-

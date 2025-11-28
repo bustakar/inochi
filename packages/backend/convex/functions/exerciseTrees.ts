@@ -7,6 +7,130 @@ import {
 } from "../validators/validators";
 import { getUserId, isAdminOrModerator } from "./auth";
 
+// ============================================================================
+// Common Validators
+// ============================================================================
+
+const exerciseTreeStatusValidator = v.union(
+  v.literal("draft"),
+  v.literal("published"),
+);
+
+const handlePositionValidator = v.union(
+  v.literal("top"),
+  v.literal("bottom"),
+  v.literal("left"),
+  v.literal("right"),
+);
+
+const connectionTypeValidator = v.union(
+  v.literal("required"),
+  v.literal("optional"),
+);
+
+const exerciseInTreeValidator = v.object({
+  _id: v.id("exercises"),
+  title: v.string(),
+  description: v.string(),
+  category: exerciseCategoryValidator,
+  level: exerciseLevelValidator,
+  difficulty: v.number(),
+});
+
+const treeNodeValidator = v.object({
+  exerciseId: v.id("exercises"),
+  x: v.number(),
+  y: v.number(),
+});
+
+const treeConnectionValidator = v.object({
+  fromExercise: v.id("exercises"),
+  toExercise: v.id("exercises"),
+  type: connectionTypeValidator,
+  sourceHandle: handlePositionValidator,
+  targetHandle: handlePositionValidator,
+});
+
+const exerciseTreeReturnValidator = v.object({
+  _id: v.id("exercise_trees"),
+  _creationTime: v.number(),
+  title: v.string(),
+  description: v.optional(v.string()),
+  status: exerciseTreeStatusValidator,
+  createdBy: v.string(),
+  exercises: v.array(exerciseInTreeValidator),
+  nodes: v.array(treeNodeValidator),
+  connections: v.array(treeConnectionValidator),
+});
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+// Collect exercise IDs from tree nodes and connections
+function collectExerciseIds(
+  nodes: Array<{ exerciseId: Id<"exercises"> }>,
+  connections: Array<{
+    fromExercise: Id<"exercises">;
+    toExercise: Id<"exercises">;
+  }>,
+): Set<Id<"exercises">> {
+  const exerciseIds = new Set<Id<"exercises">>();
+
+  // Collect exercise IDs from nodes
+  for (const node of nodes) {
+    exerciseIds.add(node.exerciseId);
+  }
+
+  // Also collect from connections (for backward compatibility)
+  for (const connection of connections) {
+    exerciseIds.add(connection.fromExercise);
+    exerciseIds.add(connection.toExercise);
+  }
+
+  return exerciseIds;
+}
+
+// Fetch exercises by IDs
+async function fetchExercises(
+  ctx: { db: any },
+  exerciseIds: Set<Id<"exercises">>,
+): Promise<
+  Array<{
+    _id: Id<"exercises">;
+    title: string;
+    description: string;
+    category: Doc<"exercises">["category"];
+    level: Doc<"exercises">["level"];
+    difficulty: number;
+  }>
+> {
+  const exercises: Array<{
+    _id: Id<"exercises">;
+    title: string;
+    description: string;
+    category: Doc<"exercises">["category"];
+    level: Doc<"exercises">["level"];
+    difficulty: number;
+  }> = [];
+
+  for (const exerciseId of exerciseIds) {
+    const exercise = await ctx.db.get(exerciseId);
+    if (exercise) {
+      exercises.push({
+        _id: exercise._id,
+        title: exercise.title,
+        description: exercise.description,
+        category: exercise.category,
+        level: exercise.level,
+        difficulty: exercise.difficulty,
+      });
+    }
+  }
+
+  return exercises;
+}
+
 // Helper: Enrich tree with exercise data
 async function enrichTree(
   ctx: { db: any },
@@ -39,41 +163,11 @@ async function enrichTree(
     targetHandle: "top" | "bottom" | "left" | "right";
   }>;
 }> {
-  const exerciseIds = new Set<Id<"exercises">>();
-  
-  // Collect exercise IDs from nodes
-  for (const node of tree.nodes || []) {
-    exerciseIds.add(node.exerciseId);
-  }
-  
-  // Also collect from connections (for backward compatibility)
-  for (const connection of tree.connections || []) {
-    exerciseIds.add(connection.fromExercise);
-    exerciseIds.add(connection.toExercise);
-  }
+  const nodes = tree.nodes || [];
+  const connections = tree.connections || [];
 
-  const exercises: Array<{
-    _id: Id<"exercises">;
-    title: string;
-    description: string;
-    category: Doc<"exercises">["category"];
-    level: Doc<"exercises">["level"];
-    difficulty: number;
-  }> = [];
-
-  for (const exerciseId of exerciseIds) {
-    const exercise = await ctx.db.get(exerciseId);
-    if (exercise) {
-      exercises.push({
-        _id: exercise._id,
-        title: exercise.title,
-        description: exercise.description,
-        category: exercise.category,
-        level: exercise.level,
-        difficulty: exercise.difficulty,
-      });
-    }
-  }
+  const exerciseIds = collectExerciseIds(nodes, connections);
+  const exercises = await fetchExercises(ctx, exerciseIds);
 
   return {
     _id: tree._id,
@@ -83,60 +177,15 @@ async function enrichTree(
     status: tree.status || "published", // Default to published for backward compatibility
     createdBy: tree.createdBy || "",
     exercises,
-    nodes: tree.nodes || [],
-    connections: tree.connections || [],
+    nodes,
+    connections,
   };
 }
 
 // List only published trees (for regular users)
 export const list = query({
   args: {},
-  returns: v.array(
-    v.object({
-      _id: v.id("exercise_trees"),
-      _creationTime: v.number(),
-      title: v.string(),
-      description: v.optional(v.string()),
-      status: v.union(v.literal("draft"), v.literal("published")),
-      createdBy: v.string(),
-      exercises: v.array(
-        v.object({
-          _id: v.id("exercises"),
-          title: v.string(),
-          description: v.string(),
-          category: exerciseCategoryValidator,
-          level: exerciseLevelValidator,
-          difficulty: v.number(),
-        }),
-      ),
-      nodes: v.array(
-        v.object({
-          exerciseId: v.id("exercises"),
-          x: v.number(),
-          y: v.number(),
-        }),
-      ),
-      connections: v.array(
-        v.object({
-          fromExercise: v.id("exercises"),
-          toExercise: v.id("exercises"),
-          type: v.union(v.literal("required"), v.literal("optional")),
-          sourceHandle: v.union(
-            v.literal("top"),
-            v.literal("bottom"),
-            v.literal("left"),
-            v.literal("right"),
-          ),
-          targetHandle: v.union(
-            v.literal("top"),
-            v.literal("bottom"),
-            v.literal("left"),
-            v.literal("right"),
-          ),
-        }),
-      ),
-    }),
-  ),
+  returns: v.array(exerciseTreeReturnValidator),
   handler: async (ctx) => {
     const publishedTrees = await ctx.db
       .query("exercise_trees")
@@ -150,55 +199,12 @@ export const list = query({
 // List all trees (admin/moderator only)
 export const listAll = query({
   args: {},
-  returns: v.array(
-    v.object({
-      _id: v.id("exercise_trees"),
-      _creationTime: v.number(),
-      title: v.string(),
-      description: v.optional(v.string()),
-      status: v.union(v.literal("draft"), v.literal("published")),
-      createdBy: v.string(),
-      exercises: v.array(
-        v.object({
-          _id: v.id("exercises"),
-          title: v.string(),
-          description: v.string(),
-          category: exerciseCategoryValidator,
-          level: exerciseLevelValidator,
-          difficulty: v.number(),
-        }),
-      ),
-      nodes: v.array(
-        v.object({
-          exerciseId: v.id("exercises"),
-          x: v.number(),
-          y: v.number(),
-        }),
-      ),
-      connections: v.array(
-        v.object({
-          fromExercise: v.id("exercises"),
-          toExercise: v.id("exercises"),
-          type: v.union(v.literal("required"), v.literal("optional")),
-          sourceHandle: v.union(
-            v.literal("top"),
-            v.literal("bottom"),
-            v.literal("left"),
-            v.literal("right"),
-          ),
-          targetHandle: v.union(
-            v.literal("top"),
-            v.literal("bottom"),
-            v.literal("left"),
-            v.literal("right"),
-          ),
-        }),
-      ),
-    }),
-  ),
+  returns: v.array(exerciseTreeReturnValidator),
   handler: async (ctx) => {
     if (!(await isAdminOrModerator(ctx))) {
-      throw new Error("Unauthorized: Only admins and moderators can list all trees");
+      throw new Error(
+        "Unauthorized: Only admins and moderators can list all trees",
+      );
     }
 
     const allTrees = await ctx.db.query("exercise_trees").collect();
@@ -211,53 +217,7 @@ export const getById = query({
   args: {
     id: v.id("exercise_trees"),
   },
-  returns: v.union(
-    v.object({
-      _id: v.id("exercise_trees"),
-      _creationTime: v.number(),
-      title: v.string(),
-      description: v.optional(v.string()),
-      status: v.union(v.literal("draft"), v.literal("published")),
-      createdBy: v.string(),
-      exercises: v.array(
-        v.object({
-          _id: v.id("exercises"),
-          title: v.string(),
-          description: v.string(),
-          category: exerciseCategoryValidator,
-          level: exerciseLevelValidator,
-          difficulty: v.number(),
-        }),
-      ),
-      nodes: v.array(
-        v.object({
-          exerciseId: v.id("exercises"),
-          x: v.number(),
-          y: v.number(),
-        }),
-      ),
-      connections: v.array(
-        v.object({
-          fromExercise: v.id("exercises"),
-          toExercise: v.id("exercises"),
-          type: v.union(v.literal("required"), v.literal("optional")),
-          sourceHandle: v.union(
-            v.literal("top"),
-            v.literal("bottom"),
-            v.literal("left"),
-            v.literal("right"),
-          ),
-          targetHandle: v.union(
-            v.literal("top"),
-            v.literal("bottom"),
-            v.literal("left"),
-            v.literal("right"),
-          ),
-        }),
-      ),
-    }),
-    v.null(),
-  ),
+  returns: v.union(exerciseTreeReturnValidator, v.null()),
   handler: async (ctx, args) => {
     const tree = await ctx.db.get(args.id);
     if (!tree) {
@@ -284,7 +244,9 @@ export const create = mutation({
   returns: v.id("exercise_trees"),
   handler: async (ctx, args) => {
     if (!(await isAdminOrModerator(ctx))) {
-      throw new Error("Unauthorized: Only admins and moderators can create trees");
+      throw new Error(
+        "Unauthorized: Only admins and moderators can create trees",
+      );
     }
 
     const userId = await getUserId(ctx);
@@ -314,41 +276,15 @@ export const update = mutation({
     id: v.id("exercise_trees"),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
-    nodes: v.optional(
-      v.array(
-        v.object({
-          exerciseId: v.id("exercises"),
-          x: v.number(),
-          y: v.number(),
-        }),
-      ),
-    ),
-    connections: v.optional(
-      v.array(
-        v.object({
-          fromExercise: v.id("exercises"),
-          toExercise: v.id("exercises"),
-          type: v.union(v.literal("required"), v.literal("optional")),
-          sourceHandle: v.union(
-            v.literal("top"),
-            v.literal("bottom"),
-            v.literal("left"),
-            v.literal("right"),
-          ),
-          targetHandle: v.union(
-            v.literal("top"),
-            v.literal("bottom"),
-            v.literal("left"),
-            v.literal("right"),
-          ),
-        }),
-      ),
-    ),
+    nodes: v.optional(v.array(treeNodeValidator)),
+    connections: v.optional(v.array(treeConnectionValidator)),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     if (!(await isAdminOrModerator(ctx))) {
-      throw new Error("Unauthorized: Only admins and moderators can update trees");
+      throw new Error(
+        "Unauthorized: Only admins and moderators can update trees",
+      );
     }
 
     const tree = await ctx.db.get(args.id);
@@ -386,7 +322,9 @@ export const publish = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     if (!(await isAdminOrModerator(ctx))) {
-      throw new Error("Unauthorized: Only admins and moderators can publish trees");
+      throw new Error(
+        "Unauthorized: Only admins and moderators can publish trees",
+      );
     }
 
     const tree = await ctx.db.get(args.id);
@@ -411,7 +349,9 @@ export const unpublish = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     if (!(await isAdminOrModerator(ctx))) {
-      throw new Error("Unauthorized: Only admins and moderators can unpublish trees");
+      throw new Error(
+        "Unauthorized: Only admins and moderators can unpublish trees",
+      );
     }
 
     const tree = await ctx.db.get(args.id);
@@ -436,7 +376,9 @@ export const delete_ = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     if (!(await isAdminOrModerator(ctx))) {
-      throw new Error("Unauthorized: Only admins and moderators can delete trees");
+      throw new Error(
+        "Unauthorized: Only admins and moderators can delete trees",
+      );
     }
 
     const tree = await ctx.db.get(args.id);
