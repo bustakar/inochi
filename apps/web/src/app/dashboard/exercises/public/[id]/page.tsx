@@ -1,6 +1,10 @@
 "use client";
 
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
+import type {
+  ExerciseLevel,
+  MuscleRole,
+} from "@packages/backend/convex/validators/validators";
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -10,28 +14,12 @@ import { Globe } from "lucide-react";
 
 import { Badge, Button } from "@inochi/ui";
 
+import {
+  exerciseLevelColors,
+  getMuscleRoleLabel,
+  muscleRoles,
+} from "../../../../../utils/exercise-utils";
 import { ExerciseVariantsReadonly } from "./_components/exercise-variants-readonly";
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const levelColors: Record<
-  "beginner" | "intermediate" | "advanced" | "expert" | "elite" | "legendary",
-  string
-> = {
-  beginner:
-    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  intermediate:
-    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  advanced:
-    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  expert:
-    "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
-  elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  legendary:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-};
 
 // ============================================================================
 // Exercise Header Component
@@ -40,13 +28,7 @@ const levelColors: Record<
 interface ExerciseHeaderProps {
   exercise: {
     title: string;
-    level:
-      | "beginner"
-      | "intermediate"
-      | "advanced"
-      | "expert"
-      | "elite"
-      | "legendary";
+    level: ExerciseLevel;
     difficulty: number;
   };
 }
@@ -57,10 +39,10 @@ function ExerciseHeader({ exercise }: ExerciseHeaderProps) {
       <div className="flex flex-col items-start gap-4 md:flex-row md:items-center">
         <h1 className="text-foreground text-3xl font-bold">{exercise.title}</h1>
         <div className="flex items-center gap-1">
-          <Badge className={levelColors[exercise.level]}>
+          <Badge className={exerciseLevelColors[exercise.level]}>
             {exercise.level}
           </Badge>
-          <Badge className={levelColors[exercise.level]}>
+          <Badge className={exerciseLevelColors[exercise.level]}>
             {exercise.difficulty}/10
           </Badge>
           <Badge
@@ -101,20 +83,14 @@ interface MusclesSectionProps {
     _id: Id<"muscles">;
     name: string;
     muscleGroup?: string;
-    role?: "primary" | "secondary" | "stabilizer";
+    role?: MuscleRole;
   }[];
 }
-
-const roleLabels: Record<"primary" | "secondary" | "stabilizer", string> = {
-  primary: "Primary",
-  secondary: "Secondary",
-  stabilizer: "Stabilizer",
-};
 
 function MusclesSection({ muscles }: MusclesSectionProps) {
   const groupedMuscles = React.useMemo(() => {
     const grouped: Record<
-      "primary" | "secondary" | "stabilizer",
+      MuscleRole,
       Map<string, { _id: Id<"muscles">; name: string }[]>
     > = {
       primary: new Map(),
@@ -156,31 +132,28 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
     <div>
       <h2 className="text-foreground mb-4 text-lg font-semibold">Muscles</h2>
       <div className="space-y-4">
-        {(
-          ["primary", "secondary", "stabilizer"] as (
-            | "primary"
-            | "secondary"
-            | "stabilizer"
-          )[]
-        ).map((role) => {
+        {muscleRoles.map((role: MuscleRole) => {
           const roleGroups = groupedMuscles[role];
           if (roleGroups.size === 0) return null;
 
           return (
             <div key={role} className="space-y-2">
               <h3 className="text-muted-foreground text-sm font-medium">
-                {roleLabels[role]}
+                {getMuscleRoleLabel(role)}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {Array.from(roleGroups.entries()).map(
-                  ([group, groupMuscles]) => {
+                  ([group, groupMuscles]: [
+                    string,
+                    { _id: Id<"muscles">; name: string }[],
+                  ]) => {
                     const displayGroupName =
                       group === "Other"
                         ? "Other"
                         : group
                             .split(" ")
                             .map(
-                              (word) =>
+                              (word: string) =>
                                 word.charAt(0).toUpperCase() + word.slice(1),
                             )
                             .join(" ");

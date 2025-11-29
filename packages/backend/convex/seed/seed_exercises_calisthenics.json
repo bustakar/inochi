@@ -16,8 +16,7 @@
       "primary": ["core-abs", "core-transverse"],
       "secondary": ["shoulders-front", "legs-quads"],
       "stabilizer": ["shoulders-rotator_cuff", "back-lower"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Regular Push-up",
@@ -45,8 +44,7 @@
       "primary": ["chest-middle", "triceps-long"],
       "secondary": ["shoulders-front"],
       "stabilizer": ["core-abs", "core-serratus"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Hollow Body Hold",
@@ -63,8 +61,7 @@
       "primary": ["core-abs", "core-transverse"],
       "secondary": ["legs-hip-flexors"],
       "stabilizer": ["shoulders-front"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Pike Hold",
@@ -85,8 +82,7 @@
       "primary": ["shoulders-front"],
       "secondary": ["triceps-long", "shoulders-side"],
       "stabilizer": ["core-abs", "back-traps-upper"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Australian Pull-up",
@@ -108,8 +104,7 @@
       "primary": ["back-lats", "back-rhomboids"],
       "secondary": ["biceps-main", "shoulders-rear"],
       "stabilizer": ["core-abs", "back-lower"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Frog Stand",
@@ -133,8 +128,7 @@
       "primary": ["shoulders-front"],
       "secondary": ["triceps-long", "forearms-flexors"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Floor Pike Push-up",
@@ -156,8 +150,7 @@
       "primary": ["shoulders-front"],
       "secondary": ["triceps-long", "chest-upper"],
       "stabilizer": ["core-abs", "back-traps-upper"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Regular Pull-up",
@@ -180,8 +173,7 @@
       "primary": ["back-lats", "biceps-main"],
       "secondary": ["back-traps-lower", "forearms-flexors"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Skin the Cat",
@@ -202,8 +194,7 @@
       "primary": ["shoulders-front", "back-lats"],
       "secondary": ["chest-upper", "biceps-main"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Wall Walk",
@@ -220,8 +211,7 @@
       "primary": ["shoulders-front"],
       "secondary": ["triceps-long", "core-abs"],
       "stabilizer": ["shoulders-rotator_cuff"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Elevated Pike Push-up",
@@ -243,8 +233,7 @@
       "primary": ["shoulders-front"],
       "secondary": ["triceps-long", "shoulders-side"],
       "stabilizer": ["core-abs", "back-traps-upper"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Chest-to-Wall Handstand",
@@ -261,8 +250,7 @@
       "primary": ["shoulders-front", "shoulders-side"],
       "secondary": ["triceps-long"],
       "stabilizer": ["core-abs", "core-transverse", "back-traps-upper"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Tuck Front Lever Hold",
@@ -283,8 +271,7 @@
       "primary": ["back-lats", "core-abs"],
       "secondary": ["back-rhomboids", "back-traps-lower"],
       "stabilizer": ["shoulders-rear", "triceps-long"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Scapular Pull-in (Front Lever)",
@@ -301,8 +288,7 @@
       "primary": ["back-lats", "shoulders-rear"],
       "secondary": ["back-traps-lower"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Kick-up to Handstand",
@@ -319,8 +305,7 @@
       "primary": ["shoulders-front"],
       "secondary": ["triceps-long"],
       "stabilizer": ["core-abs", "forearms-flexors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Tuck Front Lever Row",
@@ -341,8 +326,7 @@
       "primary": ["back-lats", "back-rhomboids"],
       "secondary": ["biceps-main", "shoulders-rear"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Back-to-Wall Handstand Push-up",
@@ -359,8 +343,7 @@
       "primary": ["shoulders-front", "triceps-long"],
       "secondary": ["chest-upper"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Freestanding Handstand",
@@ -381,8 +364,7 @@
       "primary": ["shoulders-front", "forearms-flexors"],
       "secondary": ["triceps-long"],
       "stabilizer": ["core-abs", "core-transverse", "back-traps-upper"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Advanced Tuck Front Lever Hold",
@@ -399,8 +381,7 @@
       "primary": ["back-lats", "core-abs"],
       "secondary": ["back-rhomboids"],
       "stabilizer": ["triceps-long", "shoulders-rear"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Advanced Tuck FL Row",
@@ -417,8 +398,7 @@
       "primary": ["back-lats", "back-rhomboids"],
       "secondary": ["biceps-main", "shoulders-rear"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "HSPU Negative (Eccentric)",
@@ -435,8 +415,7 @@
       "primary": ["shoulders-front", "triceps-long"],
       "secondary": ["shoulders-side"],
       "stabilizer": ["core-abs", "forearms-flexors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Full Front Lever Hold",
@@ -458,8 +437,7 @@
       "primary": ["back-lats", "core-abs"],
       "secondary": ["back-rhomboids", "shoulders-rear"],
       "stabilizer": ["triceps-long", "legs-glutes", "legs-quads"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Freestanding Handstand Push-up",
@@ -489,8 +467,7 @@
       "primary": ["shoulders-front", "triceps-long"],
       "secondary": ["chest-upper"],
       "stabilizer": ["core-abs", "forearms-flexors", "back-traps-upper"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Front Lever Pull-up",
@@ -512,8 +489,7 @@
       "primary": ["back-lats", "back-rhomboids"],
       "secondary": ["biceps-main", "shoulders-rear"],
       "stabilizer": ["core-abs", "legs-glutes"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Pseudo Planche Lean",
@@ -538,8 +514,7 @@
       "primary": ["shoulders-front", "core-serratus"],
       "secondary": ["biceps-main", "chest-upper"],
       "stabilizer": ["core-abs", "forearms-flexors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Pseudo Planche Push-up",
@@ -565,8 +540,7 @@
       "primary": ["shoulders-front", "chest-upper"],
       "secondary": ["triceps-long", "core-serratus"],
       "stabilizer": ["core-abs", "biceps-main"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Tuck Planche Hold",
@@ -597,8 +571,7 @@
       "primary": ["shoulders-front", "biceps-main"],
       "secondary": ["core-serratus", "chest-upper"],
       "stabilizer": ["core-abs", "forearms-flexors", "shoulders-side"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Tuck Planche Push-up",
@@ -627,8 +600,7 @@
       "primary": ["shoulders-front", "triceps-long"],
       "secondary": ["chest-upper", "core-serratus"],
       "stabilizer": ["core-abs", "biceps-main"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Advanced Tuck Planche Hold",
@@ -649,8 +621,7 @@
       "primary": ["shoulders-front", "biceps-main"],
       "secondary": ["core-serratus", "chest-upper"],
       "stabilizer": ["core-abs", "back-lower"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Advanced Tuck Planche Push-up",
@@ -671,8 +642,7 @@
       "primary": ["shoulders-front", "triceps-long", "chest-upper"],
       "secondary": ["core-serratus"],
       "stabilizer": ["core-abs", "biceps-main", "back-lower"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Straddle Planche Hold",
@@ -694,8 +664,7 @@
       "primary": ["shoulders-front", "biceps-main"],
       "secondary": ["legs-glutes", "legs-hip-flexors", "chest-upper"],
       "stabilizer": ["core-serratus", "back-lower"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Straddle Planche Push-up",
@@ -721,8 +690,7 @@
       "primary": ["shoulders-front", "triceps-long", "chest-upper"],
       "secondary": ["core-serratus", "biceps-main"],
       "stabilizer": ["core-abs", "legs-glutes", "legs-hip-flexors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Full Planche Hold",
@@ -754,8 +722,7 @@
       "primary": ["shoulders-front", "biceps-main"],
       "secondary": ["chest-upper", "core-serratus"],
       "stabilizer": ["core-abs", "back-lower", "legs-glutes", "legs-adductors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Full Planche Push-up",
@@ -785,8 +752,7 @@
       "primary": ["shoulders-front", "triceps-long", "chest-upper"],
       "secondary": ["core-serratus", "biceps-main"],
       "stabilizer": ["core-abs", "back-lower", "legs-glutes", "legs-adductors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Archer Pull-up",
@@ -811,8 +777,7 @@
       "primary": ["back-lats", "biceps-main"],
       "secondary": ["shoulders-rear", "forearms-brachio"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Typewriter Pull-up",
@@ -829,8 +794,7 @@
       "primary": ["back-lats", "shoulders-rear"],
       "secondary": ["biceps-main"],
       "stabilizer": ["core-abs", "back-rhomboids"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Assisted One Arm Pull-up",
@@ -849,8 +813,7 @@
       "primary": ["back-lats", "biceps-main"],
       "secondary": ["forearms-brachio", "back-traps-lower"],
       "stabilizer": ["core-abs", "shoulders-rear"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "One Arm Pull-up Negative",
@@ -871,8 +834,7 @@
       "primary": ["back-lats", "biceps-main"],
       "secondary": ["forearms-brachio"],
       "stabilizer": ["shoulders-rotator_cuff"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "One Arm Pull-up",
@@ -896,8 +858,7 @@
       "primary": ["back-lats", "biceps-main"],
       "secondary": ["forearms-brachio", "back-traps-lower"],
       "stabilizer": ["core-abs", "shoulders-rotator_cuff"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Explosive Pull-up",
@@ -914,8 +875,7 @@
       "primary": ["back-lats", "biceps-main"],
       "secondary": ["back-traps-lower", "core-abs"],
       "stabilizer": ["forearms-flexors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Chest Dip",
@@ -947,8 +907,7 @@
       "primary": ["triceps-long", "chest-lower", "shoulders-front"],
       "secondary": ["chest-middle"],
       "stabilizer": ["core-abs", "back-traps-lower"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Muscle-up Transition (Negative)",
@@ -976,8 +935,7 @@
       "primary": ["triceps-long", "back-lats"],
       "secondary": ["shoulders-front", "chest-lower"],
       "stabilizer": ["forearms-flexors", "core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Bar Muscle-up",
@@ -997,8 +955,7 @@
       "primary": ["back-lats", "triceps-long"],
       "secondary": ["biceps-main", "chest-upper"],
       "stabilizer": ["core-abs", "forearms-flexors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Strict Muscle-up",
@@ -1026,8 +983,7 @@
       "primary": ["back-lats", "biceps-main", "triceps-long"],
       "secondary": ["shoulders-front", "chest-lower"],
       "stabilizer": ["shoulders-rotator_cuff", "forearms-flexors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Side Plank",
@@ -1044,8 +1000,7 @@
       "primary": ["core-obliques"],
       "secondary": ["shoulders-side"],
       "stabilizer": ["legs-glutes"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Human Flag Support",
@@ -1065,8 +1020,7 @@
       "primary": ["shoulders-side", "back-lats"],
       "secondary": ["core-obliques"],
       "stabilizer": ["forearms-flexors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Tuck Human Flag",
@@ -1083,8 +1037,7 @@
       "primary": ["core-obliques", "shoulders-side"],
       "secondary": ["back-lats", "shoulders-rear"],
       "stabilizer": ["core-transverse"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Straddle Human Flag",
@@ -1103,8 +1056,7 @@
       "primary": ["core-obliques", "shoulders-side"],
       "secondary": ["back-lats", "legs-glutes"],
       "stabilizer": ["legs-adductors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Full Human Flag",
@@ -1121,8 +1073,7 @@
       "primary": ["core-obliques", "shoulders-side"],
       "secondary": ["back-lats"],
       "stabilizer": ["legs-glutes", "legs-quads", "core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Human Flag Pull-up",
@@ -1139,8 +1090,7 @@
       "primary": ["back-lats", "core-obliques"],
       "secondary": ["shoulders-side", "biceps-main"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Air Squat",
@@ -1157,8 +1107,7 @@
       "primary": ["legs-quads", "legs-glutes"],
       "secondary": ["legs-hamstrings"],
       "stabilizer": ["core-abs", "back-lower"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Bulgarian Split Squat",
@@ -1179,8 +1128,7 @@
       "primary": ["legs-quads", "legs-glutes"],
       "secondary": ["legs-adductors"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Shrimp Squat",
@@ -1197,8 +1145,7 @@
       "primary": ["legs-quads", "legs-glutes"],
       "secondary": ["legs-hamstrings"],
       "stabilizer": ["core-abs", "legs-calves"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Assisted Pistol Squat",
@@ -1223,8 +1170,7 @@
       "primary": ["legs-quads"],
       "secondary": ["legs-glutes"],
       "stabilizer": ["legs-hip-flexors", "core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Pistol Squat",
@@ -1244,8 +1190,7 @@
       "primary": ["legs-quads", "legs-glutes"],
       "secondary": ["legs-hamstrings", "legs-calves"],
       "stabilizer": ["legs-hip-flexors", "core-abs", "legs-tibialis"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Dragon Squat",
@@ -1264,8 +1209,7 @@
       "primary": ["legs-glutes", "legs-quads"],
       "secondary": ["legs-adductors"],
       "stabilizer": ["core-abs", "core-obliques"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "German Hang",
@@ -1288,8 +1232,7 @@
       "primary": ["shoulders-front", "chest-upper"],
       "secondary": ["biceps-main"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Tuck Back Lever",
@@ -1314,8 +1257,7 @@
       "primary": ["shoulders-front", "chest-lower", "back-lats"],
       "secondary": ["biceps-main", "core-abs"],
       "stabilizer": ["back-lower"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Advanced Tuck Back Lever",
@@ -1332,8 +1274,7 @@
       "primary": ["shoulders-front", "chest-lower", "back-lats"],
       "secondary": ["biceps-main", "core-abs"],
       "stabilizer": ["back-lower"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Full Back Lever",
@@ -1356,8 +1297,7 @@
       "primary": ["shoulders-front", "chest-lower", "back-lats"],
       "secondary": ["biceps-main", "core-abs"],
       "stabilizer": ["back-lower", "legs-glutes"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Hefesto Curl (Negative)",
@@ -1374,8 +1314,7 @@
       "primary": ["biceps-main", "biceps-brachialis"],
       "secondary": ["shoulders-front", "chest-lower"],
       "stabilizer": ["forearms-flexors", "core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Hefesto",
@@ -1403,8 +1342,7 @@
       "primary": ["biceps-main", "biceps-brachialis"],
       "secondary": ["shoulders-front", "chest-lower"],
       "stabilizer": ["forearms-flexors", "back-lats", "core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Iron Cross Support",
@@ -1424,8 +1362,7 @@
       "primary": ["chest-lower", "shoulders-side", "back-lats"],
       "secondary": ["biceps-main", "chest-middle"],
       "stabilizer": ["core-abs", "forearms-flexors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Maltese Lean",
@@ -1448,8 +1385,7 @@
       "primary": ["shoulders-front", "biceps-main"],
       "secondary": ["chest-upper", "shoulders-side"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Straddle Maltese",
@@ -1470,8 +1406,7 @@
       "primary": ["shoulders-front", "biceps-main"],
       "secondary": ["chest-upper", "shoulders-side"],
       "stabilizer": ["core-abs", "legs-glutes"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Full Maltese",
@@ -1500,8 +1435,7 @@
       "primary": ["shoulders-front", "biceps-main"],
       "secondary": ["chest-upper", "shoulders-side"],
       "stabilizer": ["core-abs", "legs-glutes", "legs-adductors"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Victorian Cross",
@@ -1532,8 +1466,7 @@
       "primary": ["triceps-long", "shoulders-front", "shoulders-rear"],
       "secondary": ["back-lats", "chest-lower"],
       "stabilizer": ["core-abs", "legs-glutes"]
-    },
-    "createdBy": "system"
+    }
   },
 
   {
@@ -1553,8 +1486,7 @@
       "primary": ["core-abs", "legs-hip-flexors"],
       "secondary": ["core-obliques"],
       "stabilizer": ["forearms-flexors", "back-lats"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "L-Sit",
@@ -1582,8 +1514,7 @@
       "primary": ["core-abs", "legs-hip-flexors"],
       "secondary": ["triceps-long", "shoulders-front"],
       "stabilizer": ["legs-quads", "core-transverse"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Reverse Plank",
@@ -1602,8 +1533,7 @@
       "primary": ["back-lower", "legs-glutes", "legs-hamstrings"],
       "secondary": ["shoulders-rear"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Arch Body Hold (Superman)",
@@ -1622,8 +1552,7 @@
       "primary": ["back-lower", "legs-glutes"],
       "secondary": ["back-traps-lower", "shoulders-rear"],
       "stabilizer": ["legs-hamstrings"]
-    },
-    "createdBy": "system"
+    }
   },
   {
     "title": "Glute Bridge",
@@ -1642,7 +1571,6 @@
       "primary": ["legs-glutes"],
       "secondary": ["legs-hamstrings", "back-lower"],
       "stabilizer": ["core-abs"]
-    },
-    "createdBy": "system"
+    }
   }
 ]

@@ -12,6 +12,8 @@ import {
   FormItem,
 } from "@inochi/ui";
 
+import { exerciseLevels } from "../../utils/exercise-utils";
+
 interface LevelSelectFieldProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
   name: FieldPath<TFieldValues>;
@@ -35,11 +37,11 @@ export function LevelSelectField<TFieldValues extends FieldValues>({
                   {...field}
                   className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                  <option value="expert">Expert</option>
-                  <option value="elite">Elite</option>
+                  {exerciseLevels.map((level) => (
+                    <option key={level} value={level}>
+                      {level.charAt(0).toUpperCase() + level.slice(1)}
+                    </option>
+                  ))}
                 </select>
               </FormControl>
               {fieldState.error && (

@@ -9,11 +9,15 @@ export const exerciseLevelValidator = v.union(
   v.literal("legendary"),
 );
 
+export type ExerciseLevel = Infer<typeof exerciseLevelValidator>;
+
 export const muscleRoleValidator = v.union(
   v.literal("primary"),
   v.literal("secondary"),
   v.literal("stabilizer"),
 );
+
+export type MuscleRole = Infer<typeof muscleRoleValidator>;
 
 export function validateDifficulty(difficulty: number): void {
   if (!Number.isInteger(difficulty) || difficulty < 1 || difficulty > 10) {
@@ -36,8 +40,6 @@ export const exerciseVariantValidator = v.object({
   overriddenDescription: v.optional(v.string()),
   overriddenDifficulty: v.optional(v.number()),
   overriddenMuscles: v.optional(v.array(v.string())), // Muscle slug
-  createdAt: v.number(),
-  updatedAt: v.number(),
 });
 
 export const exerciseValidator = v.object({

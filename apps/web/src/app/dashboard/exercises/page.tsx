@@ -1,6 +1,10 @@
 "use client";
 
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
+import type {
+  ExerciseLevel,
+  MuscleRole,
+} from "@packages/backend/convex/validators/validators";
 import * as React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +15,7 @@ import { Globe, Target } from "lucide-react";
 import { Badge } from "@inochi/ui";
 
 import { Search } from "../../../components/search";
+import { exerciseLevelColors } from "../../../utils/exercise-utils";
 
 // ============================================================================
 // Exercise Card Component
@@ -22,37 +27,17 @@ interface ExerciseCardProps {
     _creationTime: number;
     title: string;
     description: string;
-    level:
-      | "beginner"
-      | "intermediate"
-      | "advanced"
-      | "expert"
-      | "elite"
-      | "legendary";
+    level: ExerciseLevel;
     difficulty: number;
     musclesData: {
       _id: Id<"muscles">;
       name: string;
       muscleGroup?: string;
-      role?: "primary" | "secondary" | "stabilizer";
+      role?: MuscleRole;
     }[];
     primaryMuscleGroups: string[];
   };
 }
-
-const levelColors: Record<string, string> = {
-  beginner:
-    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  intermediate:
-    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  advanced:
-    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  expert:
-    "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
-  elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  legendary:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-};
 
 function ExerciseCard({ exercise }: ExerciseCardProps) {
   const router = useRouter();
@@ -88,12 +73,7 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
 
       {/* Level and visibility badges */}
       <div className="mb-2 flex flex-wrap items-center gap-2">
-        <Badge
-          className={
-            levelColors[exercise.level] ??
-            "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-          }
-        >
+        <Badge className={exerciseLevelColors[exercise.level]}>
           {exercise.level}
         </Badge>
         <Badge
