@@ -17,13 +17,21 @@ const levelColors: Record<string, string> = {
   expert:
     "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
   elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  legendary:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
 };
 
 export interface ExerciseNodeData extends Record<string, unknown> {
   _id: Id<"exercises">;
   title: string;
   description: string;
-  level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+  level:
+    | "beginner"
+    | "intermediate"
+    | "advanced"
+    | "expert"
+    | "elite"
+    | "legendary";
   difficulty: number;
 }
 

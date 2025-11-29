@@ -22,13 +22,19 @@ interface ExerciseCardProps {
     _creationTime: number;
     title: string;
     description: string;
-    level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+    level:
+      | "beginner"
+      | "intermediate"
+      | "advanced"
+      | "expert"
+      | "elite"
+      | "legendary";
     difficulty: number;
     musclesData: {
       _id: Id<"muscles">;
       name: string;
       muscleGroup?: string;
-      role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+      role?: "primary" | "secondary" | "stabilizer";
     }[];
     primaryMuscleGroups: string[];
   };
@@ -44,6 +50,8 @@ const levelColors: Record<string, string> = {
   expert:
     "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
   elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  legendary:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
 };
 
 function ExerciseCard({ exercise }: ExerciseCardProps) {
@@ -173,7 +181,7 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {exercises.map((exercise: ExerciseCardProps["exercise"]) => (
+      {exercises.map((exercise) => (
         <ExerciseCard key={exercise._id} exercise={exercise} />
       ))}
     </div>

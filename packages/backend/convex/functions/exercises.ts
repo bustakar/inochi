@@ -29,7 +29,6 @@ export const getAllExercises = query({
             v.union(
               v.literal("primary"),
               v.literal("secondary"),
-              v.literal("tertiary"),
               v.literal("stabilizer"),
             ),
           ),
@@ -56,8 +55,8 @@ export const getAllExercises = query({
 
     // Pre-fetch all muscles for enrichment
     const muscles = await ctx.db.query("muscles").collect();
-    const musclesDataMap = new Map<Id<"muscles">, Doc<"muscles">>();
-    muscles.forEach((m) => musclesDataMap.set(m._id, m));
+    const musclesDataMapBySlug = new Map<string, Doc<"muscles">>();
+    muscles.forEach((m) => musclesDataMapBySlug.set(m.slug, m));
 
     // Fetch muscle relations for all exercises
     const muscleRelations = await ctx.db.query("exercises_muscles").collect();
@@ -69,7 +68,7 @@ export const getAllExercises = query({
       _id: Id<"muscles">;
       name: string;
       muscleGroup?: string;
-      role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+      role?: "primary" | "secondary" | "stabilizer";
     }> => {
       const relations = muscleRelations.filter(
         (rel) => rel.exercise === exerciseId,
@@ -78,11 +77,11 @@ export const getAllExercises = query({
         _id: Id<"muscles">;
         name: string;
         muscleGroup?: string;
-        role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+        role?: "primary" | "secondary" | "stabilizer";
       }> = [];
 
       for (const rel of relations) {
-        const muscle = musclesDataMap.get(rel.muscle);
+        const muscle = musclesDataMapBySlug.get(rel.muscle);
         if (muscle) {
           result.push({
             _id: muscle._id,
@@ -102,7 +101,7 @@ export const getAllExercises = query({
         _id: Id<"muscles">;
         name: string;
         muscleGroup?: string;
-        role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+        role?: "primary" | "secondary" | "stabilizer";
       }>,
     ): string[] => {
       const groups: string[] = [];
@@ -255,7 +254,7 @@ async function getPublicExerciseMuscles(
     _id: Id<"muscles">;
     name: string;
     muscleGroup?: string;
-    role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+    role?: "primary" | "secondary" | "stabilizer";
   }>
 > {
   const muscleRelations = await ctx.db
@@ -263,15 +262,20 @@ async function getPublicExerciseMuscles(
     .withIndex("by_exercise", (q) => q.eq("exercise", exerciseId))
     .collect();
 
+  // Pre-fetch all muscles to map slugs to muscle data
+  const allMuscles = await ctx.db.query("muscles").collect();
+  const musclesBySlug = new Map<string, Doc<"muscles">>();
+  allMuscles.forEach((m) => musclesBySlug.set(m.slug, m));
+
   const result: Array<{
     _id: Id<"muscles">;
     name: string;
     muscleGroup?: string;
-    role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+    role?: "primary" | "secondary" | "stabilizer";
   }> = [];
 
   for (const rel of muscleRelations) {
-    const muscle = await ctx.db.get(rel.muscle);
+    const muscle = musclesBySlug.get(rel.muscle);
     if (muscle) {
       result.push({
         _id: muscle._id,
@@ -318,7 +322,6 @@ export const getPublicExerciseById = query({
             v.union(
               v.literal("primary"),
               v.literal("secondary"),
-              v.literal("tertiary"),
               v.literal("stabilizer"),
             ),
           ),

@@ -80,8 +80,8 @@ Important:
 - Description must be maximum 200 characters
 - Use EXACT names/titles from the lists above (without the level/difficulty info in parentheses)
 - If a muscle/exercise doesn't exist in the lists, don't include it
-- For muscles, assign roles: "primary" for main muscles used, "secondary" for supporting muscles, "tertiary" for minor muscles, "stabilizer" for stabilizing muscles
-- Typically, 1-3 muscles should be "primary", others should be "secondary", "tertiary", or "stabilizer"
+- For muscles, assign roles: "primary" for main muscles used, "secondary" for supporting muscles, "stabilizer" for stabilizing muscles
+- Typically, 1-3 muscles should be "primary", others should be "secondary" or "stabilizer"
 - Prerequisites should be exercises that are easier or foundational to this exercise (choose exercises with lower difficulty/level)
 - Consider the difficulty and level of existing exercises when determining appropriate prerequisites`;
 
@@ -127,12 +127,11 @@ Important:
           if (!muscle) return null;
 
           // Validate and normalize role
-          const validRoles = ["primary", "secondary", "tertiary", "stabilizer"];
+          const validRoles = ["primary", "secondary", "stabilizer"];
           const role = validRoles.includes(muscleData.role?.toLowerCase())
             ? (muscleData.role.toLowerCase() as
                 | "primary"
                 | "secondary"
-                | "tertiary"
                 | "stabilizer")
             : "primary"; // Default to primary if invalid role
 
@@ -146,7 +145,7 @@ Important:
             m: { muscleId: string; role: string } | null,
           ): m is {
             muscleId: string;
-            role: "primary" | "secondary" | "tertiary" | "stabilizer";
+            role: "primary" | "secondary" | "stabilizer";
           } => m !== null,
         ) || [];
 
@@ -179,7 +178,7 @@ Important:
       muscles: matchedMuscles.map(
         (m: {
           muscleId: string;
-          role: "primary" | "secondary" | "tertiary" | "stabilizer";
+          role: "primary" | "secondary" | "stabilizer";
         }) => ({
           muscleId: m.muscleId,
           role: m.role,

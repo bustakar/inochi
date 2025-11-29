@@ -19,7 +19,6 @@ export const batchInsertExercises = internalMutation({
           v.object({
             primary: v.optional(v.array(v.string())),
             secondary: v.optional(v.array(v.string())),
-            tertiary: v.optional(v.array(v.string())),
             stabilizer: v.optional(v.array(v.string())),
           }),
         ),
@@ -30,11 +29,11 @@ export const batchInsertExercises = internalMutation({
   handler: async (ctx, args) => {
     const insertedIds: Id<"exercises">[] = [];
 
-    // Pre-fetch all muscles to create a slug-to-ID map for efficiency
+    // Pre-fetch all muscles to verify slugs exist
     const allMuscles = await ctx.db.query("muscles").collect();
-    const muscleSlugToIdMap = new Map<string, Id<"muscles">>();
+    const validMuscleSlugs = new Set<string>();
     for (const muscle of allMuscles) {
-      muscleSlugToIdMap.set(muscle.slug, muscle._id);
+      validMuscleSlugs.add(muscle.slug);
     }
 
     for (const exerciseData of args.exercises) {
@@ -81,12 +80,11 @@ export const batchInsertExercises = internalMutation({
       // Convert muscles object format to exercises_muscles table entries
       if (exerciseData.muscles) {
         const roleMap: Array<{
-          role: "primary" | "secondary" | "tertiary" | "stabilizer";
+          role: "primary" | "secondary" | "stabilizer";
           slugs: string[];
         }> = [
           { role: "primary", slugs: exerciseData.muscles.primary || [] },
           { role: "secondary", slugs: exerciseData.muscles.secondary || [] },
-          { role: "tertiary", slugs: exerciseData.muscles.tertiary || [] },
           {
             role: "stabilizer",
             slugs: exerciseData.muscles.stabilizer || [],
@@ -95,8 +93,7 @@ export const batchInsertExercises = internalMutation({
 
         for (const { role, slugs } of roleMap) {
           for (const muscleSlug of slugs) {
-            const muscleId = muscleSlugToIdMap.get(muscleSlug);
-            if (!muscleId) {
+            if (!validMuscleSlugs.has(muscleSlug)) {
               throw new Error(
                 `Muscle not found: ${muscleSlug} for exercise ${exerciseData.title}`,
               );
@@ -104,7 +101,7 @@ export const batchInsertExercises = internalMutation({
 
             await ctx.db.insert("exercises_muscles", {
               exercise: exerciseId,
-              muscle: muscleId,
+              muscle: muscleSlug, // Store slug instead of ID
               role,
             });
           }
@@ -263,7 +260,7 @@ export const batchUpdateExerciseMuscles = internalMutation({
         exerciseId: v.id("exercises"),
         muscles: v.array(
           v.object({
-            muscleId: v.id("muscles"),
+            muscleSlug: v.string(),
             role: muscleRoleValidator,
           }),
         ),
@@ -271,6 +268,13 @@ export const batchUpdateExerciseMuscles = internalMutation({
     ),
   },
   handler: async (ctx, args) => {
+    // Pre-fetch all muscles to verify slugs exist
+    const allMuscles = await ctx.db.query("muscles").collect();
+    const validMuscleSlugs = new Set<string>();
+    for (const muscle of allMuscles) {
+      validMuscleSlugs.add(muscle.slug);
+    }
+
     for (const update of args.updates) {
       const exercise = await ctx.db.get(update.exerciseId);
       if (!exercise) {
@@ -287,13 +291,12 @@ export const batchUpdateExerciseMuscles = internalMutation({
       }
 
       for (const target of update.muscles) {
-        const muscle = await ctx.db.get(target.muscleId);
-        if (!muscle) {
-          throw new Error(`Muscle not found: ${target.muscleId}`);
+        if (!validMuscleSlugs.has(target.muscleSlug)) {
+          throw new Error(`Muscle not found: ${target.muscleSlug}`);
         }
         await ctx.db.insert("exercises_muscles", {
           exercise: update.exerciseId,
-          muscle: target.muscleId,
+          muscle: target.muscleSlug, // Store slug instead of ID
           role: target.role,
         });
       }

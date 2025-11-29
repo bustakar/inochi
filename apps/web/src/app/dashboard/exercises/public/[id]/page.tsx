@@ -17,7 +17,7 @@ import { ExerciseVariantsReadonly } from "./_components/exercise-variants-readon
 // ============================================================================
 
 const levelColors: Record<
-  "beginner" | "intermediate" | "advanced" | "expert" | "elite",
+  "beginner" | "intermediate" | "advanced" | "expert" | "elite" | "legendary",
   string
 > = {
   beginner:
@@ -29,6 +29,8 @@ const levelColors: Record<
   expert:
     "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
   elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  legendary:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
 };
 
 // ============================================================================
@@ -38,7 +40,13 @@ const levelColors: Record<
 interface ExerciseHeaderProps {
   exercise: {
     title: string;
-    level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+    level:
+      | "beginner"
+      | "intermediate"
+      | "advanced"
+      | "expert"
+      | "elite"
+      | "legendary";
     difficulty: number;
   };
 }
@@ -93,29 +101,24 @@ interface MusclesSectionProps {
     _id: Id<"muscles">;
     name: string;
     muscleGroup?: string;
-    role?: "primary" | "secondary" | "tertiary" | "stabilizer";
+    role?: "primary" | "secondary" | "stabilizer";
   }[];
 }
 
-const roleLabels: Record<
-  "primary" | "secondary" | "tertiary" | "stabilizer",
-  string
-> = {
+const roleLabels: Record<"primary" | "secondary" | "stabilizer", string> = {
   primary: "Primary",
   secondary: "Secondary",
-  tertiary: "Tertiary",
   stabilizer: "Stabilizer",
 };
 
 function MusclesSection({ muscles }: MusclesSectionProps) {
   const groupedMuscles = React.useMemo(() => {
     const grouped: Record<
-      "primary" | "secondary" | "tertiary" | "stabilizer",
+      "primary" | "secondary" | "stabilizer",
       Map<string, { _id: Id<"muscles">; name: string }[]>
     > = {
       primary: new Map(),
       secondary: new Map(),
-      tertiary: new Map(),
       stabilizer: new Map(),
     };
 
@@ -154,10 +157,9 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
       <h2 className="text-foreground mb-4 text-lg font-semibold">Muscles</h2>
       <div className="space-y-4">
         {(
-          ["primary", "secondary", "tertiary", "stabilizer"] as (
+          ["primary", "secondary", "stabilizer"] as (
             | "primary"
             | "secondary"
-            | "tertiary"
             | "stabilizer"
           )[]
         ).map((role) => {

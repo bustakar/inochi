@@ -6,12 +6,12 @@ export const exerciseLevelValidator = v.union(
   v.literal("advanced"),
   v.literal("expert"),
   v.literal("elite"),
+  v.literal("legendary"),
 );
 
 export const muscleRoleValidator = v.union(
   v.literal("primary"),
   v.literal("secondary"),
-  v.literal("tertiary"),
   v.literal("stabilizer"),
 );
 

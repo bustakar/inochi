@@ -6,8 +6,6 @@ import {
   muscleRoleValidator,
 } from "./validators/validators.js";
 
-const urlValidator = v.string();
-
 export default defineSchema({
   muscles: defineTable({
     name: v.string(),
@@ -50,7 +48,7 @@ export default defineSchema({
 
   exercises_muscles: defineTable({
     exercise: v.id("exercises"),
-    muscle: v.id("muscles"),
+    muscle: v.string(), // Muscle slug
     role: muscleRoleValidator,
   })
     .index("by_exercise", ["exercise"])
