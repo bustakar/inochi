@@ -1,12 +1,9 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
-  exerciseCategoryValidator,
   exerciseLevelValidator,
-  exerciseValidator,
   exerciseVariantValidator,
   muscleRoleValidator,
-  submissionStatusValidator,
 } from "./validators/validators.js";
 
 const urlValidator = v.string();
@@ -33,81 +30,26 @@ export default defineSchema({
   exercises: defineTable({
     title: v.string(),
     description: v.string(),
-    category: exerciseCategoryValidator,
     level: exerciseLevelValidator,
     difficulty: v.number(),
-    prerequisites: v.array(v.id("exercises")),
+    variants: v.array(exerciseVariantValidator),
     createdAt: v.number(),
     updatedAt: v.number(),
     createdBy: v.string(),
   })
     .index("by_level", ["level"])
     .index("by_difficulty", ["difficulty"])
-    .index("by_category", ["category"])
     .searchIndex("search_title", {
       searchField: "title",
-      filterFields: ["level", "difficulty", "category"],
+      filterFields: ["level", "difficulty"],
     })
     .searchIndex("search_description", {
       searchField: "description",
-      filterFields: ["level", "difficulty", "category"],
+      filterFields: ["level", "difficulty"],
     }),
-
-  private_exercises: defineTable({
-    userId: v.string(),
-    title: v.string(),
-    description: v.string(),
-    category: exerciseCategoryValidator,
-    level: exerciseLevelValidator,
-    difficulty: v.number(),
-    prerequisites: v.array(
-      v.union(v.id("exercises"), v.id("private_exercises")),
-    ),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-    createdBy: v.string(),
-  })
-    .index("by_level", ["level"])
-    .index("by_difficulty", ["difficulty"])
-    .index("by_category", ["category"])
-    .index("by_user", ["createdBy"])
-    .searchIndex("search_title", {
-      searchField: "title",
-      filterFields: ["level", "difficulty", "category"],
-    })
-    .searchIndex("search_description", {
-      searchField: "description",
-      filterFields: ["level", "difficulty", "category"],
-    }),
-
-  exercise_variants: defineTable({
-    exercise: v.union(v.id("exercises"), v.id("private_exercises")),
-    equipment: v.array(v.id("equipment")),
-    tips: v.optional(v.array(v.string())), // TODO: For compatibility, remove in future versions
-    embedded_videos: v.optional(v.array(urlValidator)), // TODO: For compatibility, remove in future versions
-    tipsV2: v.optional(
-      v.array(
-        v.object({
-          text: v.string(),
-          videoUrl: v.optional(v.string()),
-          exerciseReference: v.optional(
-            v.union(v.id("exercises"), v.id("private_exercises")),
-          ),
-        }),
-      ),
-    ),
-    overriddenTitle: v.optional(v.string()),
-    overriddenDescription: v.optional(v.string()),
-    overriddenDifficulty: v.optional(v.number()),
-    overriddenMuscles: v.optional(v.array(v.id("exercises_muscles"))),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  })
-    .index("by_exercise", ["exercise"])
-    .index("by_equipment", ["equipment"]),
 
   exercises_muscles: defineTable({
-    exercise: v.union(v.id("exercises"), v.id("private_exercises")),
+    exercise: v.id("exercises"),
     muscle: v.id("muscles"),
     role: muscleRoleValidator,
   })
@@ -117,32 +59,10 @@ export default defineSchema({
     .index("by_exercise_and_role", ["exercise", "role"]),
 
   exercise_progressions: defineTable({
-    fromExercise: v.union(v.id("exercises"), v.id("private_exercises")),
-    toExercise: v.union(v.id("exercises"), v.id("private_exercises")),
+    fromExercise: v.id("exercises"),
+    toExercise: v.id("exercises"),
     createdAt: v.number(),
   })
     .index("by_from_exercise", ["fromExercise"])
     .index("by_to_exercise", ["toExercise"]),
-
-  user_submissions: defineTable({
-    submissionType: v.union(v.literal("create"), v.literal("edit")),
-    status: submissionStatusValidator,
-    originalExerciseId: v.optional(
-      v.union(v.id("exercises"), v.id("private_exercises")),
-    ),
-    originalExerciseData: v.optional(
-      v.object({
-        exercise: exerciseValidator,
-        variants: v.array(exerciseVariantValidator),
-      }),
-    ),
-    submittedBy: v.string(),
-    submittedAt: v.number(),
-    reviewedBy: v.optional(v.string()),
-    reviewedAt: v.optional(v.number()),
-    rejectionReason: v.optional(v.string()),
-  })
-    .index("by_user", ["submittedBy"])
-    .index("by_status", ["status"])
-    .index("by_user_and_status", ["submittedBy", "status"]),
 });

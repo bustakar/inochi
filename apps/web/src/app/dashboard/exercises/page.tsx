@@ -6,12 +6,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { Globe, Lock, Target } from "lucide-react";
+import { Globe, Target } from "lucide-react";
 
 import { Badge } from "@inochi/ui";
 
 import { Search } from "../../../components/search";
-import { CreateExerciseDialog } from "./_components/create-exercise-dialog";
 
 // ============================================================================
 // Exercise Card Component
@@ -19,14 +18,12 @@ import { CreateExerciseDialog } from "./_components/create-exercise-dialog";
 
 interface ExerciseCardProps {
   exercise: {
-    _id: Id<"exercises"> | Id<"private_exercises">;
+    _id: Id<"exercises">;
     _creationTime: number;
     title: string;
     description: string;
-    category: "calisthenics" | "gym" | "stretch" | "mobility";
     level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
     difficulty: number;
-    isPrivate: boolean;
     musclesData: {
       _id: Id<"muscles">;
       name: string;
@@ -49,23 +46,10 @@ const levelColors: Record<string, string> = {
   elite: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
 };
 
-const categoryColors: Record<string, string> = {
-  calisthenics:
-    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  gym: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  stretch:
-    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  mobility:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-};
-
 function ExerciseCard({ exercise }: ExerciseCardProps) {
   const router = useRouter();
 
-  // Route to private or public detail page based on exercise type
-  const detailUrl = exercise.isPrivate
-    ? `/dashboard/exercises/private/${exercise._id}`
-    : `/dashboard/exercises/public/${exercise._id}`;
+  const detailUrl = `/dashboard/exercises/public/${exercise._id}`;
 
   const handleCardClick = () => {
     router.push(detailUrl);
@@ -94,7 +78,7 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
         </h3>
       </div>
 
-      {/* Level, category, and visibility badges */}
+      {/* Level and visibility badges */}
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <Badge
           className={
@@ -105,30 +89,12 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
           {exercise.level}
         </Badge>
         <Badge
-          className={
-            categoryColors[exercise.category] ??
-            "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-          }
+          variant="outline"
+          className="border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400"
         >
-          {exercise.category}
+          <Globe className="mr-1 h-3 w-3" />
+          Public
         </Badge>
-        {exercise.isPrivate ? (
-          <Badge
-            variant="outline"
-            className="border-amber-500 bg-amber-50 text-amber-700 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
-          >
-            <Lock className="mr-1 h-3 w-3" />
-            Private
-          </Badge>
-        ) : (
-          <Badge
-            variant="outline"
-            className="border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400"
-          >
-            <Globe className="mr-1 h-3 w-3" />
-            Public
-          </Badge>
-        )}
       </div>
 
       <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
@@ -207,7 +173,7 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {exercises.map((exercise) => (
+      {exercises.map((exercise: ExerciseCardProps["exercise"]) => (
         <ExerciseCard key={exercise._id} exercise={exercise} />
       ))}
     </div>
@@ -219,17 +185,12 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
 // ============================================================================
 
 export default function ExercisesPage() {
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-foreground text-3xl font-bold">Exercises</h1>
-        <CreateExerciseDialog
-          open={createDialogOpen}
-          onOpenChange={setCreateDialogOpen}
-        />
       </div>
 
       {/* Search */}

@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { Dumbbell, FileText } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 
 import {
   Sidebar,
@@ -25,13 +25,7 @@ const platformData = {
 };
 
 const userData = {
-  navMain: [
-    {
-      title: "Submissions",
-      url: "/dashboard/submissions",
-      icon: FileText,
-    },
-  ],
+  navMain: [],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
-import type { GetExerciseVariantResponse } from "@packages/backend/convex/functions/exerciseVariants";
+import type { ExerciseVariant } from "@packages/backend/convex/validators/validators";
 import * as React from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Link as LinkIcon } from "lucide-react";
@@ -21,7 +21,7 @@ import {
 // ============================================================================
 
 interface ExerciseVariantsReadonlyProps {
-  variants: GetExerciseVariantResponse[];
+  variants: ExerciseVariant[];
 }
 
 export function ExerciseVariantsReadonly({
@@ -73,10 +73,7 @@ export function ExerciseVariantsReadonly({
   };
 
   // Helper to determine exercise route based on ID
-  const getExerciseRoute = (
-    exerciseId: Id<"exercises"> | Id<"private_exercises">,
-  ) => {
-    // For public exercise variants, references should primarily be to public exercises
+  const getExerciseRoute = (exerciseId: Id<"exercises">) => {
     return `/dashboard/exercises/public/${exerciseId}`;
   };
 
@@ -142,7 +139,7 @@ export function ExerciseVariantsReadonly({
             </div>
           )}
 
-          {currentVariant.equipment.length > 0 && (
+          {/* {currentVariant.equipment.length > 0 && (
             <div>
               <h3 className="text-foreground mb-2 text-sm font-medium">
                 Equipment
@@ -155,13 +152,13 @@ export function ExerciseVariantsReadonly({
                 ))}
               </div>
             </div>
-          )}
+          )} */}
 
-          {currentVariant.tipsV2.length > 0 && (
+          {currentVariant.tips.length > 0 && (
             <div>
               <h3 className="text-foreground mb-3 text-sm font-medium">Tips</h3>
               <div className="space-y-3">
-                {currentVariant.tipsV2.map((tip, index) => (
+                {currentVariant.tips.map((tip, index) => (
                   <div
                     key={index}
                     className="bg-muted/30 flex flex-row items-start justify-between gap-2 rounded-lg border p-2"
@@ -183,11 +180,11 @@ export function ExerciseVariantsReadonly({
                       )}
                       {tip.exerciseReference && (
                         <Link
-                          href={getExerciseRoute(tip.exerciseReference._id)}
+                          href={getExerciseRoute(tip.exerciseReference)}
                           className="transition-opacity hover:opacity-80"
                         >
                           <Badge variant="secondary" className="cursor-pointer">
-                            {tip.exerciseReference.title}
+                            {tip.exerciseReference}
                           </Badge>
                         </Link>
                       )}

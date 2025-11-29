@@ -39,7 +39,6 @@ interface ExerciseHeaderProps {
   exercise: {
     title: string;
     level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
-    category: "calisthenics" | "gym" | "stretch" | "mobility";
     difficulty: number;
   };
 }
@@ -272,12 +271,6 @@ export default function PublicExerciseDetailPage() {
   const exercise = useQuery(api.functions.exercises.getPublicExerciseById, {
     exerciseId,
   });
-  const variants = useQuery(
-    api.functions.exerciseVariants.getExerciseVariants,
-    {
-      exerciseId,
-    },
-  );
 
   if (exercise === undefined) {
     return (
@@ -313,7 +306,7 @@ export default function PublicExerciseDetailPage() {
           exercises={exercise.progressions}
           title="Progressions"
         />
-        <ExerciseVariantsReadonly variants={variants ?? []} />
+        <ExerciseVariantsReadonly variants={exercise.variants} />
       </div>
     </div>
   );

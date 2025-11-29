@@ -644,7 +644,7 @@ interface CreateVariantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   exerciseId: Id<"private_exercises">;
-  variantId?: Id<"exercise_variants">;
+  variantId?: string;
 }
 
 export function CreateVariantDialog({
@@ -674,8 +674,8 @@ export function CreateVariantDialog({
   const form = useAppForm({
     defaultValues: {
       equipment: existingVariant?.equipment.map((eq) => eq._id as string) ?? [],
-      tipsV2: existingVariant?.tipsV2.length
-        ? existingVariant.tipsV2.map((tip) => ({
+      tipsV2: existingVariant?.tips.length
+        ? existingVariant.tips.map((tip) => ({
             text: tip.text,
             videoUrl: tip.videoUrl,
             exerciseReference: tip.exerciseReference?._id,
@@ -718,6 +718,7 @@ export function CreateVariantDialog({
       if (isEditing && variantId) {
         await updateVariant({
           id: variantId,
+          exerciseId: exerciseId,
           data: {
             exercise: exerciseId,
             equipment: data.equipment as Id<"equipment">[],
