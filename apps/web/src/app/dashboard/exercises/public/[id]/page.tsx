@@ -20,6 +20,7 @@ import {
   muscleRoles,
 } from "../../../../../utils/exercise-utils";
 import { ExerciseVariantsReadonly } from "./_components/exercise-variants-readonly";
+import { UserProgressSection } from "./_components/user-progress-section";
 
 // ============================================================================
 // Exercise Header Component
@@ -195,47 +196,6 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
 }
 
 // ============================================================================
-// Progression Section Component
-// ============================================================================
-
-interface ProgressionSectionProps {
-  exercises: {
-    _id: Id<"exercises">;
-    title: string;
-  }[];
-  title: string;
-}
-
-function ProgressionSection({ exercises, title }: ProgressionSectionProps) {
-  const getExerciseRoute = (exerciseId: Id<"exercises">): string => {
-    return `/dashboard/exercises/public/${exerciseId}`;
-  };
-
-  return (
-    <div>
-      <h2 className="text-foreground mb-2 text-lg font-semibold">{title}</h2>
-      {exercises.length === 0 ? (
-        <p className="text-muted-foreground text-sm">None</p>
-      ) : (
-        <div className="flex flex-wrap gap-2">
-          {exercises.map((exercise) => (
-            <Link
-              key={exercise._id}
-              href={getExerciseRoute(exercise._id)}
-              className="transition-opacity hover:opacity-80"
-            >
-              <Badge variant="secondary" className="cursor-pointer">
-                {exercise.title}
-              </Badge>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================================================
 // Main Page Component
 // ============================================================================
 
@@ -271,16 +231,12 @@ export default function PublicExerciseDetailPage() {
       <ExerciseHeader exercise={exercise} />
 
       <div className="space-y-6">
+        <UserProgressSection
+          exerciseId={exerciseId}
+          userProgress={exercise.userProgress}
+        />
         <DescriptionSection description={exercise.description} />
         <MusclesSection muscles={exercise.muscles} />
-        <ProgressionSection
-          exercises={exercise.prerequisites}
-          title="Prerequisites"
-        />
-        <ProgressionSection
-          exercises={exercise.progressions}
-          title="Progressions"
-        />
         <ExerciseVariantsReadonly variants={exercise.variants} />
       </div>
     </div>

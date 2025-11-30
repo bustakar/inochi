@@ -4,6 +4,7 @@ import {
   exerciseLevelValidator,
   exerciseVariantValidator,
   muscleRoleValidator,
+  progressStatusValidator,
 } from "./validators/validators.js";
 
 export default defineSchema({
@@ -65,4 +66,14 @@ export default defineSchema({
   })
     .index("by_from_exercise", ["fromExercise"])
     .index("by_to_exercise", ["toExercise"]),
+
+  user_exercise_progress: defineTable({
+    userId: v.string(),
+    exerciseId: v.id("exercises"),
+    status: progressStatusValidator,
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_exercise", ["exerciseId"])
+    .index("by_user_and_exercise", ["userId", "exerciseId"]),
 });

@@ -1,6 +1,7 @@
 import type {
   ExerciseLevel,
   MuscleRole,
+  ProgressStatus,
 } from "@packages/backend/convex/validators/validators";
 
 /**
@@ -59,3 +60,47 @@ export const exerciseLevels: ExerciseLevel[] = [
  * All muscle roles in order
  */
 export const muscleRoles: MuscleRole[] = ["primary", "secondary", "stabilizer"];
+
+/**
+ * Human-readable labels for progress statuses
+ */
+export const progressStatusLabels: Record<ProgressStatus, string> = {
+  novice: "Novice",
+  apprentice: "Apprentice",
+  journeyman: "Journeyman",
+  master: "Master",
+};
+
+/**
+ * Get human-readable label for a progress status
+ */
+export function getProgressStatusLabel(status: ProgressStatus): string {
+  return progressStatusLabels[status];
+}
+
+/**
+ * Color classes for progress statuses
+ */
+export const progressStatusColors: Record<ProgressStatus, string> = {
+  novice: "bg-gray-500 text-white",
+  apprentice: "bg-blue-500 text-white",
+  journeyman: "bg-purple-500 text-white",
+  master: "bg-yellow-500 text-black",
+};
+
+/**
+ * Get color classes for a progress status
+ */
+export function getProgressStatusColor(status: ProgressStatus): string {
+  return progressStatusColors[status];
+}
+
+/**
+ * All progress statuses in order
+ */
+export const progressStatuses: ProgressStatus[] = [
+  "novice",
+  "apprentice",
+  "journeyman",
+  "master",
+];
