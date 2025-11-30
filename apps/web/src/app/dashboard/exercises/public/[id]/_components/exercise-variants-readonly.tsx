@@ -1,9 +1,7 @@
 "use client";
 
-import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { ExerciseVariant } from "@packages/backend/convex/validators/validators";
 import * as React from "react";
-import Link from "next/link";
 import { ChevronLeft, ChevronRight, Link as LinkIcon } from "lucide-react";
 
 import {
@@ -28,14 +26,6 @@ export function ExerciseVariantsReadonly({
   variants,
 }: ExerciseVariantsReadonlyProps) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
-
-  if (variants.length === 0) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">No variants available</p>
-      </div>
-    );
-  }
 
   if (variants.length === 0) {
     return (
@@ -70,11 +60,6 @@ export function ExerciseVariantsReadonly({
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === variants.length - 1 ? 0 : prev + 1));
-  };
-
-  // Helper to determine exercise route based on ID
-  const getExerciseRoute = (exerciseId: Id<"exercises">) => {
-    return `/dashboard/exercises/public/${exerciseId}`;
   };
 
   return (
@@ -177,16 +162,6 @@ export function ExerciseVariantsReadonly({
                           <LinkIcon className="h-4 w-4" />
                           Watch video
                         </a>
-                      )}
-                      {tip.exerciseReference && (
-                        <Link
-                          href={getExerciseRoute(tip.exerciseReference)}
-                          className="transition-opacity hover:opacity-80"
-                        >
-                          <Badge variant="secondary" className="cursor-pointer">
-                            {tip.exerciseReference}
-                          </Badge>
-                        </Link>
                       )}
                     </div>
                   </div>

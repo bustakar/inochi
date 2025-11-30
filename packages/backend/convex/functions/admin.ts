@@ -1,6 +1,10 @@
 import { v } from "convex/values";
+import { internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
+import seedEquipmentCalisthenics from "../seed/seed_equipment_calisthenics.json";
+import seedExercisesCalisthenics from "../seed/seed_exercises_calisthenics.json";
+import seedMuscles from "../seed/seed_muscles.json";
 import {
   exerciseLevelValidator,
   exerciseVariantValidator,
@@ -11,6 +15,7 @@ export const batchInsertExercises = internalMutation({
     exercises: v.array(
       v.object({
         title: v.string(),
+        slug: v.string(),
         description: v.optional(v.string()),
         level: v.optional(exerciseLevelValidator),
         difficulty: v.optional(v.number()),
@@ -27,6 +32,7 @@ export const batchInsertExercises = internalMutation({
   },
   handler: async (ctx, args) => {
     const insertedIds: Id<"exercises">[] = [];
+    const skippedSlugs: string[] = [];
 
     // Pre-fetch all muscles to verify slugs exist
     const allMuscles = await ctx.db.query("muscles").collect();
@@ -36,10 +42,19 @@ export const batchInsertExercises = internalMutation({
     }
 
     for (const exerciseData of args.exercises) {
+      const existingExercise = await ctx.db
+        .query("exercises")
+        .withIndex("by_slug", (q) => q.eq("slug", exerciseData.slug))
+        .first();
+
+      if (existingExercise) {
+        skippedSlugs.push(exerciseData.slug);
+        continue;
+      }
+
       const now = Date.now();
       const variants = exerciseData.variants ?? [];
 
-      // Verify equipment slugs exist for variants
       for (const variant of variants) {
         for (const eqSlug of variant.equipment) {
           const equipment = await ctx.db
@@ -54,22 +69,20 @@ export const batchInsertExercises = internalMutation({
         }
       }
 
-      // 1. Insert base exercise
       const exerciseId = await ctx.db.insert("exercises", {
         title: exerciseData.title,
+        slug: exerciseData.slug,
         description: exerciseData.description ?? "",
         level: exerciseData.level ?? "beginner",
         difficulty: exerciseData.difficulty ?? 1,
         variants: variants,
         createdAt: now,
         updatedAt: now,
-        createdBy: "system", // Or some admin identifier
+        createdBy: "system",
       });
 
       insertedIds.push(exerciseId);
 
-      // 2. Insert muscles relations
-      // Convert muscles object format to exercises_muscles table entries
       if (exerciseData.muscles) {
         const roleMap: Array<{
           role: "primary" | "secondary" | "stabilizer";
@@ -91,17 +104,27 @@ export const batchInsertExercises = internalMutation({
               );
             }
 
-            await ctx.db.insert("exercises_muscles", {
-              exercise: exerciseId,
-              muscle: muscleSlug, // Store slug instead of ID
-              role,
-            });
+            const existingRelation = await ctx.db
+              .query("exercises_muscles")
+              .withIndex("by_exercise_and_role", (q) =>
+                q.eq("exercise", exerciseId).eq("role", role),
+              )
+              .filter((q) => q.eq(q.field("muscle"), muscleSlug))
+              .first();
+
+            if (!existingRelation) {
+              await ctx.db.insert("exercises_muscles", {
+                exercise: exerciseId,
+                muscle: muscleSlug,
+                role,
+              });
+            }
           }
         }
       }
     }
 
-    return insertedIds;
+    return { insertedIds, skipped: skippedSlugs.length };
   },
 });
 
@@ -119,6 +142,7 @@ export const batchInsertMuscles = internalMutation({
   },
   handler: async (ctx, args) => {
     const insertedIds: Id<"muscles">[] = [];
+    const skippedSlugs: string[] = [];
 
     for (const muscleData of args.muscles) {
       const existingMuscle = await ctx.db
@@ -127,9 +151,8 @@ export const batchInsertMuscles = internalMutation({
         .first();
 
       if (existingMuscle) {
-        throw new Error(
-          `Muscle with slug "${muscleData.slug}" already exists: ${existingMuscle._id}`,
-        );
+        skippedSlugs.push(muscleData.slug);
+        continue;
       }
 
       const muscleId = await ctx.db.insert("muscles", {
@@ -143,7 +166,7 @@ export const batchInsertMuscles = internalMutation({
       insertedIds.push(muscleId);
     }
 
-    return insertedIds;
+    return { insertedIds, skipped: skippedSlugs.length };
   },
 });
 
@@ -159,6 +182,7 @@ export const batchInsertEquipment = internalMutation({
   },
   handler: async (ctx, args) => {
     const insertedIds: Id<"equipment">[] = [];
+    const skippedSlugs: string[] = [];
 
     for (const equipmentData of args.equipment) {
       const existingEquipment = await ctx.db
@@ -167,9 +191,8 @@ export const batchInsertEquipment = internalMutation({
         .first();
 
       if (existingEquipment) {
-        throw new Error(
-          `Equipment with slug "${equipmentData.slug}" already exists: ${existingEquipment._id}`,
-        );
+        skippedSlugs.push(equipmentData.slug);
+        continue;
       }
 
       const equipmentId = await ctx.db.insert("equipment", {
@@ -181,6 +204,86 @@ export const batchInsertEquipment = internalMutation({
       insertedIds.push(equipmentId);
     }
 
-    return insertedIds;
+    return { insertedIds, skipped: skippedSlugs.length };
+  },
+});
+
+export const seedDatabase = internalMutation({
+  args: {},
+  returns: v.object({
+    muscles: v.object({
+      inserted: v.number(),
+      skipped: v.number(),
+    }),
+    equipment: v.object({
+      inserted: v.number(),
+      skipped: v.number(),
+    }),
+    exercises: v.object({
+      inserted: v.number(),
+      skipped: v.number(),
+    }),
+  }),
+  handler: async (
+    ctx,
+  ): Promise<{
+    muscles: { inserted: number; skipped: number };
+    equipment: { inserted: number; skipped: number };
+    exercises: { inserted: number; skipped: number };
+  }> => {
+    const musclesResult: {
+      insertedIds: Id<"muscles">[];
+      skipped: number;
+    } = await ctx.runMutation(internal.functions.admin.batchInsertMuscles, {
+      muscles: seedMuscles as Array<{
+        name: string;
+        slug: string;
+        commonName?: string;
+        recommendedRestHours: number;
+        muscleGroup: string;
+      }>,
+    });
+
+    const equipmentResult: {
+      insertedIds: Id<"equipment">[];
+      skipped: number;
+    } = await ctx.runMutation(internal.functions.admin.batchInsertEquipment, {
+      equipment: seedEquipmentCalisthenics as Array<{
+        name: string;
+        slug: string;
+        category: string;
+      }>,
+    });
+
+    const exercisesResult: {
+      insertedIds: Id<"exercises">[];
+      skipped: number;
+    } = await ctx.runMutation(internal.functions.admin.batchInsertExercises, {
+      exercises: seedExercisesCalisthenics.map((ex) => ({
+        ...ex,
+        level: ex.level as
+          | "beginner"
+          | "intermediate"
+          | "advanced"
+          | "expert"
+          | "elite"
+          | "legendary",
+      })),
+    });
+
+    return {
+      muscles: {
+        inserted: musclesResult.insertedIds.length,
+        skipped: musclesResult.skipped,
+      },
+      equipment: {
+        inserted: equipmentResult.insertedIds.length,
+        skipped: equipmentResult.skipped,
+      },
+      exercises: {
+        inserted: exercisesResult.insertedIds.length,
+        skipped: exercisesResult.skipped,
+      },
+    };
   },
 });
