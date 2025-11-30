@@ -13,6 +13,7 @@ import type * as functions_admin from "../functions/admin.js";
 import type * as functions_auth from "../functions/auth.js";
 import type * as functions_exercises from "../functions/exercises.js";
 import type * as functions_openai from "../functions/openai.js";
+import type * as functions_userExerciseProgress from "../functions/userExerciseProgress.js";
 import type * as utils from "../utils.js";
 import type * as validators_validators from "../validators/validators.js";
 
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   "functions/auth": typeof functions_auth;
   "functions/exercises": typeof functions_exercises;
   "functions/openai": typeof functions_openai;
+  "functions/userExerciseProgress": typeof functions_userExerciseProgress;
   utils: typeof utils;
   "validators/validators": typeof validators_validators;
 }>;
