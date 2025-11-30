@@ -1,6 +1,5 @@
 "use client";
 
-import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { ExerciseVariant } from "@packages/backend/convex/validators/validators";
 import * as React from "react";
 import { ChevronLeft, ChevronRight, Link as LinkIcon } from "lucide-react";
@@ -61,11 +60,6 @@ export function ExerciseVariantsReadonly({
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === variants.length - 1 ? 0 : prev + 1));
-  };
-
-  // Helper to determine exercise route based on ID
-  const getExerciseRoute = (exerciseId: Id<"exercises">) => {
-    return `/dashboard/exercises/public/${exerciseId}`;
   };
 
   return (
