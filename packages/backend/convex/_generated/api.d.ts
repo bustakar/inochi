@@ -11,10 +11,8 @@
 import type * as env from "../env.js";
 import type * as functions_admin from "../functions/admin.js";
 import type * as functions_auth from "../functions/auth.js";
-import type * as functions_exerciseVariants from "../functions/exerciseVariants.js";
 import type * as functions_exercises from "../functions/exercises.js";
 import type * as functions_openai from "../functions/openai.js";
-import type * as functions_submissions from "../functions/submissions.js";
 import type * as utils from "../utils.js";
 import type * as validators_validators from "../validators/validators.js";
 
@@ -28,10 +26,8 @@ declare const fullApi: ApiFromModules<{
   env: typeof env;
   "functions/admin": typeof functions_admin;
   "functions/auth": typeof functions_auth;
-  "functions/exerciseVariants": typeof functions_exerciseVariants;
   "functions/exercises": typeof functions_exercises;
   "functions/openai": typeof functions_openai;
-  "functions/submissions": typeof functions_submissions;
   utils: typeof utils;
   "validators/validators": typeof validators_validators;
 }>;

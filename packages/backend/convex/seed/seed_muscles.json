@@ -1,247 +1,225 @@
 [
   {
-    "name": "Upper Chest",
-    "slug": "upper_chest",
+    "name": "Iliopsoas",
+    "slug": "legs-hip-flexors",
+    "commonName": "Hip Flexors",
     "recommendedRestHours": 48,
-    "muscleGroup": "chest",
-    "parts": []
+    "muscleGroup": "legs"
   },
   {
-    "name": "Middle Chest",
-    "slug": "middle_chest",
+    "name": "Adductors",
+    "slug": "legs-adductors",
+    "commonName": "Inner Thighs",
     "recommendedRestHours": 48,
-    "muscleGroup": "chest",
-    "parts": []
-  },
-  {
-    "name": "Lower Chest",
-    "slug": "lower_chest",
-    "recommendedRestHours": 48,
-    "muscleGroup": "chest",
-    "parts": []
-  },
-  {
-    "name": "Lats",
-    "slug": "lats",
-    "recommendedRestHours": 72,
-    "muscleGroup": "back",
-    "parts": []
-  },
-  {
-    "name": "Rhomboids",
-    "slug": "rhomboids",
-    "recommendedRestHours": 72,
-    "muscleGroup": "back",
-    "parts": []
-  },
-  {
-    "name": "Trapezius",
-    "slug": "trapezius",
-    "recommendedRestHours": 72,
-    "muscleGroup": "back",
-    "parts": []
-  },
-  {
-    "name": "Erector Spinae",
-    "slug": "erector_spinae",
-    "recommendedRestHours": 72,
-    "muscleGroup": "back",
-    "parts": []
-  },
-  {
-    "name": "Front Deltoid",
-    "slug": "front_deltoid",
-    "recommendedRestHours": 48,
-    "muscleGroup": "shoulders",
-    "parts": []
-  },
-  {
-    "name": "Side Deltoid",
-    "slug": "side_deltoid",
-    "recommendedRestHours": 48,
-    "muscleGroup": "shoulders",
-    "parts": []
-  },
-  {
-    "name": "Rear Deltoid",
-    "slug": "rear_deltoid",
-    "recommendedRestHours": 48,
-    "muscleGroup": "shoulders",
-    "parts": []
-  },
-  {
-    "name": "Biceps Long Head",
-    "slug": "biceps_long_head",
-    "recommendedRestHours": 48,
-    "muscleGroup": "biceps",
-    "parts": []
-  },
-  {
-    "name": "Biceps Short Head",
-    "slug": "biceps_short_head",
-    "recommendedRestHours": 48,
-    "muscleGroup": "biceps",
-    "parts": []
-  },
-  {
-    "name": "Triceps Long Head",
-    "slug": "triceps_long_head",
-    "recommendedRestHours": 48,
-    "muscleGroup": "triceps",
-    "parts": []
-  },
-  {
-    "name": "Triceps Lateral Head",
-    "slug": "triceps_lateral_head",
-    "recommendedRestHours": 48,
-    "muscleGroup": "triceps",
-    "parts": []
-  },
-  {
-    "name": "Triceps Medial Head",
-    "slug": "triceps_medial_head",
-    "recommendedRestHours": 48,
-    "muscleGroup": "triceps",
-    "parts": []
-  },
-  {
-    "name": "Brachioradialis",
-    "slug": "brachioradialis",
-    "recommendedRestHours": 48,
-    "muscleGroup": "forearms",
-    "parts": []
-  },
-  {
-    "name": "Forearm Flexors",
-    "slug": "forearm_flexors",
-    "recommendedRestHours": 48,
-    "muscleGroup": "forearms",
-    "parts": []
-  },
-  {
-    "name": "Forearm Extensors",
-    "slug": "forearm_extensors",
-    "recommendedRestHours": 48,
-    "muscleGroup": "forearms",
-    "parts": []
-  },
-  {
-    "name": "Rectus Abdominis",
-    "slug": "rectus_abdominis",
-    "recommendedRestHours": 48,
-    "muscleGroup": "core",
-    "parts": []
-  },
-  {
-    "name": "Obliques",
-    "slug": "obliques",
-    "recommendedRestHours": 48,
-    "muscleGroup": "core",
-    "parts": []
-  },
-  {
-    "name": "Transverse Abdominis",
-    "slug": "transverse_abdominis",
-    "recommendedRestHours": 48,
-    "muscleGroup": "core",
-    "parts": []
-  },
-  {
-    "name": "Lower Back",
-    "slug": "lower_back",
-    "recommendedRestHours": 48,
-    "muscleGroup": "core",
-    "parts": []
-  },
-  {
-    "name": "Gluteus Maximus",
-    "slug": "gluteus_maximus",
-    "recommendedRestHours": 72,
-    "muscleGroup": "glutes",
-    "parts": []
-  },
-  {
-    "name": "Gluteus Medius",
-    "slug": "gluteus_medius",
-    "recommendedRestHours": 72,
-    "muscleGroup": "glutes",
-    "parts": []
-  },
-  {
-    "name": "Gluteus Minimus",
-    "slug": "gluteus_minimus",
-    "recommendedRestHours": 72,
-    "muscleGroup": "glutes",
-    "parts": []
-  },
-  {
-    "name": "Rectus Femoris",
-    "slug": "rectus_femoris",
-    "recommendedRestHours": 72,
-    "muscleGroup": "quadriceps",
-    "parts": []
-  },
-  {
-    "name": "Vastus Lateralis",
-    "slug": "vastus_lateralis",
-    "recommendedRestHours": 72,
-    "muscleGroup": "quadriceps",
-    "parts": []
-  },
-  {
-    "name": "Vastus Medialis",
-    "slug": "vastus_medialis",
-    "recommendedRestHours": 72,
-    "muscleGroup": "quadriceps",
-    "parts": []
-  },
-  {
-    "name": "Vastus Intermedius",
-    "slug": "vastus_intermedius",
-    "recommendedRestHours": 72,
-    "muscleGroup": "quadriceps",
-    "parts": []
-  },
-  {
-    "name": "Biceps Femoris",
-    "slug": "biceps_femoris",
-    "recommendedRestHours": 72,
-    "muscleGroup": "hamstrings",
-    "parts": []
-  },
-  {
-    "name": "Semitendinosus",
-    "slug": "semitendinosus",
-    "recommendedRestHours": 72,
-    "muscleGroup": "hamstrings",
-    "parts": []
-  },
-  {
-    "name": "Semimembranosus",
-    "slug": "semimembranosus",
-    "recommendedRestHours": 72,
-    "muscleGroup": "hamstrings",
-    "parts": []
-  },
-  {
-    "name": "Gastrocnemius",
-    "slug": "gastrocnemius",
-    "recommendedRestHours": 48,
-    "muscleGroup": "calves",
-    "parts": []
-  },
-  {
-    "name": "Soleus",
-    "slug": "soleus",
-    "recommendedRestHours": 48,
-    "muscleGroup": "calves",
-    "parts": []
+    "muscleGroup": "legs"
   },
   {
     "name": "Tibialis Anterior",
-    "slug": "tibialis_anterior",
+    "slug": "legs-tibialis",
+    "commonName": "Shins (Tibialis)",
+    "recommendedRestHours": 24,
+    "muscleGroup": "legs"
+  },
+  {
+    "name": "Gastrocnemius",
+    "slug": "legs-calves",
+    "commonName": "Calves",
+    "recommendedRestHours": 24,
+    "muscleGroup": "legs"
+  },
+  {
+    "name": "Gluteus Maximus",
+    "slug": "legs-glutes",
+    "commonName": "Glutes",
     "recommendedRestHours": 48,
-    "muscleGroup": "calves",
-    "parts": []
+    "muscleGroup": "legs"
+  },
+  {
+    "name": "Hamstrings",
+    "slug": "legs-hamstrings",
+    "commonName": "Hamstrings",
+    "recommendedRestHours": 48,
+    "muscleGroup": "legs"
+  },
+  {
+    "name": "Quadriceps Femoris",
+    "slug": "legs-quads",
+    "commonName": "Quads",
+    "recommendedRestHours": 72,
+    "muscleGroup": "legs"
+  },
+
+  {
+    "name": "Serratus Anterior",
+    "slug": "core-serratus",
+    "commonName": "Serratus (Ribs)",
+    "recommendedRestHours": 48,
+    "muscleGroup": "core"
+  },
+  {
+    "name": "Transverse Abdominis",
+    "slug": "core-transverse",
+    "commonName": "Deep Core",
+    "recommendedRestHours": 24,
+    "muscleGroup": "core"
+  },
+  {
+    "name": "Obliquus Externus",
+    "slug": "core-obliques",
+    "commonName": "Obliques",
+    "recommendedRestHours": 48,
+    "muscleGroup": "core"
+  },
+  {
+    "name": "Rectus Abdominis",
+    "slug": "core-abs",
+    "commonName": "Abs",
+    "recommendedRestHours": 48,
+    "muscleGroup": "core"
+  },
+  {
+    "name": "Erector Spinae",
+    "slug": "back-lower",
+    "commonName": "Lower Back",
+    "recommendedRestHours": 72,
+    "muscleGroup": "back"
+  },
+  {
+    "name": "Rhomboids",
+    "slug": "back-rhomboids",
+    "commonName": "Rhomboids (Mid-Back)",
+    "recommendedRestHours": 48,
+    "muscleGroup": "back"
+  },
+  {
+    "name": "Trapezius (Lower)",
+    "slug": "back-traps-lower",
+    "commonName": "Lower Traps (Scapular Depression)",
+    "recommendedRestHours": 48,
+    "muscleGroup": "back"
+  },
+  {
+    "name": "Trapezius (Upper)",
+    "slug": "back-traps-upper",
+    "commonName": "Upper Traps (Neck)",
+    "recommendedRestHours": 24,
+    "muscleGroup": "back"
+  },
+  {
+    "name": "Latissimus Dorsi",
+    "slug": "back-lats",
+    "commonName": "Lats",
+    "recommendedRestHours": 48,
+    "muscleGroup": "back"
+  },
+
+  {
+    "name": "Rotator Cuff",
+    "slug": "shoulders-rotator_cuff",
+    "commonName": "Rotator Cuff",
+    "recommendedRestHours": 24,
+    "muscleGroup": "shoulders"
+  },
+  {
+    "name": "Posterior Deltoid",
+    "slug": "shoulders-rear",
+    "commonName": "Rear Delts",
+    "recommendedRestHours": 48,
+    "muscleGroup": "shoulders"
+  },
+  {
+    "name": "Lateral Deltoid",
+    "slug": "shoulders-side",
+    "commonName": "Side Delts",
+    "recommendedRestHours": 48,
+    "muscleGroup": "shoulders"
+  },
+  {
+    "name": "Anterior Deltoid",
+    "slug": "shoulders-front",
+    "commonName": "Front Delts",
+    "recommendedRestHours": 48,
+    "muscleGroup": "shoulders"
+  },
+
+  {
+    "name": "Pectoralis Major (Lower)",
+    "slug": "chest-lower",
+    "commonName": "Lower Chest / Pecs",
+    "recommendedRestHours": 48,
+    "muscleGroup": "chest"
+  },
+  {
+    "name": "Pectoralis Major (Middle)",
+    "slug": "chest-middle",
+    "commonName": "Middle Chest",
+    "recommendedRestHours": 48,
+    "muscleGroup": "chest"
+  },
+  {
+    "name": "Pectoralis Major (Upper)",
+    "slug": "chest-upper",
+    "commonName": "Upper Chest",
+    "recommendedRestHours": 48,
+    "muscleGroup": "chest"
+  },
+
+  {
+    "name": "Biceps Brachii",
+    "slug": "biceps-main",
+    "commonName": "Biceps",
+    "recommendedRestHours": 48,
+    "muscleGroup": "biceps"
+  },
+  {
+    "name": "Brachialis",
+    "slug": "biceps-brachialis",
+    "commonName": "Brachialis",
+    "recommendedRestHours": 48,
+    "muscleGroup": "biceps"
+  },
+
+  {
+    "name": "Triceps Medial Head",
+    "slug": "triceps-medial",
+    "commonName": "Elbow Triceps",
+    "recommendedRestHours": 48,
+    "muscleGroup": "triceps"
+  },
+  {
+    "name": "Triceps Lateral Head",
+    "slug": "triceps-lateral",
+    "commonName": "Outer Triceps",
+    "recommendedRestHours": 48,
+    "muscleGroup": "triceps"
+  },
+  {
+    "name": "Triceps Long Head",
+    "slug": "triceps-long",
+    "commonName": "Inner Triceps",
+    "recommendedRestHours": 48,
+    "muscleGroup": "triceps"
+  },
+
+  {
+    "name": "Flexor Carpi",
+    "slug": "forearms-flexors",
+    "commonName": "Wrist Flexors",
+    "recommendedRestHours": 24,
+    "muscleGroup": "forearms"
+  },
+  {
+    "name": "Brachioradialis",
+    "slug": "forearms-brachio",
+    "commonName": "Upper Forearm",
+    "recommendedRestHours": 24,
+    "muscleGroup": "forearms"
+  },
+  {
+    "name": "Extensor Digitorum",
+    "slug": "forearms-extensors",
+    "commonName": "Wrist Extensors",
+    "recommendedRestHours": 24,
+    "muscleGroup": "forearms"
   }
 ]

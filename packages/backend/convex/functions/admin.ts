@@ -1,11 +1,13 @@
 import { v } from "convex/values";
+import { internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
+import seedEquipmentCalisthenics from "../seed/seed_equipment_calisthenics.json";
+import seedExercisesCalisthenics from "../seed/seed_exercises_calisthenics.json";
+import seedMuscles from "../seed/seed_muscles.json";
 import {
-  exerciseCategoryValidator,
   exerciseLevelValidator,
-  muscleRoleValidator,
-  tipV2Validator,
+  exerciseVariantValidator,
 } from "../validators/validators";
 
 export const batchInsertExercises = internalMutation({
@@ -13,101 +15,116 @@ export const batchInsertExercises = internalMutation({
     exercises: v.array(
       v.object({
         title: v.string(),
+        slug: v.string(),
         description: v.optional(v.string()),
-        category: v.optional(exerciseCategoryValidator),
         level: v.optional(exerciseLevelValidator),
         difficulty: v.optional(v.number()),
         muscles: v.optional(
-          v.array(
-            v.object({
-              muscleId: v.id("muscles"),
-              role: muscleRoleValidator,
-            }),
-          ),
+          v.object({
+            primary: v.optional(v.array(v.string())),
+            secondary: v.optional(v.array(v.string())),
+            stabilizer: v.optional(v.array(v.string())),
+          }),
         ),
-        prerequisites: v.optional(v.array(v.id("exercises"))),
-        variants: v.optional(
-          v.array(
-            v.object({
-              equipmentIds: v.array(v.id("equipment")),
-              tipsV2: v.optional(v.array(tipV2Validator)),
-              overriddenTitle: v.optional(v.string()),
-              overriddenDescription: v.optional(v.string()),
-              overriddenDifficulty: v.optional(v.number()),
-            }),
-          ),
-        ),
+        variants: v.optional(v.array(exerciseVariantValidator)),
       }),
     ),
   },
   handler: async (ctx, args) => {
-    const insertedIds = [];
+    const insertedIds: Id<"exercises">[] = [];
+    const skippedSlugs: string[] = [];
+
+    // Pre-fetch all muscles to verify slugs exist
+    const allMuscles = await ctx.db.query("muscles").collect();
+    const validMuscleSlugs = new Set<string>();
+    for (const muscle of allMuscles) {
+      validMuscleSlugs.add(muscle.slug);
+    }
 
     for (const exerciseData of args.exercises) {
-      const now = Date.now();
+      const existingExercise = await ctx.db
+        .query("exercises")
+        .withIndex("by_slug", (q) => q.eq("slug", exerciseData.slug))
+        .first();
 
-      // 1. Insert base exercise
+      if (existingExercise) {
+        skippedSlugs.push(exerciseData.slug);
+        continue;
+      }
+
+      const now = Date.now();
+      const variants = exerciseData.variants ?? [];
+
+      for (const variant of variants) {
+        for (const eqSlug of variant.equipment) {
+          const equipment = await ctx.db
+            .query("equipment")
+            .withIndex("by_slug", (q) => q.eq("slug", eqSlug))
+            .first();
+          if (!equipment) {
+            throw new Error(
+              `Equipment not found: ${eqSlug} for exercise ${exerciseData.title}`,
+            );
+          }
+        }
+      }
+
       const exerciseId = await ctx.db.insert("exercises", {
         title: exerciseData.title,
+        slug: exerciseData.slug,
         description: exerciseData.description ?? "",
-        category: exerciseData.category ?? "calisthenics",
         level: exerciseData.level ?? "beginner",
         difficulty: exerciseData.difficulty ?? 1,
-        prerequisites: exerciseData.prerequisites || [],
+        variants: variants,
         createdAt: now,
         updatedAt: now,
-        createdBy: "system", // Or some admin identifier
+        createdBy: "system",
       });
 
       insertedIds.push(exerciseId);
 
-      // 2. Insert muscles relations
-      if (exerciseData.muscles && exerciseData.muscles.length > 0) {
-        for (const muscleData of exerciseData.muscles) {
-          // Verify muscle exists
-          const muscle = await ctx.db.get(muscleData.muscleId);
-          if (!muscle) {
-            throw new Error(
-              `Muscle not found: ${muscleData.muscleId} for exercise ${exerciseData.title}`,
-            );
-          }
+      if (exerciseData.muscles) {
+        const roleMap: Array<{
+          role: "primary" | "secondary" | "stabilizer";
+          slugs: string[];
+        }> = [
+          { role: "primary", slugs: exerciseData.muscles.primary || [] },
+          { role: "secondary", slugs: exerciseData.muscles.secondary || [] },
+          {
+            role: "stabilizer",
+            slugs: exerciseData.muscles.stabilizer || [],
+          },
+        ];
 
-          await ctx.db.insert("exercises_muscles", {
-            exercise: exerciseId,
-            muscle: muscleData.muscleId,
-            role: muscleData.role,
-          });
-        }
-      }
-
-      // 3. Insert variants
-      if (exerciseData.variants && exerciseData.variants.length > 0) {
-        for (const variantData of exerciseData.variants) {
-          // Verify equipment exists
-          for (const eqId of variantData.equipmentIds) {
-            const equipment = await ctx.db.get(eqId);
-            if (!equipment) {
+        for (const { role, slugs } of roleMap) {
+          for (const muscleSlug of slugs) {
+            if (!validMuscleSlugs.has(muscleSlug)) {
               throw new Error(
-                `Equipment not found: ${eqId} for exercise ${exerciseData.title}`,
+                `Muscle not found: ${muscleSlug} for exercise ${exerciseData.title}`,
               );
             }
-          }
 
-          await ctx.db.insert("exercise_variants", {
-            exercise: exerciseId,
-            equipment: variantData.equipmentIds,
-            tipsV2: variantData.tipsV2,
-            overriddenTitle: variantData.overriddenTitle,
-            overriddenDescription: variantData.overriddenDescription,
-            overriddenDifficulty: variantData.overriddenDifficulty,
-            createdAt: now,
-            updatedAt: now,
-          });
+            const existingRelation = await ctx.db
+              .query("exercises_muscles")
+              .withIndex("by_exercise_and_role", (q) =>
+                q.eq("exercise", exerciseId).eq("role", role),
+              )
+              .filter((q) => q.eq(q.field("muscle"), muscleSlug))
+              .first();
+
+            if (!existingRelation) {
+              await ctx.db.insert("exercises_muscles", {
+                exercise: exerciseId,
+                muscle: muscleSlug,
+                role,
+              });
+            }
+          }
         }
       }
     }
 
-    return insertedIds;
+    return { insertedIds, skipped: skippedSlugs.length };
   },
 });
 
@@ -125,18 +142,17 @@ export const batchInsertMuscles = internalMutation({
   },
   handler: async (ctx, args) => {
     const insertedIds: Id<"muscles">[] = [];
+    const skippedSlugs: string[] = [];
 
     for (const muscleData of args.muscles) {
-      // Check if muscle with same slug already exists
       const existingMuscle = await ctx.db
         .query("muscles")
         .withIndex("by_slug", (q) => q.eq("slug", muscleData.slug))
         .first();
 
       if (existingMuscle) {
-        throw new Error(
-          `Muscle with slug "${muscleData.slug}" already exists: ${existingMuscle._id}`,
-        );
+        skippedSlugs.push(muscleData.slug);
+        continue;
       }
 
       const muscleId = await ctx.db.insert("muscles", {
@@ -150,155 +166,124 @@ export const batchInsertMuscles = internalMutation({
       insertedIds.push(muscleId);
     }
 
-    return insertedIds;
+    return { insertedIds, skipped: skippedSlugs.length };
   },
 });
 
-export const batchUpdateExercisePrerequisites = internalMutation({
+export const batchInsertEquipment = internalMutation({
   args: {
-    updates: v.array(
+    equipment: v.array(
       v.object({
-        exerciseId: v.id("exercises"),
-        prerequisites: v.array(v.id("exercises")),
+        name: v.string(),
+        slug: v.string(),
+        category: v.string(),
       }),
     ),
   },
   handler: async (ctx, args) => {
-    const updatedIds = [];
-    const now = Date.now();
+    const insertedIds: Id<"equipment">[] = [];
+    const skippedSlugs: string[] = [];
 
-    for (const update of args.updates) {
-      const exercise = await ctx.db.get(update.exerciseId);
-      if (!exercise) {
-        throw new Error(`Exercise not found: ${update.exerciseId}`);
+    for (const equipmentData of args.equipment) {
+      const existingEquipment = await ctx.db
+        .query("equipment")
+        .withIndex("by_slug", (q) => q.eq("slug", equipmentData.slug))
+        .first();
+
+      if (existingEquipment) {
+        skippedSlugs.push(equipmentData.slug);
+        continue;
       }
 
-      for (const prereqId of update.prerequisites) {
-        const prereq = await ctx.db.get(prereqId);
-        if (!prereq) {
-          throw new Error(
-            `Prerequisite exercise not found: ${prereqId} for exercise ${exercise.title}`,
-          );
-        }
-      }
-
-      await ctx.db.patch(update.exerciseId, {
-        prerequisites: update.prerequisites,
-        updatedAt: now,
+      const equipmentId = await ctx.db.insert("equipment", {
+        name: equipmentData.name,
+        slug: equipmentData.slug,
+        category: equipmentData.category,
       });
-      updatedIds.push(update.exerciseId);
+
+      insertedIds.push(equipmentId);
     }
 
-    return updatedIds;
+    return { insertedIds, skipped: skippedSlugs.length };
   },
 });
 
-export const batchUpdateExerciseMuscles = internalMutation({
-  args: {
-    updates: v.array(
-      v.object({
-        exerciseId: v.id("exercises"),
-        muscles: v.array(
-          v.object({
-            muscleId: v.id("muscles"),
-            role: muscleRoleValidator,
-          }),
-        ),
-      }),
-    ),
-  },
-  handler: async (ctx, args) => {
-    for (const update of args.updates) {
-      const exercise = await ctx.db.get(update.exerciseId);
-      if (!exercise) {
-        throw new Error(`Exercise not found: ${update.exerciseId}`);
-      }
+export const seedDatabase = internalMutation({
+  args: {},
+  returns: v.object({
+    muscles: v.object({
+      inserted: v.number(),
+      skipped: v.number(),
+    }),
+    equipment: v.object({
+      inserted: v.number(),
+      skipped: v.number(),
+    }),
+    exercises: v.object({
+      inserted: v.number(),
+      skipped: v.number(),
+    }),
+  }),
+  handler: async (
+    ctx,
+  ): Promise<{
+    muscles: { inserted: number; skipped: number };
+    equipment: { inserted: number; skipped: number };
+    exercises: { inserted: number; skipped: number };
+  }> => {
+    const musclesResult: {
+      insertedIds: Id<"muscles">[];
+      skipped: number;
+    } = await ctx.runMutation(internal.functions.admin.batchInsertMuscles, {
+      muscles: seedMuscles as Array<{
+        name: string;
+        slug: string;
+        commonName?: string;
+        recommendedRestHours: number;
+        muscleGroup: string;
+      }>,
+    });
 
-      const existing = await ctx.db
-        .query("exercises_muscles")
-        .withIndex("by_exercise", (q) => q.eq("exercise", update.exerciseId))
-        .collect();
+    const equipmentResult: {
+      insertedIds: Id<"equipment">[];
+      skipped: number;
+    } = await ctx.runMutation(internal.functions.admin.batchInsertEquipment, {
+      equipment: seedEquipmentCalisthenics as Array<{
+        name: string;
+        slug: string;
+        category: string;
+      }>,
+    });
 
-      for (const row of existing) {
-        await ctx.db.delete(row._id);
-      }
+    const exercisesResult: {
+      insertedIds: Id<"exercises">[];
+      skipped: number;
+    } = await ctx.runMutation(internal.functions.admin.batchInsertExercises, {
+      exercises: seedExercisesCalisthenics.map((ex) => ({
+        ...ex,
+        level: ex.level as
+          | "beginner"
+          | "intermediate"
+          | "advanced"
+          | "expert"
+          | "elite"
+          | "legendary",
+      })),
+    });
 
-      for (const target of update.muscles) {
-        const muscle = await ctx.db.get(target.muscleId);
-        if (!muscle) {
-          throw new Error(`Muscle not found: ${target.muscleId}`);
-        }
-        await ctx.db.insert("exercises_muscles", {
-          exercise: update.exerciseId,
-          muscle: target.muscleId,
-          role: target.role,
-        });
-      }
-    }
-  },
-});
-
-export const batchUpdateExerciseVariants = internalMutation({
-  args: {
-    updates: v.array(
-      v.object({
-        exerciseId: v.id("exercises"),
-        variants: v.array(
-          v.object({
-            equipmentIds: v.array(v.id("equipment")),
-            tipsV2: v.optional(v.array(tipV2Validator)),
-            overriddenTitle: v.optional(v.string()),
-            overriddenDescription: v.optional(v.string()),
-            overriddenDifficulty: v.optional(v.number()),
-          }),
-        ),
-      }),
-    ),
-  },
-  handler: async (ctx, args) => {
-    const updatedIds = [];
-    const now = Date.now();
-
-    for (const update of args.updates) {
-      const exercise = await ctx.db.get(update.exerciseId);
-      if (!exercise) {
-        throw new Error(`Exercise not found: ${update.exerciseId}`);
-      }
-
-      const existingVariants = await ctx.db
-        .query("exercise_variants")
-        .withIndex("by_exercise", (q) => q.eq("exercise", update.exerciseId))
-        .collect();
-
-      for (const variant of existingVariants) {
-        await ctx.db.delete(variant._id);
-      }
-
-      for (const variantData of update.variants) {
-        for (const eqId of variantData.equipmentIds) {
-          const equipment = await ctx.db.get(eqId);
-          if (!equipment) {
-            throw new Error(
-              `Equipment not found: ${eqId} for exercise ${exercise.title}`,
-            );
-          }
-        }
-
-        await ctx.db.insert("exercise_variants", {
-          exercise: update.exerciseId,
-          equipment: variantData.equipmentIds,
-          tipsV2: variantData.tipsV2,
-          overriddenTitle: variantData.overriddenTitle,
-          overriddenDescription: variantData.overriddenDescription,
-          overriddenDifficulty: variantData.overriddenDifficulty,
-          createdAt: now,
-          updatedAt: now,
-        });
-      }
-
-      updatedIds.push(update.exerciseId);
-    }
-
-    return updatedIds;
+    return {
+      muscles: {
+        inserted: musclesResult.insertedIds.length,
+        skipped: musclesResult.skipped,
+      },
+      equipment: {
+        inserted: equipmentResult.insertedIds.length,
+        skipped: equipmentResult.skipped,
+      },
+      exercises: {
+        inserted: exercisesResult.insertedIds.length,
+        skipped: exercisesResult.skipped,
+      },
+    };
   },
 });
