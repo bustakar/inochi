@@ -74,8 +74,8 @@ export function UserProgressSection({
         )}
         <Select
           value={currentStatus ?? undefined}
-          onValueChange={(value) => {
-            handleStatusChange(value as ProgressStatus);
+          onValueChange={async (value) => {
+            await handleStatusChange(value as ProgressStatus);
           }}
           disabled={isUpdating}
         >
