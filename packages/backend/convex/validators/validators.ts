@@ -20,8 +20,8 @@ export const muscleRoleValidator = v.union(
 export type MuscleRole = Infer<typeof muscleRoleValidator>;
 
 export function validateDifficulty(difficulty: number): void {
-  if (!Number.isInteger(difficulty) || difficulty < 1 || difficulty > 10) {
-    throw new Error("Difficulty must be an integer between 1 and 10");
+  if (!Number.isInteger(difficulty) || difficulty < 1 || difficulty > 12) {
+    throw new Error("Difficulty must be an integer between 1 and 12");
   }
 }
 
@@ -52,3 +52,12 @@ export const exerciseValidator = v.object({
   updatedAt: v.number(),
   createdBy: v.string(),
 });
+
+export const progressStatusValidator = v.union(
+  v.literal("novice"),
+  v.literal("apprentice"),
+  v.literal("journeyman"),
+  v.literal("master"),
+);
+
+export type ProgressStatus = Infer<typeof progressStatusValidator>;
