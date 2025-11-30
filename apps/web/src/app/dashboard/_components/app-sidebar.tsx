@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -25,7 +25,13 @@ const platformData = {
 };
 
 const userData = {
-  navMain: [],
+  navMain: [
+    {
+      title: "Profile",
+      url: "/dashboard/profile",
+      icon: User,
+    },
+  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
