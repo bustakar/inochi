@@ -34,9 +34,11 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
     createdBy: v.string(),
+    slug: v.string(),
   })
     .index("by_level", ["level"])
     .index("by_difficulty", ["difficulty"])
+    .index("by_slug", ["slug"])
     .searchIndex("search_title", {
       searchField: "title",
       filterFields: ["level", "difficulty"],

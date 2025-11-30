@@ -6,17 +6,31 @@
     "difficulty": 1,
     "variants": [
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
-          { "text": "Squeeze glutes and tuck pelvis (posterior pelvic tilt)." }
+          {
+            "text": "Squeeze glutes and tuck pelvis (posterior pelvic tilt)."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["core-abs", "core-transverse"],
-      "secondary": ["shoulders-front", "legs-quads"],
-      "stabilizer": ["shoulders-rotator_cuff", "back-lower"]
-    }
+      "primary": [
+        "core-abs",
+        "core-transverse"
+      ],
+      "secondary": [
+        "shoulders-front",
+        "legs-quads"
+      ],
+      "stabilizer": [
+        "shoulders-rotator_cuff",
+        "back-lower"
+      ]
+    },
+    "slug": "standard-plank"
   },
   {
     "title": "Regular Push-up",
@@ -25,26 +39,52 @@
     "difficulty": 2,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Chest to floor, full lockout at top." }]
-      },
-      {
-        "equipment": ["parallettes", "floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
-          { "text": "Allows for neutral wrist position and deeper ROM." }
+          {
+            "text": "Chest to floor, full lockout at top."
+          }
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "parallettes",
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Allows for neutral wrist position and deeper ROM."
+          }
+        ]
+      },
+      {
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 3,
-        "tips": [{ "text": "Turn rings out at the top." }]
+        "tips": [
+          {
+            "text": "Turn rings out at the top."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["chest-middle", "triceps-long"],
-      "secondary": ["shoulders-front"],
-      "stabilizer": ["core-abs", "core-serratus"]
-    }
+      "primary": [
+        "chest-middle",
+        "triceps-long"
+      ],
+      "secondary": [
+        "shoulders-front"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "core-serratus"
+      ]
+    },
+    "slug": "regular-push-up"
   },
   {
     "title": "Hollow Body Hold",
@@ -53,15 +93,29 @@
     "difficulty": 2,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "If lower back lifts, raise legs higher." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "If lower back lifts, raise legs higher."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["core-abs", "core-transverse"],
-      "secondary": ["legs-hip-flexors"],
-      "stabilizer": ["shoulders-front"]
-    }
+      "primary": [
+        "core-abs",
+        "core-transverse"
+      ],
+      "secondary": [
+        "legs-hip-flexors"
+      ],
+      "stabilizer": [
+        "shoulders-front"
+      ]
+    },
+    "slug": "hollow-body-hold"
   },
   {
     "title": "Pike Hold",
@@ -70,19 +124,40 @@
     "difficulty": 2,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Push the floor away, elevate scapula." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Push the floor away, elevate scapula."
+          }
+        ]
       },
       {
-        "equipment": ["parallettes"],
-        "tips": [{ "text": "Keep elbows locked." }]
+        "equipment": [
+          "parallettes"
+        ],
+        "tips": [
+          {
+            "text": "Keep elbows locked."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front"],
-      "secondary": ["triceps-long", "shoulders-side"],
-      "stabilizer": ["core-abs", "back-traps-upper"]
-    }
+      "primary": [
+        "shoulders-front"
+      ],
+      "secondary": [
+        "triceps-long",
+        "shoulders-side"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-traps-upper"
+      ]
+    },
+    "slug": "pike-hold"
   },
   {
     "title": "Australian Pull-up",
@@ -91,20 +166,42 @@
     "difficulty": 2,
     "variants": [
       {
-        "equipment": ["low_bar"],
-        "tips": [{ "text": "Keep body in a straight plank line." }]
+        "equipment": [
+          "low_bar"
+        ],
+        "tips": [
+          {
+            "text": "Keep body in a straight plank line."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenTitle": "Ring Row",
-        "tips": [{ "text": "Pull rings to armpits." }]
+        "tips": [
+          {
+            "text": "Pull rings to armpits."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "back-rhomboids"],
-      "secondary": ["biceps-main", "shoulders-rear"],
-      "stabilizer": ["core-abs", "back-lower"]
-    }
+      "primary": [
+        "back-lats",
+        "back-rhomboids"
+      ],
+      "secondary": [
+        "biceps-main",
+        "shoulders-rear"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-lower"
+      ]
+    },
+    "slug": "australian-pull-up"
   },
   {
     "title": "Frog Stand",
@@ -113,22 +210,40 @@
     "difficulty": 3,
     "variants": [
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
-          { "text": "Look forward to form a triangle with hands and head." }
+          {
+            "text": "Look forward to form a triangle with hands and head."
+          }
         ]
       },
       {
-        "equipment": ["parallettes"],
+        "equipment": [
+          "parallettes"
+        ],
         "overriddenTitle": "Frog Stand on Parallettes",
-        "tips": [{ "text": "Grip the bars tightly to balance." }]
+        "tips": [
+          {
+            "text": "Grip the bars tightly to balance."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front"],
-      "secondary": ["triceps-long", "forearms-flexors"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "shoulders-front"
+      ],
+      "secondary": [
+        "triceps-long",
+        "forearms-flexors"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "frog-stand"
   },
   {
     "title": "Floor Pike Push-up",
@@ -137,20 +252,41 @@
     "difficulty": 3,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Head goes forward, not just down." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Head goes forward, not just down."
+          }
+        ]
       },
       {
-        "equipment": ["parallettes"],
+        "equipment": [
+          "parallettes"
+        ],
         "overriddenDifficulty": 4,
-        "tips": [{ "text": "Go deeper for more ROM." }]
+        "tips": [
+          {
+            "text": "Go deeper for more ROM."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front"],
-      "secondary": ["triceps-long", "chest-upper"],
-      "stabilizer": ["core-abs", "back-traps-upper"]
-    }
+      "primary": [
+        "shoulders-front"
+      ],
+      "secondary": [
+        "triceps-long",
+        "chest-upper"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-traps-upper"
+      ]
+    },
+    "slug": "floor-pike-push-up"
   },
   {
     "title": "Regular Pull-up",
@@ -159,21 +295,40 @@
     "difficulty": 3,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Chin over bar, full lockout at bottom." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Chin over bar, full lockout at bottom."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "tips": [
-          { "text": "Start with palms forward, rotate to palms facing you." }
+          {
+            "text": "Start with palms forward, rotate to palms facing you."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "biceps-main"],
-      "secondary": ["back-traps-lower", "forearms-flexors"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "back-lats",
+        "biceps-main"
+      ],
+      "secondary": [
+        "back-traps-lower",
+        "forearms-flexors"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "regular-pull-up"
   },
   {
     "title": "Skin the Cat",
@@ -182,19 +337,40 @@
     "difficulty": 3,
     "variants": [
       {
-        "equipment": ["gymnastic_rings"],
-        "tips": [{ "text": "Keep arms straight throughout the rotation." }]
+        "equipment": [
+          "gymnastic_rings"
+        ],
+        "tips": [
+          {
+            "text": "Keep arms straight throughout the rotation."
+          }
+        ]
       },
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Use a pronated grip." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Use a pronated grip."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "back-lats"],
-      "secondary": ["chest-upper", "biceps-main"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "shoulders-front",
+        "back-lats"
+      ],
+      "secondary": [
+        "chest-upper",
+        "biceps-main"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "skin-the-cat"
   },
   {
     "title": "Wall Walk",
@@ -203,15 +379,30 @@
     "difficulty": 4,
     "variants": [
       {
-        "equipment": ["wall", "floor"],
-        "tips": [{ "text": "Walk hands in as close to wall as possible." }]
+        "equipment": [
+          "wall",
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Walk hands in as close to wall as possible."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front"],
-      "secondary": ["triceps-long", "core-abs"],
-      "stabilizer": ["shoulders-rotator_cuff"]
-    }
+      "primary": [
+        "shoulders-front"
+      ],
+      "secondary": [
+        "triceps-long",
+        "core-abs"
+      ],
+      "stabilizer": [
+        "shoulders-rotator_cuff"
+      ]
+    },
+    "slug": "wall-walk"
   },
   {
     "title": "Elevated Pike Push-up",
@@ -220,20 +411,43 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["bench_box", "floor"],
-        "tips": [{ "text": "Keep hips stacked over shoulders." }]
+        "equipment": [
+          "bench_box",
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Keep hips stacked over shoulders."
+          }
+        ]
       },
       {
-        "equipment": ["bench_box", "parallettes"],
+        "equipment": [
+          "bench_box",
+          "parallettes"
+        ],
         "overriddenDifficulty": 6,
-        "tips": [{ "text": "Utilize full range of motion." }]
+        "tips": [
+          {
+            "text": "Utilize full range of motion."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front"],
-      "secondary": ["triceps-long", "shoulders-side"],
-      "stabilizer": ["core-abs", "back-traps-upper"]
-    }
+      "primary": [
+        "shoulders-front"
+      ],
+      "secondary": [
+        "triceps-long",
+        "shoulders-side"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-traps-upper"
+      ]
+    },
+    "slug": "elevated-pike-push-up"
   },
   {
     "title": "Chest-to-Wall Handstand",
@@ -242,15 +456,32 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["wall", "floor"],
-        "tips": [{ "text": "Only toes and nose should touch the wall." }]
+        "equipment": [
+          "wall",
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Only toes and nose should touch the wall."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "shoulders-side"],
-      "secondary": ["triceps-long"],
-      "stabilizer": ["core-abs", "core-transverse", "back-traps-upper"]
-    }
+      "primary": [
+        "shoulders-front",
+        "shoulders-side"
+      ],
+      "secondary": [
+        "triceps-long"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "core-transverse",
+        "back-traps-upper"
+      ]
+    },
+    "slug": "chest-to-wall-handstand"
   },
   {
     "title": "Tuck Front Lever Hold",
@@ -259,19 +490,41 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Retract scapula strongly." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Retract scapula strongly."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
-        "tips": [{ "text": "Keep rings close to body." }]
+        "equipment": [
+          "gymnastic_rings"
+        ],
+        "tips": [
+          {
+            "text": "Keep rings close to body."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "core-abs"],
-      "secondary": ["back-rhomboids", "back-traps-lower"],
-      "stabilizer": ["shoulders-rear", "triceps-long"]
-    }
+      "primary": [
+        "back-lats",
+        "core-abs"
+      ],
+      "secondary": [
+        "back-rhomboids",
+        "back-traps-lower"
+      ],
+      "stabilizer": [
+        "shoulders-rear",
+        "triceps-long"
+      ]
+    },
+    "slug": "tuck-front-lever-hold"
   },
   {
     "title": "Scapular Pull-in (Front Lever)",
@@ -280,15 +533,29 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Keep arms dead straight." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Keep arms dead straight."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "shoulders-rear"],
-      "secondary": ["back-traps-lower"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "back-lats",
+        "shoulders-rear"
+      ],
+      "secondary": [
+        "back-traps-lower"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "scapular-pull-in-front-lever"
   },
   {
     "title": "Kick-up to Handstand",
@@ -297,15 +564,29 @@
     "difficulty": 6,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Keep arms locked before you kick." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Keep arms locked before you kick."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front"],
-      "secondary": ["triceps-long"],
-      "stabilizer": ["core-abs", "forearms-flexors"]
-    }
+      "primary": [
+        "shoulders-front"
+      ],
+      "secondary": [
+        "triceps-long"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "forearms-flexors"
+      ]
+    },
+    "slug": "kick-up-to-handstand"
   },
   {
     "title": "Tuck Front Lever Row",
@@ -314,19 +595,40 @@
     "difficulty": 6,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Pull waist to the bar." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Pull waist to the bar."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
-        "tips": [{ "text": "False grip helps." }]
+        "equipment": [
+          "gymnastic_rings"
+        ],
+        "tips": [
+          {
+            "text": "False grip helps."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "back-rhomboids"],
-      "secondary": ["biceps-main", "shoulders-rear"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "back-lats",
+        "back-rhomboids"
+      ],
+      "secondary": [
+        "biceps-main",
+        "shoulders-rear"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "tuck-front-lever-row"
   },
   {
     "title": "Back-to-Wall Handstand Push-up",
@@ -335,15 +637,30 @@
     "difficulty": 7,
     "variants": [
       {
-        "equipment": ["wall", "floor"],
-        "tips": [{ "text": "Don't over-arch lower back." }]
+        "equipment": [
+          "wall",
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Don't over-arch lower back."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "triceps-long"],
-      "secondary": ["chest-upper"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "shoulders-front",
+        "triceps-long"
+      ],
+      "secondary": [
+        "chest-upper"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "back-to-wall-handstand-push-up"
   },
   {
     "title": "Freestanding Handstand",
@@ -352,19 +669,41 @@
     "difficulty": 7,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Grip floor with fingers." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Grip floor with fingers."
+          }
+        ]
       },
       {
-        "equipment": ["parallettes"],
-        "tips": [{ "text": "Use wrist flexion to balance." }]
+        "equipment": [
+          "parallettes"
+        ],
+        "tips": [
+          {
+            "text": "Use wrist flexion to balance."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "forearms-flexors"],
-      "secondary": ["triceps-long"],
-      "stabilizer": ["core-abs", "core-transverse", "back-traps-upper"]
-    }
+      "primary": [
+        "shoulders-front",
+        "forearms-flexors"
+      ],
+      "secondary": [
+        "triceps-long"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "core-transverse",
+        "back-traps-upper"
+      ]
+    },
+    "slug": "freestanding-handstand"
   },
   {
     "title": "Advanced Tuck Front Lever Hold",
@@ -373,15 +712,30 @@
     "difficulty": 7,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Back must be parallel to ground." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Back must be parallel to ground."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "core-abs"],
-      "secondary": ["back-rhomboids"],
-      "stabilizer": ["triceps-long", "shoulders-rear"]
-    }
+      "primary": [
+        "back-lats",
+        "core-abs"
+      ],
+      "secondary": [
+        "back-rhomboids"
+      ],
+      "stabilizer": [
+        "triceps-long",
+        "shoulders-rear"
+      ]
+    },
+    "slug": "advanced-tuck-front-lever-hold"
   },
   {
     "title": "Advanced Tuck FL Row",
@@ -390,15 +744,30 @@
     "difficulty": 8,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Touch stomach to bar every rep." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Touch stomach to bar every rep."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "back-rhomboids"],
-      "secondary": ["biceps-main", "shoulders-rear"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "back-lats",
+        "back-rhomboids"
+      ],
+      "secondary": [
+        "biceps-main",
+        "shoulders-rear"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "advanced-tuck-fl-row"
   },
   {
     "title": "HSPU Negative (Eccentric)",
@@ -407,15 +776,30 @@
     "difficulty": 8,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "5 second count on the way down." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "5 second count on the way down."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "triceps-long"],
-      "secondary": ["shoulders-side"],
-      "stabilizer": ["core-abs", "forearms-flexors"]
-    }
+      "primary": [
+        "shoulders-front",
+        "triceps-long"
+      ],
+      "secondary": [
+        "shoulders-side"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "forearms-flexors"
+      ]
+    },
+    "slug": "hspu-negative-eccentric"
   },
   {
     "title": "Full Front Lever Hold",
@@ -424,20 +808,43 @@
     "difficulty": 9,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Squeeze glutes and point toes." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Squeeze glutes and point toes."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 10,
-        "tips": [{ "text": "Much harder stabilization required." }]
+        "tips": [
+          {
+            "text": "Much harder stabilization required."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "core-abs"],
-      "secondary": ["back-rhomboids", "shoulders-rear"],
-      "stabilizer": ["triceps-long", "legs-glutes", "legs-quads"]
-    }
+      "primary": [
+        "back-lats",
+        "core-abs"
+      ],
+      "secondary": [
+        "back-rhomboids",
+        "shoulders-rear"
+      ],
+      "stabilizer": [
+        "triceps-long",
+        "legs-glutes",
+        "legs-quads"
+      ]
+    },
+    "slug": "full-front-lever-hold"
   },
   {
     "title": "Freestanding Handstand Push-up",
@@ -446,28 +853,54 @@
     "difficulty": 9,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Keep body tight, don't arch." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Keep body tight, don't arch."
+          }
+        ]
       },
       {
-        "equipment": ["parallettes"],
+        "equipment": [
+          "parallettes"
+        ],
         "overriddenTitle": "Deficit Freestanding HSPU",
         "overriddenDifficulty": 9,
-        "tips": [{ "text": "The deficit makes it significantly harder." }]
+        "tips": [
+          {
+            "text": "The deficit makes it significantly harder."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 11,
         "tips": [
-          { "text": "Turn rings out; keep rings under shoulders throughout." }
+          {
+            "text": "Turn rings out; keep rings under shoulders throughout."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "triceps-long"],
-      "secondary": ["chest-upper"],
-      "stabilizer": ["core-abs", "forearms-flexors", "back-traps-upper"]
-    }
+      "primary": [
+        "shoulders-front",
+        "triceps-long"
+      ],
+      "secondary": [
+        "chest-upper"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "forearms-flexors",
+        "back-traps-upper"
+      ]
+    },
+    "slug": "freestanding-handstand-push-up"
   },
   {
     "title": "Front Lever Pull-up",
@@ -476,20 +909,42 @@
     "difficulty": 10,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Maintain horizontal bodyline throughout." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Maintain horizontal bodyline throughout."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 11,
-        "tips": [{ "text": "False grip is essential here." }]
+        "tips": [
+          {
+            "text": "False grip is essential here."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "back-rhomboids"],
-      "secondary": ["biceps-main", "shoulders-rear"],
-      "stabilizer": ["core-abs", "legs-glutes"]
-    }
+      "primary": [
+        "back-lats",
+        "back-rhomboids"
+      ],
+      "secondary": [
+        "biceps-main",
+        "shoulders-rear"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "legs-glutes"
+      ]
+    },
+    "slug": "front-lever-pull-up"
   },
   {
     "title": "Pseudo Planche Lean",
@@ -498,23 +953,41 @@
     "difficulty": 2,
     "variants": [
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
-          { "text": "Turn hands out 45 degrees to reduce wrist strain." }
+          {
+            "text": "Turn hands out 45 degrees to reduce wrist strain."
+          }
         ]
       },
       {
-        "equipment": ["parallettes"],
+        "equipment": [
+          "parallettes"
+        ],
         "tips": [
-          { "text": "Allows for a deeper lean with less wrist pressure." }
+          {
+            "text": "Allows for a deeper lean with less wrist pressure."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "core-serratus"],
-      "secondary": ["biceps-main", "chest-upper"],
-      "stabilizer": ["core-abs", "forearms-flexors"]
-    }
+      "primary": [
+        "shoulders-front",
+        "core-serratus"
+      ],
+      "secondary": [
+        "biceps-main",
+        "chest-upper"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "forearms-flexors"
+      ]
+    },
+    "slug": "pseudo-planche-lean"
   },
   {
     "title": "Pseudo Planche Push-up",
@@ -523,24 +996,52 @@
     "difficulty": 3,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Lean forward as you push up; do not rock back." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Lean forward as you push up; do not rock back."
+          }
+        ]
       },
       {
-        "equipment": ["parallettes"],
-        "tips": [{ "text": "Keep elbows tucked close to the body." }]
+        "equipment": [
+          "parallettes"
+        ],
+        "tips": [
+          {
+            "text": "Keep elbows tucked close to the body."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 4,
-        "tips": [{ "text": "Turn rings out at the top of every rep." }]
+        "tips": [
+          {
+            "text": "Turn rings out at the top of every rep."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "chest-upper"],
-      "secondary": ["triceps-long", "core-serratus"],
-      "stabilizer": ["core-abs", "biceps-main"]
-    }
+      "primary": [
+        "shoulders-front",
+        "chest-upper"
+      ],
+      "secondary": [
+        "triceps-long",
+        "core-serratus"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "biceps-main"
+      ]
+    },
+    "slug": "pseudo-planche-push-up"
   },
   {
     "title": "Tuck Planche Hold",
@@ -549,29 +1050,54 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["parallettes"],
+        "equipment": [
+          "parallettes"
+        ],
         "tips": [
-          { "text": "Easier on wrists than floor. Lock elbows completely." }
+          {
+            "text": "Easier on wrists than floor. Lock elbows completely."
+          }
         ]
       },
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "overriddenDifficulty": 6,
-        "tips": [{ "text": "Requires significant wrist mobility." }]
+        "tips": [
+          {
+            "text": "Requires significant wrist mobility."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 7,
         "tips": [
-          { "text": "Rings must stay close to the body. Turn rings out." }
+          {
+            "text": "Rings must stay close to the body. Turn rings out."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "biceps-main"],
-      "secondary": ["core-serratus", "chest-upper"],
-      "stabilizer": ["core-abs", "forearms-flexors", "shoulders-side"]
-    }
+      "primary": [
+        "shoulders-front",
+        "biceps-main"
+      ],
+      "secondary": [
+        "core-serratus",
+        "chest-upper"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "forearms-flexors",
+        "shoulders-side"
+      ]
+    },
+    "slug": "tuck-planche-hold"
   },
   {
     "title": "Tuck Planche Push-up",
@@ -580,27 +1106,53 @@
     "difficulty": 6,
     "variants": [
       {
-        "equipment": ["parallettes"],
-        "tips": [{ "text": "Control the descent; do not crash down." }]
+        "equipment": [
+          "parallettes"
+        ],
+        "tips": [
+          {
+            "text": "Control the descent; do not crash down."
+          }
+        ]
       },
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "overriddenDifficulty": 7,
-        "tips": [{ "text": "Lean forward to counterbalance hips." }]
+        "tips": [
+          {
+            "text": "Lean forward to counterbalance hips."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 8,
         "tips": [
-          { "text": "Squeeze rings inward to stabilize; keep elbows tucked." }
+          {
+            "text": "Squeeze rings inward to stabilize; keep elbows tucked."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "triceps-long"],
-      "secondary": ["chest-upper", "core-serratus"],
-      "stabilizer": ["core-abs", "biceps-main"]
-    }
+      "primary": [
+        "shoulders-front",
+        "triceps-long"
+      ],
+      "secondary": [
+        "chest-upper",
+        "core-serratus"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "biceps-main"
+      ]
+    },
+    "slug": "tuck-planche-push-up"
   },
   {
     "title": "Advanced Tuck Planche Hold",
@@ -609,19 +1161,41 @@
     "difficulty": 7,
     "variants": [
       {
-        "equipment": ["parallettes"],
-        "tips": [{ "text": "Think about flattening your lower back." }]
+        "equipment": [
+          "parallettes"
+        ],
+        "tips": [
+          {
+            "text": "Think about flattening your lower back."
+          }
+        ]
       },
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Lean further forward than regular tuck." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Lean further forward than regular tuck."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "biceps-main"],
-      "secondary": ["core-serratus", "chest-upper"],
-      "stabilizer": ["core-abs", "back-lower"]
-    }
+      "primary": [
+        "shoulders-front",
+        "biceps-main"
+      ],
+      "secondary": [
+        "core-serratus",
+        "chest-upper"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-lower"
+      ]
+    },
+    "slug": "advanced-tuck-planche-hold"
   },
   {
     "title": "Advanced Tuck Planche Push-up",
@@ -630,19 +1204,42 @@
     "difficulty": 8,
     "variants": [
       {
-        "equipment": ["parallettes"],
-        "tips": [{ "text": "Full ROM: shoulders down to hand level." }]
+        "equipment": [
+          "parallettes"
+        ],
+        "tips": [
+          {
+            "text": "Full ROM: shoulders down to hand level."
+          }
+        ]
       },
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Keep scapula protracted at the top." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Keep scapula protracted at the top."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "triceps-long", "chest-upper"],
-      "secondary": ["core-serratus"],
-      "stabilizer": ["core-abs", "biceps-main", "back-lower"]
-    }
+      "primary": [
+        "shoulders-front",
+        "triceps-long",
+        "chest-upper"
+      ],
+      "secondary": [
+        "core-serratus"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "biceps-main",
+        "back-lower"
+      ]
+    },
+    "slug": "advanced-tuck-planche-push-up"
   },
   {
     "title": "Straddle Planche Hold",
@@ -651,20 +1248,43 @@
     "difficulty": 9,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Wider straddle makes the hold easier." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Wider straddle makes the hold easier."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 10,
-        "tips": [{ "text": "Turn rings out fully (RTO) for proper form." }]
+        "tips": [
+          {
+            "text": "Turn rings out fully (RTO) for proper form."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "biceps-main"],
-      "secondary": ["legs-glutes", "legs-hip-flexors", "chest-upper"],
-      "stabilizer": ["core-serratus", "back-lower"]
-    }
+      "primary": [
+        "shoulders-front",
+        "biceps-main"
+      ],
+      "secondary": [
+        "legs-glutes",
+        "legs-hip-flexors",
+        "chest-upper"
+      ],
+      "stabilizer": [
+        "core-serratus",
+        "back-lower"
+      ]
+    },
+    "slug": "straddle-planche-hold"
   },
   {
     "title": "Straddle Planche Push-up",
@@ -673,11 +1293,19 @@
     "difficulty": 10,
     "variants": [
       {
-        "equipment": ["parallettes"],
-        "tips": [{ "text": "Maintain the straddle height throughout the rep." }]
+        "equipment": [
+          "parallettes"
+        ],
+        "tips": [
+          {
+            "text": "Maintain the straddle height throughout the rep."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 11,
         "tips": [
           {
@@ -687,10 +1315,22 @@
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "triceps-long", "chest-upper"],
-      "secondary": ["core-serratus", "biceps-main"],
-      "stabilizer": ["core-abs", "legs-glutes", "legs-hip-flexors"]
-    }
+      "primary": [
+        "shoulders-front",
+        "triceps-long",
+        "chest-upper"
+      ],
+      "secondary": [
+        "core-serratus",
+        "biceps-main"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "legs-glutes",
+        "legs-hip-flexors"
+      ]
+    },
+    "slug": "straddle-planche-push-up"
   },
   {
     "title": "Full Planche Hold",
@@ -699,17 +1339,29 @@
     "difficulty": 10,
     "variants": [
       {
-        "equipment": ["parallettes"],
+        "equipment": [
+          "parallettes"
+        ],
         "tips": [
-          { "text": "Point toes hard to engage entire posterior chain." }
+          {
+            "text": "Point toes hard to engage entire posterior chain."
+          }
         ]
       },
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Fingers sideways or backwards." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Fingers sideways or backwards."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 11,
         "tips": [
           {
@@ -719,10 +1371,22 @@
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "biceps-main"],
-      "secondary": ["chest-upper", "core-serratus"],
-      "stabilizer": ["core-abs", "back-lower", "legs-glutes", "legs-adductors"]
-    }
+      "primary": [
+        "shoulders-front",
+        "biceps-main"
+      ],
+      "secondary": [
+        "chest-upper",
+        "core-serratus"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-lower",
+        "legs-glutes",
+        "legs-adductors"
+      ]
+    },
+    "slug": "full-planche-hold"
   },
   {
     "title": "Full Planche Push-up",
@@ -731,15 +1395,29 @@
     "difficulty": 11,
     "variants": [
       {
-        "equipment": ["parallettes"],
-        "tips": [{ "text": "Don't let hips sag at the bottom." }]
+        "equipment": [
+          "parallettes"
+        ],
+        "tips": [
+          {
+            "text": "Don't let hips sag at the bottom."
+          }
+        ]
       },
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Lean is extreme at the bottom position." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Lean is extreme at the bottom position."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 12,
         "tips": [
           {
@@ -749,10 +1427,23 @@
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "triceps-long", "chest-upper"],
-      "secondary": ["core-serratus", "biceps-main"],
-      "stabilizer": ["core-abs", "back-lower", "legs-glutes", "legs-adductors"]
-    }
+      "primary": [
+        "shoulders-front",
+        "triceps-long",
+        "chest-upper"
+      ],
+      "secondary": [
+        "core-serratus",
+        "biceps-main"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-lower",
+        "legs-glutes",
+        "legs-adductors"
+      ]
+    },
+    "slug": "full-planche-push-up"
   },
   {
     "title": "Archer Pull-up",
@@ -761,7 +1452,9 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
           {
             "text": "Try to put as little weight as possible on the straight arm."
@@ -769,15 +1462,30 @@
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
-        "tips": [{ "text": "Turn the pulling ring in towards chest." }]
+        "equipment": [
+          "gymnastic_rings"
+        ],
+        "tips": [
+          {
+            "text": "Turn the pulling ring in towards chest."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "biceps-main"],
-      "secondary": ["shoulders-rear", "forearms-brachio"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "back-lats",
+        "biceps-main"
+      ],
+      "secondary": [
+        "shoulders-rear",
+        "forearms-brachio"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "archer-pull-up"
   },
   {
     "title": "Typewriter Pull-up",
@@ -786,15 +1494,30 @@
     "difficulty": 6,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Keep chin above bar level the entire time." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Keep chin above bar level the entire time."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "shoulders-rear"],
-      "secondary": ["biceps-main"],
-      "stabilizer": ["core-abs", "back-rhomboids"]
-    }
+      "primary": [
+        "back-lats",
+        "shoulders-rear"
+      ],
+      "secondary": [
+        "biceps-main"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-rhomboids"
+      ]
+    },
+    "slug": "typewriter-pull-up"
   },
   {
     "title": "Assisted One Arm Pull-up",
@@ -803,17 +1526,33 @@
     "difficulty": 8,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "overriddenTitle": "Finger Assisted OAP",
         "overriddenDifficulty": 9,
-        "tips": [{ "text": "Use 2 fingers on the non-working hand to assist." }]
+        "tips": [
+          {
+            "text": "Use 2 fingers on the non-working hand to assist."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "biceps-main"],
-      "secondary": ["forearms-brachio", "back-traps-lower"],
-      "stabilizer": ["core-abs", "shoulders-rear"]
-    }
+      "primary": [
+        "back-lats",
+        "biceps-main"
+      ],
+      "secondary": [
+        "forearms-brachio",
+        "back-traps-lower"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "shoulders-rear"
+      ]
+    },
+    "slug": "assisted-one-arm-pull-up"
   },
   {
     "title": "One Arm Pull-up Negative",
@@ -822,7 +1561,9 @@
     "difficulty": 9,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
           {
             "text": "Fight gravity. Don't drop into the shoulder socket at bottom."
@@ -831,10 +1572,18 @@
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "biceps-main"],
-      "secondary": ["forearms-brachio"],
-      "stabilizer": ["shoulders-rotator_cuff"]
-    }
+      "primary": [
+        "back-lats",
+        "biceps-main"
+      ],
+      "secondary": [
+        "forearms-brachio"
+      ],
+      "stabilizer": [
+        "shoulders-rotator_cuff"
+      ]
+    },
+    "slug": "one-arm-pull-up-negative"
   },
   {
     "title": "One Arm Pull-up",
@@ -843,22 +1592,42 @@
     "difficulty": 10,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
-          { "text": "Control rotation. Drive the elbow down to the hip." }
+          {
+            "text": "Control rotation. Drive the elbow down to the hip."
+          }
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 11,
-        "tips": [{ "text": "Harder due to rotation instability." }]
+        "tips": [
+          {
+            "text": "Harder due to rotation instability."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "biceps-main"],
-      "secondary": ["forearms-brachio", "back-traps-lower"],
-      "stabilizer": ["core-abs", "shoulders-rotator_cuff"]
-    }
+      "primary": [
+        "back-lats",
+        "biceps-main"
+      ],
+      "secondary": [
+        "forearms-brachio",
+        "back-traps-lower"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "shoulders-rotator_cuff"
+      ]
+    },
+    "slug": "one-arm-pull-up"
   },
   {
     "title": "Explosive Pull-up",
@@ -867,15 +1636,30 @@
     "difficulty": 4,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Aim to hit the bar with your lower chest." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Aim to hit the bar with your lower chest."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "biceps-main"],
-      "secondary": ["back-traps-lower", "core-abs"],
-      "stabilizer": ["forearms-flexors"]
-    }
+      "primary": [
+        "back-lats",
+        "biceps-main"
+      ],
+      "secondary": [
+        "back-traps-lower",
+        "core-abs"
+      ],
+      "stabilizer": [
+        "forearms-flexors"
+      ]
+    },
+    "slug": "explosive-pull-up"
   },
   {
     "title": "Chest Dip",
@@ -884,11 +1668,20 @@
     "difficulty": 3,
     "variants": [
       {
-        "equipment": ["dip_bars", "parallel_bars"],
-        "tips": [{ "text": "Lower until shoulders are below elbows." }]
+        "equipment": [
+          "dip_bars",
+          "parallel_bars"
+        ],
+        "tips": [
+          {
+            "text": "Lower until shoulders are below elbows."
+          }
+        ]
       },
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "overriddenTitle": "Straight Bar Dip",
         "overriddenDifficulty": 4,
         "tips": [
@@ -898,16 +1691,32 @@
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 4,
-        "tips": [{ "text": "Turn rings out at the top. Keep elbows tucked." }]
+        "tips": [
+          {
+            "text": "Turn rings out at the top. Keep elbows tucked."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["triceps-long", "chest-lower", "shoulders-front"],
-      "secondary": ["chest-middle"],
-      "stabilizer": ["core-abs", "back-traps-lower"]
-    }
+      "primary": [
+        "triceps-long",
+        "chest-lower",
+        "shoulders-front"
+      ],
+      "secondary": [
+        "chest-middle"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-traps-lower"
+      ]
+    },
+    "slug": "chest-dip"
   },
   {
     "title": "Muscle-up Transition (Negative)",
@@ -916,13 +1725,19 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
-          { "text": "Control the 'drop' moment where elbows go below bar." }
+          {
+            "text": "Control the 'drop' moment where elbows go below bar."
+          }
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 6,
         "tips": [
           {
@@ -932,10 +1747,20 @@
       }
     ],
     "muscles": {
-      "primary": ["triceps-long", "back-lats"],
-      "secondary": ["shoulders-front", "chest-lower"],
-      "stabilizer": ["forearms-flexors", "core-abs"]
-    }
+      "primary": [
+        "triceps-long",
+        "back-lats"
+      ],
+      "secondary": [
+        "shoulders-front",
+        "chest-lower"
+      ],
+      "stabilizer": [
+        "forearms-flexors",
+        "core-abs"
+      ]
+    },
+    "slug": "muscle-up-transition-negative"
   },
   {
     "title": "Bar Muscle-up",
@@ -944,18 +1769,34 @@
     "difficulty": 6,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
-          { "text": "Kipping: drive knees up explosively." },
-          { "text": "Strict: wrists must rotate over the bar early." }
+          {
+            "text": "Kipping: drive knees up explosively."
+          },
+          {
+            "text": "Strict: wrists must rotate over the bar early."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "triceps-long"],
-      "secondary": ["biceps-main", "chest-upper"],
-      "stabilizer": ["core-abs", "forearms-flexors"]
-    }
+      "primary": [
+        "back-lats",
+        "triceps-long"
+      ],
+      "secondary": [
+        "biceps-main",
+        "chest-upper"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "forearms-flexors"
+      ]
+    },
+    "slug": "bar-muscle-up"
   },
   {
     "title": "Strict Muscle-up",
@@ -964,26 +1805,49 @@
     "difficulty": 7,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
-          { "text": "Rotate wrists over the bar early during the transition." },
-          { "text": "Pull to lower chest, then lean forward to get on top." }
+          {
+            "text": "Rotate wrists over the bar early during the transition."
+          },
+          {
+            "text": "Pull to lower chest, then lean forward to get on top."
+          }
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 6,
         "tips": [
-          { "text": "Maintain False Grip throughout the pull." },
-          { "text": "Trace the outline of your chest with the rings." }
+          {
+            "text": "Maintain False Grip throughout the pull."
+          },
+          {
+            "text": "Trace the outline of your chest with the rings."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "biceps-main", "triceps-long"],
-      "secondary": ["shoulders-front", "chest-lower"],
-      "stabilizer": ["shoulders-rotator_cuff", "forearms-flexors"]
-    }
+      "primary": [
+        "back-lats",
+        "biceps-main",
+        "triceps-long"
+      ],
+      "secondary": [
+        "shoulders-front",
+        "chest-lower"
+      ],
+      "stabilizer": [
+        "shoulders-rotator_cuff",
+        "forearms-flexors"
+      ]
+    },
+    "slug": "strict-muscle-up"
   },
   {
     "title": "Side Plank",
@@ -992,15 +1856,28 @@
     "difficulty": 2,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Keep hips stacked vertically." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Keep hips stacked vertically."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["core-obliques"],
-      "secondary": ["shoulders-side"],
-      "stabilizer": ["legs-glutes"]
-    }
+      "primary": [
+        "core-obliques"
+      ],
+      "secondary": [
+        "shoulders-side"
+      ],
+      "stabilizer": [
+        "legs-glutes"
+      ]
+    },
+    "slug": "side-plank"
   },
   {
     "title": "Human Flag Support",
@@ -1009,18 +1886,32 @@
     "difficulty": 4,
     "variants": [
       {
-        "equipment": ["wall_bars"],
+        "equipment": [
+          "wall_bars"
+        ],
         "tips": [
-          { "text": "Bottom arm pushes hard, top arm pulls hard." },
-          { "text": "Keep body vertical." }
+          {
+            "text": "Bottom arm pushes hard, top arm pulls hard."
+          },
+          {
+            "text": "Keep body vertical."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-side", "back-lats"],
-      "secondary": ["core-obliques"],
-      "stabilizer": ["forearms-flexors"]
-    }
+      "primary": [
+        "shoulders-side",
+        "back-lats"
+      ],
+      "secondary": [
+        "core-obliques"
+      ],
+      "stabilizer": [
+        "forearms-flexors"
+      ]
+    },
+    "slug": "human-flag-support"
   },
   {
     "title": "Tuck Human Flag",
@@ -1029,15 +1920,30 @@
     "difficulty": 6,
     "variants": [
       {
-        "equipment": ["wall_bars"],
-        "tips": [{ "text": " hips must be level with shoulders." }]
+        "equipment": [
+          "wall_bars"
+        ],
+        "tips": [
+          {
+            "text": " hips must be level with shoulders."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["core-obliques", "shoulders-side"],
-      "secondary": ["back-lats", "shoulders-rear"],
-      "stabilizer": ["core-transverse"]
-    }
+      "primary": [
+        "core-obliques",
+        "shoulders-side"
+      ],
+      "secondary": [
+        "back-lats",
+        "shoulders-rear"
+      ],
+      "stabilizer": [
+        "core-transverse"
+      ]
+    },
+    "slug": "tuck-human-flag"
   },
   {
     "title": "Straddle Human Flag",
@@ -1046,17 +1952,30 @@
     "difficulty": 8,
     "variants": [
       {
-        "equipment": ["wall_bars"],
+        "equipment": [
+          "wall_bars"
+        ],
         "tips": [
-          { "text": "Top leg forward, bottom leg back prevents rotation." }
+          {
+            "text": "Top leg forward, bottom leg back prevents rotation."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["core-obliques", "shoulders-side"],
-      "secondary": ["back-lats", "legs-glutes"],
-      "stabilizer": ["legs-adductors"]
-    }
+      "primary": [
+        "core-obliques",
+        "shoulders-side"
+      ],
+      "secondary": [
+        "back-lats",
+        "legs-glutes"
+      ],
+      "stabilizer": [
+        "legs-adductors"
+      ]
+    },
+    "slug": "straddle-human-flag"
   },
   {
     "title": "Full Human Flag",
@@ -1065,15 +1984,31 @@
     "difficulty": 9,
     "variants": [
       {
-        "equipment": ["wall_bars"],
-        "tips": [{ "text": "Lock out the bottom arm completely." }]
+        "equipment": [
+          "wall_bars"
+        ],
+        "tips": [
+          {
+            "text": "Lock out the bottom arm completely."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["core-obliques", "shoulders-side"],
-      "secondary": ["back-lats"],
-      "stabilizer": ["legs-glutes", "legs-quads", "core-abs"]
-    }
+      "primary": [
+        "core-obliques",
+        "shoulders-side"
+      ],
+      "secondary": [
+        "back-lats"
+      ],
+      "stabilizer": [
+        "legs-glutes",
+        "legs-quads",
+        "core-abs"
+      ]
+    },
+    "slug": "full-human-flag"
   },
   {
     "title": "Human Flag Pull-up",
@@ -1082,15 +2017,30 @@
     "difficulty": 10,
     "variants": [
       {
-        "equipment": ["wall_bars"],
-        "tips": [{ "text": "Entirely lats and oblique strength." }]
+        "equipment": [
+          "wall_bars"
+        ],
+        "tips": [
+          {
+            "text": "Entirely lats and oblique strength."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["back-lats", "core-obliques"],
-      "secondary": ["shoulders-side", "biceps-main"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "back-lats",
+        "core-obliques"
+      ],
+      "secondary": [
+        "shoulders-side",
+        "biceps-main"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "human-flag-pull-up"
   },
   {
     "title": "Air Squat",
@@ -1099,15 +2049,30 @@
     "difficulty": 1,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Keep heels on the ground." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Keep heels on the ground."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["legs-quads", "legs-glutes"],
-      "secondary": ["legs-hamstrings"],
-      "stabilizer": ["core-abs", "back-lower"]
-    }
+      "primary": [
+        "legs-quads",
+        "legs-glutes"
+      ],
+      "secondary": [
+        "legs-hamstrings"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "back-lower"
+      ]
+    },
+    "slug": "air-squat"
   },
   {
     "title": "Bulgarian Split Squat",
@@ -1116,7 +2081,10 @@
     "difficulty": 3,
     "variants": [
       {
-        "equipment": ["bench_box", "floor"],
+        "equipment": [
+          "bench_box",
+          "floor"
+        ],
         "tips": [
           {
             "text": "Keep torso upright to target quads, lean forward for glutes."
@@ -1125,10 +2093,18 @@
       }
     ],
     "muscles": {
-      "primary": ["legs-quads", "legs-glutes"],
-      "secondary": ["legs-adductors"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "legs-quads",
+        "legs-glutes"
+      ],
+      "secondary": [
+        "legs-adductors"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "bulgarian-split-squat"
   },
   {
     "title": "Shrimp Squat",
@@ -1137,15 +2113,30 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Try to touch your back knee to the floor." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Try to touch your back knee to the floor."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["legs-quads", "legs-glutes"],
-      "secondary": ["legs-hamstrings"],
-      "stabilizer": ["core-abs", "legs-calves"]
-    }
+      "primary": [
+        "legs-quads",
+        "legs-glutes"
+      ],
+      "secondary": [
+        "legs-hamstrings"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "legs-calves"
+      ]
+    },
+    "slug": "shrimp-squat"
   },
   {
     "title": "Assisted Pistol Squat",
@@ -1154,23 +2145,42 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["pull_up_bar", "floor"],
+        "equipment": [
+          "pull_up_bar",
+          "floor"
+        ],
         "overriddenTitle": "Pole Assisted Pistol",
         "tips": [
-          { "text": "Use the pole only for balance, not to pull yourself up." }
+          {
+            "text": "Use the pole only for balance, not to pull yourself up."
+          }
         ]
       },
       {
-        "equipment": ["bench_box"],
+        "equipment": [
+          "bench_box"
+        ],
         "overriddenTitle": "Box Pistol Squat",
-        "tips": [{ "text": "Squat down to a box and stand back up." }]
+        "tips": [
+          {
+            "text": "Squat down to a box and stand back up."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["legs-quads"],
-      "secondary": ["legs-glutes"],
-      "stabilizer": ["legs-hip-flexors", "core-abs"]
-    }
+      "primary": [
+        "legs-quads"
+      ],
+      "secondary": [
+        "legs-glutes"
+      ],
+      "stabilizer": [
+        "legs-hip-flexors",
+        "core-abs"
+      ]
+    },
+    "slug": "assisted-pistol-squat"
   },
   {
     "title": "Pistol Squat",
@@ -1179,18 +2189,35 @@
     "difficulty": 7,
     "variants": [
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
-          { "text": "Keep the heel of the standing foot planted." },
-          { "text": "Mobility is usually the limiting factor." }
+          {
+            "text": "Keep the heel of the standing foot planted."
+          },
+          {
+            "text": "Mobility is usually the limiting factor."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["legs-quads", "legs-glutes"],
-      "secondary": ["legs-hamstrings", "legs-calves"],
-      "stabilizer": ["legs-hip-flexors", "core-abs", "legs-tibialis"]
-    }
+      "primary": [
+        "legs-quads",
+        "legs-glutes"
+      ],
+      "secondary": [
+        "legs-hamstrings",
+        "legs-calves"
+      ],
+      "stabilizer": [
+        "legs-hip-flexors",
+        "core-abs",
+        "legs-tibialis"
+      ]
+    },
+    "slug": "pistol-squat"
   },
   {
     "title": "Dragon Squat",
@@ -1199,17 +2226,30 @@
     "difficulty": 9,
     "variants": [
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
-          { "text": "Requires rotational knee stability and glute power." }
+          {
+            "text": "Requires rotational knee stability and glute power."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["legs-glutes", "legs-quads"],
-      "secondary": ["legs-adductors"],
-      "stabilizer": ["core-abs", "core-obliques"]
-    }
+      "primary": [
+        "legs-glutes",
+        "legs-quads"
+      ],
+      "secondary": [
+        "legs-adductors"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "core-obliques"
+      ]
+    },
+    "slug": "dragon-squat"
   },
   {
     "title": "German Hang",
@@ -1218,21 +2258,39 @@
     "difficulty": 3,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
-          { "text": "Let your shoulders relax and stretch. Don't pull yet." }
+          {
+            "text": "Let your shoulders relax and stretch. Don't pull yet."
+          }
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
-        "tips": [{ "text": "Easier on the shoulders as rings can rotate." }]
+        "equipment": [
+          "gymnastic_rings"
+        ],
+        "tips": [
+          {
+            "text": "Easier on the shoulders as rings can rotate."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "chest-upper"],
-      "secondary": ["biceps-main"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "shoulders-front",
+        "chest-upper"
+      ],
+      "secondary": [
+        "biceps-main"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "german-hang"
   },
   {
     "title": "Tuck Back Lever",
@@ -1241,11 +2299,19 @@
     "difficulty": 5,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Squeeze glutes slightly to flatten lower back." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Squeeze glutes slightly to flatten lower back."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "tips": [
           {
             "text": "Keep palms facing down (pronated) or back (supinated - harder)."
@@ -1254,10 +2320,20 @@
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "chest-lower", "back-lats"],
-      "secondary": ["biceps-main", "core-abs"],
-      "stabilizer": ["back-lower"]
-    }
+      "primary": [
+        "shoulders-front",
+        "chest-lower",
+        "back-lats"
+      ],
+      "secondary": [
+        "biceps-main",
+        "core-abs"
+      ],
+      "stabilizer": [
+        "back-lower"
+      ]
+    },
+    "slug": "tuck-back-lever"
   },
   {
     "title": "Advanced Tuck Back Lever",
@@ -1266,15 +2342,31 @@
     "difficulty": 7,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Create a flat shelf with your back." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Create a flat shelf with your back."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "chest-lower", "back-lats"],
-      "secondary": ["biceps-main", "core-abs"],
-      "stabilizer": ["back-lower"]
-    }
+      "primary": [
+        "shoulders-front",
+        "chest-lower",
+        "back-lats"
+      ],
+      "secondary": [
+        "biceps-main",
+        "core-abs"
+      ],
+      "stabilizer": [
+        "back-lower"
+      ]
+    },
+    "slug": "advanced-tuck-back-lever"
   },
   {
     "title": "Full Back Lever",
@@ -1283,21 +2375,42 @@
     "difficulty": 9,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
-          { "text": "Supinated grip (palms up) conditions biceps for Hefesto." }
+          {
+            "text": "Supinated grip (palms up) conditions biceps for Hefesto."
+          }
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
-        "tips": [{ "text": "Rings allow natural rotation." }]
+        "equipment": [
+          "gymnastic_rings"
+        ],
+        "tips": [
+          {
+            "text": "Rings allow natural rotation."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "chest-lower", "back-lats"],
-      "secondary": ["biceps-main", "core-abs"],
-      "stabilizer": ["back-lower", "legs-glutes"]
-    }
+      "primary": [
+        "shoulders-front",
+        "chest-lower",
+        "back-lats"
+      ],
+      "secondary": [
+        "biceps-main",
+        "core-abs"
+      ],
+      "stabilizer": [
+        "back-lower",
+        "legs-glutes"
+      ]
+    },
+    "slug": "full-back-lever"
   },
   {
     "title": "Hefesto Curl (Negative)",
@@ -1306,15 +2419,31 @@
     "difficulty": 10,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
-        "tips": [{ "text": "Do not let elbows flare out." }]
+        "equipment": [
+          "pull_up_bar"
+        ],
+        "tips": [
+          {
+            "text": "Do not let elbows flare out."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["biceps-main", "biceps-brachialis"],
-      "secondary": ["shoulders-front", "chest-lower"],
-      "stabilizer": ["forearms-flexors", "core-abs"]
-    }
+      "primary": [
+        "biceps-main",
+        "biceps-brachialis"
+      ],
+      "secondary": [
+        "shoulders-front",
+        "chest-lower"
+      ],
+      "stabilizer": [
+        "forearms-flexors",
+        "core-abs"
+      ]
+    },
+    "slug": "hefesto-curl-negative"
   },
   {
     "title": "Hefesto",
@@ -1323,7 +2452,9 @@
     "difficulty": 12,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
           {
             "text": "Keep wrists fully supinated; keep elbows in front of torso throughout."
@@ -1331,18 +2462,33 @@
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenTitle": "Ring Hefesto (Pelican Curl)",
         "tips": [
-          { "text": "Rings can move away from you, making leverage harder." }
+          {
+            "text": "Rings can move away from you, making leverage harder."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["biceps-main", "biceps-brachialis"],
-      "secondary": ["shoulders-front", "chest-lower"],
-      "stabilizer": ["forearms-flexors", "back-lats", "core-abs"]
-    }
+      "primary": [
+        "biceps-main",
+        "biceps-brachialis"
+      ],
+      "secondary": [
+        "shoulders-front",
+        "chest-lower"
+      ],
+      "stabilizer": [
+        "forearms-flexors",
+        "back-lats",
+        "core-abs"
+      ]
+    },
+    "slug": "hefesto"
   },
   {
     "title": "Iron Cross Support",
@@ -1351,18 +2497,35 @@
     "difficulty": 10,
     "variants": [
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "tips": [
-          { "text": "Start with a false grip." },
-          { "text": "Push down on the rings, don't just hang." }
+          {
+            "text": "Start with a false grip."
+          },
+          {
+            "text": "Push down on the rings, don't just hang."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["chest-lower", "shoulders-side", "back-lats"],
-      "secondary": ["biceps-main", "chest-middle"],
-      "stabilizer": ["core-abs", "forearms-flexors"]
-    }
+      "primary": [
+        "chest-lower",
+        "shoulders-side",
+        "back-lats"
+      ],
+      "secondary": [
+        "biceps-main",
+        "chest-middle"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "forearms-flexors"
+      ]
+    },
+    "slug": "iron-cross-support"
   },
   {
     "title": "Maltese Lean",
@@ -1371,21 +2534,40 @@
     "difficulty": 9,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Hands wider than planche lean." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Hands wider than planche lean."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "tips": [
-          { "text": "Lower from support towards Maltese, hold, and pull back." }
+          {
+            "text": "Lower from support towards Maltese, hold, and pull back."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "biceps-main"],
-      "secondary": ["chest-upper", "shoulders-side"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "shoulders-front",
+        "biceps-main"
+      ],
+      "secondary": [
+        "chest-upper",
+        "shoulders-side"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "maltese-lean"
   },
   {
     "title": "Straddle Maltese",
@@ -1394,19 +2576,41 @@
     "difficulty": 11,
     "variants": [
       {
-        "equipment": ["floor"],
-        "tips": [{ "text": "Fingers backwards or sideways." }]
+        "equipment": [
+          "floor"
+        ],
+        "tips": [
+          {
+            "text": "Fingers backwards or sideways."
+          }
+        ]
       },
       {
-        "equipment": ["gymnastic_rings"],
-        "tips": [{ "text": "Arms should be almost parallel to the body." }]
+        "equipment": [
+          "gymnastic_rings"
+        ],
+        "tips": [
+          {
+            "text": "Arms should be almost parallel to the body."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "biceps-main"],
-      "secondary": ["chest-upper", "shoulders-side"],
-      "stabilizer": ["core-abs", "legs-glutes"]
-    }
+      "primary": [
+        "shoulders-front",
+        "biceps-main"
+      ],
+      "secondary": [
+        "chest-upper",
+        "shoulders-side"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "legs-glutes"
+      ]
+    },
+    "slug": "straddle-maltese"
   },
   {
     "title": "Full Maltese",
@@ -1415,7 +2619,9 @@
     "difficulty": 12,
     "variants": [
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
           {
             "text": "Hands very wide with fingers backward; lock elbows and depress scapulae."
@@ -1423,7 +2629,9 @@
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "tips": [
           {
             "text": "Keep rings turned out; maintain slight external rotation at the shoulders."
@@ -1432,10 +2640,21 @@
       }
     ],
     "muscles": {
-      "primary": ["shoulders-front", "biceps-main"],
-      "secondary": ["chest-upper", "shoulders-side"],
-      "stabilizer": ["core-abs", "legs-glutes", "legs-adductors"]
-    }
+      "primary": [
+        "shoulders-front",
+        "biceps-main"
+      ],
+      "secondary": [
+        "chest-upper",
+        "shoulders-side"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "legs-glutes",
+        "legs-adductors"
+      ]
+    },
+    "slug": "full-maltese"
   },
   {
     "title": "Victorian Cross",
@@ -1444,7 +2663,9 @@
     "difficulty": 12,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "overriddenDifficulty": 12,
         "tips": [
           {
@@ -1453,7 +2674,9 @@
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
+        "equipment": [
+          "gymnastic_rings"
+        ],
         "overriddenDifficulty": 12,
         "tips": [
           {
@@ -1463,12 +2686,22 @@
       }
     ],
     "muscles": {
-      "primary": ["triceps-long", "shoulders-front", "shoulders-rear"],
-      "secondary": ["back-lats", "chest-lower"],
-      "stabilizer": ["core-abs", "legs-glutes"]
-    }
+      "primary": [
+        "triceps-long",
+        "shoulders-front",
+        "shoulders-rear"
+      ],
+      "secondary": [
+        "back-lats",
+        "chest-lower"
+      ],
+      "stabilizer": [
+        "core-abs",
+        "legs-glutes"
+      ]
+    },
+    "slug": "victorian-cross"
   },
-
   {
     "title": "Hanging Leg Raise",
     "description": "Core compression exercise hanging from the bar.",
@@ -1476,17 +2709,30 @@
     "difficulty": 3,
     "variants": [
       {
-        "equipment": ["pull_up_bar"],
+        "equipment": [
+          "pull_up_bar"
+        ],
         "tips": [
-          { "text": "Don't use momentum/swinging. Control the descent." }
+          {
+            "text": "Don't use momentum/swinging. Control the descent."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["core-abs", "legs-hip-flexors"],
-      "secondary": ["core-obliques"],
-      "stabilizer": ["forearms-flexors", "back-lats"]
-    }
+      "primary": [
+        "core-abs",
+        "legs-hip-flexors"
+      ],
+      "secondary": [
+        "core-obliques"
+      ],
+      "stabilizer": [
+        "forearms-flexors",
+        "back-lats"
+      ]
+    },
+    "slug": "hanging-leg-raise"
   },
   {
     "title": "L-Sit",
@@ -1495,26 +2741,52 @@
     "difficulty": 4,
     "variants": [
       {
-        "equipment": ["parallettes"],
-        "tips": [{ "text": "Push shoulders down hard. Lock knees." }]
-      },
-      {
-        "equipment": ["floor"],
-        "overriddenDifficulty": 5,
+        "equipment": [
+          "parallettes"
+        ],
         "tips": [
-          { "text": "Requires more flexibility and compression strength." }
+          {
+            "text": "Push shoulders down hard. Lock knees."
+          }
         ]
       },
       {
-        "equipment": ["gymnastic_rings"],
-        "tips": [{ "text": "Turn rings out slightly for stability." }]
+        "equipment": [
+          "floor"
+        ],
+        "overriddenDifficulty": 5,
+        "tips": [
+          {
+            "text": "Requires more flexibility and compression strength."
+          }
+        ]
+      },
+      {
+        "equipment": [
+          "gymnastic_rings"
+        ],
+        "tips": [
+          {
+            "text": "Turn rings out slightly for stability."
+          }
+        ]
       }
     ],
     "muscles": {
-      "primary": ["core-abs", "legs-hip-flexors"],
-      "secondary": ["triceps-long", "shoulders-front"],
-      "stabilizer": ["legs-quads", "core-transverse"]
-    }
+      "primary": [
+        "core-abs",
+        "legs-hip-flexors"
+      ],
+      "secondary": [
+        "triceps-long",
+        "shoulders-front"
+      ],
+      "stabilizer": [
+        "legs-quads",
+        "core-transverse"
+      ]
+    },
+    "slug": "l-sit"
   },
   {
     "title": "Reverse Plank",
@@ -1523,17 +2795,30 @@
     "difficulty": 2,
     "variants": [
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
-          { "text": "Push hips up, squeeze glutes and shoulder blades." }
+          {
+            "text": "Push hips up, squeeze glutes and shoulder blades."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["back-lower", "legs-glutes", "legs-hamstrings"],
-      "secondary": ["shoulders-rear"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "back-lower",
+        "legs-glutes",
+        "legs-hamstrings"
+      ],
+      "secondary": [
+        "shoulders-rear"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "reverse-plank"
   },
   {
     "title": "Arch Body Hold (Superman)",
@@ -1542,17 +2827,30 @@
     "difficulty": 1,
     "variants": [
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
-          { "text": "Lift thighs and chest off the ground simultaneously." }
+          {
+            "text": "Lift thighs and chest off the ground simultaneously."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["back-lower", "legs-glutes"],
-      "secondary": ["back-traps-lower", "shoulders-rear"],
-      "stabilizer": ["legs-hamstrings"]
-    }
+      "primary": [
+        "back-lower",
+        "legs-glutes"
+      ],
+      "secondary": [
+        "back-traps-lower",
+        "shoulders-rear"
+      ],
+      "stabilizer": [
+        "legs-hamstrings"
+      ]
+    },
+    "slug": "arch-body-hold-superman"
   },
   {
     "title": "Glute Bridge",
@@ -1561,16 +2859,28 @@
     "difficulty": 1,
     "variants": [
       {
-        "equipment": ["floor"],
+        "equipment": [
+          "floor"
+        ],
         "tips": [
-          { "text": "Squeeze glutes at the top. Don't hyperextend back." }
+          {
+            "text": "Squeeze glutes at the top. Don't hyperextend back."
+          }
         ]
       }
     ],
     "muscles": {
-      "primary": ["legs-glutes"],
-      "secondary": ["legs-hamstrings", "back-lower"],
-      "stabilizer": ["core-abs"]
-    }
+      "primary": [
+        "legs-glutes"
+      ],
+      "secondary": [
+        "legs-hamstrings",
+        "back-lower"
+      ],
+      "stabilizer": [
+        "core-abs"
+      ]
+    },
+    "slug": "glute-bridge"
   }
 ]
