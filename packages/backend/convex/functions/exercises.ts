@@ -37,6 +37,10 @@ export const getAllExercises = query({
         }),
       ),
       primaryMuscleGroups: v.array(v.string()),
+      userProgress: v.union(
+        v.object({ status: progressStatusValidator }),
+        v.null(),
+      ),
     }),
   ),
   handler: async (ctx, args) => {
@@ -62,6 +66,22 @@ export const getAllExercises = query({
 
     // Fetch muscle relations for all exercises
     const muscleRelations = await ctx.db.query("exercises_muscles").collect();
+
+    // Fetch user progress if authenticated
+    const userId = await getUserId(ctx);
+    const userProgressMap = new Map<
+      Id<"exercises">,
+      "novice" | "apprentice" | "journeyman" | "master"
+    >();
+    if (userId) {
+      const allProgress = await ctx.db
+        .query("user_exercise_progress")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .collect();
+      for (const p of allProgress) {
+        userProgressMap.set(p.exerciseId, p.status);
+      }
+    }
 
     // Helper to get muscles for an exercise
     const getMusclesForExercise = (
@@ -119,6 +139,7 @@ export const getAllExercises = query({
     const enrichedPublic = publicExercises.map((exercise) => {
       const musclesData = getMusclesForExercise(exercise._id);
       const primaryMuscleGroups = getPrimaryMuscleGroups(musclesData);
+      const progressStatus = userProgressMap.get(exercise._id);
       return {
         _id: exercise._id,
         _creationTime: exercise._creationTime,
@@ -128,6 +149,7 @@ export const getAllExercises = query({
         difficulty: exercise.difficulty,
         musclesData,
         primaryMuscleGroups,
+        userProgress: progressStatus ? { status: progressStatus } : null,
       };
     });
 

@@ -4,6 +4,7 @@ import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type {
   ExerciseLevel,
   MuscleRole,
+  ProgressStatus,
 } from "@packages/backend/convex/validators/validators";
 import * as React from "react";
 import { useState } from "react";
@@ -12,10 +13,14 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Globe, Target } from "lucide-react";
 
-import { Badge } from "@inochi/ui";
+import { Badge, cn } from "@inochi/ui";
 
 import { Search } from "../../../components/search";
-import { exerciseLevelColors } from "../../../utils/exercise-utils";
+import {
+  exerciseLevelColors,
+  getProgressStatusColor,
+  getProgressStatusLabel,
+} from "../../../utils/exercise-utils";
 
 // ============================================================================
 // Exercise Card Component
@@ -36,7 +41,25 @@ interface ExerciseCardProps {
       role?: MuscleRole;
     }[];
     primaryMuscleGroups: string[];
+    userProgress: { status: ProgressStatus } | null;
   };
+}
+
+// ============================================================================
+// Progress Ribbon Component
+// ============================================================================
+
+function ProgressRibbon({ status }: { status: ProgressStatus }) {
+  return (
+    <div
+      className={cn(
+        "absolute top-0 right-0 rounded-bl-lg px-3 py-1 text-xs font-bold shadow-sm",
+        getProgressStatusColor(status),
+      )}
+    >
+      {getProgressStatusLabel(status)}
+    </div>
+  );
 }
 
 function ExerciseCard({ exercise }: ExerciseCardProps) {
@@ -61,9 +84,17 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
 
   return (
     <div
-      className="bg-card relative cursor-pointer rounded-lg border p-4 transition-shadow hover:shadow-md"
+      className={cn(
+        "bg-card relative cursor-pointer rounded-lg border p-4 transition-shadow hover:shadow-md",
+        !exercise.userProgress && "opacity-90 grayscale",
+      )}
       onClick={handleCardClick}
     >
+      {/* Progress ribbon */}
+      {exercise.userProgress && (
+        <ProgressRibbon status={exercise.userProgress.status} />
+      )}
+
       {/* Header with title */}
       <div className="mb-2 flex items-start justify-between">
         <h3 className="text-card-foreground flex-1 pr-8 text-lg font-semibold">
