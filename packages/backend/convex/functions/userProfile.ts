@@ -168,40 +168,40 @@ function determineArchetype(stats: {
 
   // Easter egg: Only legs dominant
   if (legs > threshold && legs > push * 1.5 && legs > pull * 1.5) {
-    return ARCHETYPE_DEFINITIONS["the-t-rex"];
+    return ARCHETYPE_DEFINITIONS["the-t-rex"]!;
   }
 
   // High Push + High Skill
   if (push >= threshold && skill >= threshold) {
-    return ARCHETYPE_DEFINITIONS["hand-balancer"];
+    return ARCHETYPE_DEFINITIONS["hand-balancer"]!;
   }
 
   // High Pull + High Core
   if (pull >= threshold && core >= threshold) {
-    return ARCHETYPE_DEFINITIONS["bar-warrior"];
+    return ARCHETYPE_DEFINITIONS["bar-warrior"]!;
   }
 
   // High Pull + High Skill
   if (pull >= threshold && skill >= threshold) {
-    return ARCHETYPE_DEFINITIONS["ring-master"];
+    return ARCHETYPE_DEFINITIONS["ring-master"]!;
   }
 
   // High Legs + High Core
   if (legs >= threshold && core >= threshold) {
-    return ARCHETYPE_DEFINITIONS["gymnast"];
+    return ARCHETYPE_DEFINITIONS["gymnast"]!;
   }
 
   // Balanced stats
   if (isBalanced) {
-    return ARCHETYPE_DEFINITIONS["street-athlete"];
+    return ARCHETYPE_DEFINITIONS["street-athlete"]!;
   }
 
   // Default fallback based on highest stat
-  if (push === maxStat) return ARCHETYPE_DEFINITIONS["push-specialist"];
-  if (pull === maxStat) return ARCHETYPE_DEFINITIONS["pull-specialist"];
-  if (core === maxStat) return ARCHETYPE_DEFINITIONS["core-specialist"];
-  if (legs === maxStat) return ARCHETYPE_DEFINITIONS["leg-specialist"];
-  return ARCHETYPE_DEFINITIONS["skill-specialist"];
+  if (push === maxStat) return ARCHETYPE_DEFINITIONS["push-specialist"]!;
+  if (pull === maxStat) return ARCHETYPE_DEFINITIONS["pull-specialist"]!;
+  if (core === maxStat) return ARCHETYPE_DEFINITIONS["core-specialist"]!;
+  if (legs === maxStat) return ARCHETYPE_DEFINITIONS["leg-specialist"]!;
+  return ARCHETYPE_DEFINITIONS["skill-specialist"]!;
 }
 
 export const getUserProfileStats = query({
@@ -252,7 +252,7 @@ export const getUserProfileStats = query({
           legs: 0,
           skill: 0,
         },
-        archetype: ARCHETYPE_DEFINITIONS["beginner"],
+        archetype: ARCHETYPE_DEFINITIONS["beginner"]!,
         trophyCase: [],
       };
     }

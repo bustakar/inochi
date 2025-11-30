@@ -1,9 +1,11 @@
 "use client";
 
-import { Badge, cn } from "@inochi/ui";
-import { Trophy, Medal, Award } from "lucide-react";
-import { exerciseLevelColors } from "../../../../utils/exercise-utils";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
+import { Award, Medal, Trophy } from "lucide-react";
+
+import { Badge, cn } from "@inochi/ui";
+
+import { exerciseLevelColors } from "../../../../utils/exercise-utils";
 
 interface Trophy {
   _id: Id<"exercises">;
@@ -18,11 +20,7 @@ interface TrophyCaseProps {
 }
 
 const trophyIcons = [Trophy, Medal, Award];
-const trophyColors = [
-  "text-yellow-500",
-  "text-gray-400",
-  "text-amber-600",
-];
+const trophyColors = ["text-yellow-500", "text-gray-400", "text-amber-600"];
 
 export function TrophyCase({ trophies }: TrophyCaseProps) {
   if (trophies.length === 0) {
@@ -41,8 +39,8 @@ export function TrophyCase({ trophies }: TrophyCaseProps) {
   return (
     <div className="space-y-4">
       {trophies.map((trophy, index) => {
-        const Icon = trophyIcons[index] || Award;
-        const colorClass = trophyColors[index] || "text-gray-500";
+        const Icon = trophyIcons[index] ?? Award;
+        const colorClass = trophyColors[index] ?? "text-gray-500";
 
         return (
           <div
@@ -51,7 +49,7 @@ export function TrophyCase({ trophies }: TrophyCaseProps) {
           >
             <div
               className={cn(
-                "flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted",
+                "bg-muted flex h-12 w-12 shrink-0 items-center justify-center rounded-full",
                 colorClass,
               )}
             >
@@ -86,4 +84,3 @@ export function TrophyCase({ trophies }: TrophyCaseProps) {
     </div>
   );
 }
-

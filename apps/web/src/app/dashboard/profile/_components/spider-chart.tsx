@@ -1,11 +1,11 @@
 "use client";
 
 import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
   Radar,
   RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
   ResponsiveContainer,
 } from "recharts";
 
@@ -84,4 +84,3 @@ export function SpiderChart({ stats }: SpiderChartProps) {
     </div>
   );
 }
-

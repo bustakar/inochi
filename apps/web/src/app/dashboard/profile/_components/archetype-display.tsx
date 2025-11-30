@@ -68,7 +68,7 @@ const archetypeVisualConfig: Record<
 
 export function ArchetypeDisplay({ archetype }: ArchetypeDisplayProps) {
   const visualConfig = archetypeVisualConfig[archetype.slug] ??
-    archetypeVisualConfig["beginner"] ??
+    archetypeVisualConfig.beginner ??
     archetypeVisualConfig["street-athlete"] ?? {
       icon: Award,
       color: "text-gray-500",

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@inochi/ui";
 import { Zap } from "lucide-react";
+
+import { Card } from "@inochi/ui";
 
 interface PowerLevelDisplayProps {
   powerLevel: number;
@@ -40,14 +41,14 @@ export function PowerLevelDisplay({ powerLevel }: PowerLevelDisplayProps) {
       <div className="relative z-10">
         <div className="mb-2 flex items-center gap-2">
           <Zap className="h-5 w-5 text-yellow-500" />
-          <span className="text-muted-foreground text-sm font-medium uppercase tracking-wide">
+          <span className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
             Power Level
           </span>
         </div>
         <div
           className={`text-6xl font-bold transition-all duration-300 md:text-8xl ${
             isAnimating
-              ? "pl-8 scale-110 text-yellow-500 drop-shadow-lg"
+              ? "scale-110 pl-8 text-yellow-500 drop-shadow-lg"
               : "text-foreground"
           }`}
         >
@@ -64,4 +65,3 @@ export function PowerLevelDisplay({ powerLevel }: PowerLevelDisplayProps) {
     </Card>
   );
 }
-

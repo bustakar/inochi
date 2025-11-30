@@ -1,12 +1,13 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@packages/backend/convex/_generated/api";
+import { useQuery } from "convex/react";
+
 import { Card } from "@inochi/ui";
 
+import { ArchetypeDisplay } from "./_components/archetype-display";
 import { PowerLevelDisplay } from "./_components/power-level-display";
 import { SpiderChart } from "./_components/spider-chart";
-import { ArchetypeDisplay } from "./_components/archetype-display";
 import { TrophyCase } from "./_components/trophy-case";
 
 export default function ProfilePage() {
@@ -49,4 +50,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
