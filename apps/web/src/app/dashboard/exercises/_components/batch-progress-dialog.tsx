@@ -212,11 +212,17 @@ export function BatchProgressDialog({
   const [searchQuery, setSearchQuery] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Sort and filter exercises
+  // Flatten grouped exercises and filter by search query
   const filteredAndSortedExercises = useMemo(() => {
     if (!exercises) return [];
 
-    let result = [...exercises];
+    // Flatten the grouped structure into a single array
+    let result: Exercise[] = [];
+    for (const level of exerciseLevels) {
+      if (exercises[level]) {
+        result.push(...exercises[level]);
+      }
+    }
 
     // Filter by search query
     if (searchQuery.trim()) {
@@ -228,24 +234,7 @@ export function BatchProgressDialog({
       );
     }
 
-    // Sort by level, difficulty, then title
-    result.sort((a, b) => {
-      // 1. Sort by level order
-      const levelOrderA = exerciseLevels.indexOf(a.level);
-      const levelOrderB = exerciseLevels.indexOf(b.level);
-      if (levelOrderA !== levelOrderB) {
-        return levelOrderA - levelOrderB;
-      }
-
-      // 2. Sort by difficulty (ascending)
-      if (a.difficulty !== b.difficulty) {
-        return a.difficulty - b.difficulty;
-      }
-
-      // 3. Sort by title (alphabetical)
-      return a.title.localeCompare(b.title);
-    });
-
+    // Exercises are already sorted by level, difficulty, then title from backend
     return result;
   }, [exercises, searchQuery]);
 

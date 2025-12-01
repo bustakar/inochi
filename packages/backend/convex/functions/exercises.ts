@@ -2,45 +2,53 @@ import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
 import { internalQuery, mutation, query, QueryCtx } from "../_generated/server";
 import {
+  ExerciseLevel,
   exerciseLevelValidator,
   exerciseVariantValidator,
   progressStatusValidator,
 } from "../validators/validators";
 import { getUserId } from "./auth";
 
+const exerciseResponseValidator = v.object({
+  _id: v.id("exercises"),
+  _creationTime: v.number(),
+  title: v.string(),
+  description: v.string(),
+  level: exerciseLevelValidator,
+  difficulty: v.number(),
+  musclesData: v.array(
+    v.object({
+      _id: v.id("muscles"),
+      name: v.string(),
+      muscleGroup: v.optional(v.string()),
+      role: v.optional(
+        v.union(
+          v.literal("primary"),
+          v.literal("secondary"),
+          v.literal("stabilizer"),
+        ),
+      ),
+    }),
+  ),
+  primaryMuscleGroups: v.array(v.string()),
+  userProgress: v.union(
+    v.object({ status: progressStatusValidator }),
+    v.null(),
+  ),
+});
+
 export const getAllExercises = query({
   args: {
     searchQuery: v.optional(v.string()),
   },
-  returns: v.array(
-    v.object({
-      _id: v.id("exercises"),
-      _creationTime: v.number(),
-      title: v.string(),
-      description: v.string(),
-      level: exerciseLevelValidator,
-      difficulty: v.number(),
-      musclesData: v.array(
-        v.object({
-          _id: v.id("muscles"),
-          name: v.string(),
-          muscleGroup: v.optional(v.string()),
-          role: v.optional(
-            v.union(
-              v.literal("primary"),
-              v.literal("secondary"),
-              v.literal("stabilizer"),
-            ),
-          ),
-        }),
-      ),
-      primaryMuscleGroups: v.array(v.string()),
-      userProgress: v.union(
-        v.object({ status: progressStatusValidator }),
-        v.null(),
-      ),
-    }),
-  ),
+  returns: v.object({
+    beginner: v.array(exerciseResponseValidator),
+    intermediate: v.array(exerciseResponseValidator),
+    advanced: v.array(exerciseResponseValidator),
+    expert: v.array(exerciseResponseValidator),
+    elite: v.array(exerciseResponseValidator),
+    legendary: v.array(exerciseResponseValidator),
+  }),
   handler: async (ctx, args) => {
     // Fetch all public exercises
     let publicExercises = await ctx.db.query("exercises").collect();
@@ -151,7 +159,29 @@ export const getAllExercises = query({
       };
     });
 
-    return enrichedPublic.sort((a, b) => b._creationTime - a._creationTime);
+    const grouped: Record<ExerciseLevel, typeof enrichedPublic> = {
+      beginner: [],
+      intermediate: [],
+      advanced: [],
+      expert: [],
+      elite: [],
+      legendary: [],
+    };
+
+    for (const exercise of enrichedPublic) {
+      grouped[exercise.level].push(exercise);
+    }
+
+    for (const level of Object.keys(grouped) as ExerciseLevel[]) {
+      grouped[level].sort((a, b) => {
+        if (a.difficulty !== b.difficulty) {
+          return a.difficulty - b.difficulty;
+        }
+        return a.title.localeCompare(b.title);
+      });
+    }
+
+    return grouped;
   },
 });
 
