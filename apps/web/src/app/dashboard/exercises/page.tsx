@@ -195,7 +195,7 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
 
   // Check if all levels are empty
   const hasAnyExercises = exerciseLevels.some(
-    (level) => exercisesByLevel[level] && exercisesByLevel[level].length > 0,
+    (level) => exercisesByLevel[level].length > 0,
   );
 
   if (!hasAnyExercises) {
@@ -214,7 +214,7 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
     <div className="space-y-8">
       {exerciseLevels.map((level) => {
         const exercises = exercisesByLevel[level];
-        if (!exercises || exercises.length === 0) {
+        if (exercises.length === 0) {
           return null;
         }
 

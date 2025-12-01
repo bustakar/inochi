@@ -75,7 +75,7 @@ interface Exercise {
 }
 
 interface ExerciseListProps {
-  exercises: Exercise[] | undefined;
+  exercises: Record<ExerciseLevel, Exercise[]> | undefined;
   filteredExercises: Exercise[];
   searchQuery: string;
   exerciseStatuses: Map<Id<"exercises">, ProgressStatus | null>;
@@ -135,7 +135,7 @@ function ExerciseList({
             className={cn(
               "hover:bg-muted/50 flex flex-col gap-3 p-4 transition-all md:flex-row md:items-center md:justify-between",
               hasChangedStatus &&
-                "border-l-4 border-l-primary bg-primary/5 ring-1 ring-primary/20",
+                "border-l-primary bg-primary/5 ring-primary/20 border-l-4 ring-1",
             )}
           >
             <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -157,7 +157,11 @@ function ExerciseList({
                 if (value === "none" || !value) {
                   onStatusChange(exercise._id, null, originalStatus);
                 } else {
-                  onStatusChange(exercise._id, value as ProgressStatus, originalStatus);
+                  onStatusChange(
+                    exercise._id,
+                    value as ProgressStatus,
+                    originalStatus,
+                  );
                 }
               }}
               disabled={disabled}
@@ -219,9 +223,7 @@ export function BatchProgressDialog({
     // Flatten the grouped structure into a single array
     let result: Exercise[] = [];
     for (const level of exerciseLevels) {
-      if (exercises[level]) {
-        result.push(...exercises[level]);
-      }
+      result.push(...exercises[level]);
     }
 
     // Filter by search query
@@ -260,12 +262,15 @@ export function BatchProgressDialog({
 
   const handleSubmit = async () => {
     // Filter out null statuses (not started)
-    const updates = Array.from(exerciseStatuses.entries())
-      .filter(([, status]) => status !== null)
-      .map(([exerciseId, status]) => ({
-        exerciseId,
-        status: status as ProgressStatus,
-      }));
+    const updates: {
+      exerciseId: Id<"exercises">;
+      status: ProgressStatus;
+    }[] = [];
+    for (const [exerciseId, status] of exerciseStatuses.entries()) {
+      if (status !== null) {
+        updates.push({ exerciseId, status });
+      }
+    }
 
     if (updates.length === 0) {
       toast.error("Please select at least one exercise status");
