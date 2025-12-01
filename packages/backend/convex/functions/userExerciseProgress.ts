@@ -83,3 +83,121 @@ export const updateUserExerciseProgress = mutation({
   },
 });
 
+// Batch update user's progress for multiple exercises
+export const batchUpdateUserExerciseProgress = mutation({
+  args: {
+    exerciseIds: v.array(v.id("exercises")),
+    status: progressStatusValidator,
+  },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    if (args.exerciseIds.length === 0) {
+      return 0;
+    }
+
+    const now = Date.now();
+    let updatedCount = 0;
+
+    for (const exerciseId of args.exerciseIds) {
+      // Verify exercise exists
+      const exercise = await ctx.db.get(exerciseId);
+      if (!exercise) {
+        continue; // Skip invalid exercise IDs
+      }
+
+      // Check if progress record already exists
+      const existingProgress = await ctx.db
+        .query("user_exercise_progress")
+        .withIndex("by_user_and_exercise", (q) =>
+          q.eq("userId", userId).eq("exerciseId", exerciseId),
+        )
+        .first();
+
+      if (existingProgress) {
+        // Update existing record
+        await ctx.db.patch(existingProgress._id, {
+          status: args.status,
+          updatedAt: now,
+        });
+      } else {
+        // Create new record
+        await ctx.db.insert("user_exercise_progress", {
+          userId,
+          exerciseId,
+          status: args.status,
+          updatedAt: now,
+        });
+      }
+      updatedCount++;
+    }
+
+    return updatedCount;
+  },
+});
+
+// Batch update user's progress for multiple exercises with individual statuses
+export const batchUpdateUserExerciseProgressWithStatuses = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        exerciseId: v.id("exercises"),
+        status: progressStatusValidator,
+      }),
+    ),
+  },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    if (args.updates.length === 0) {
+      return 0;
+    }
+
+    const now = Date.now();
+    let updatedCount = 0;
+
+    for (const { exerciseId, status } of args.updates) {
+      // Verify exercise exists
+      const exercise = await ctx.db.get(exerciseId);
+      if (!exercise) {
+        continue; // Skip invalid exercise IDs
+      }
+
+      // Check if progress record already exists
+      const existingProgress = await ctx.db
+        .query("user_exercise_progress")
+        .withIndex("by_user_and_exercise", (q) =>
+          q.eq("userId", userId).eq("exerciseId", exerciseId),
+        )
+        .first();
+
+      if (existingProgress) {
+        // Update existing record
+        await ctx.db.patch(existingProgress._id, {
+          status,
+          updatedAt: now,
+        });
+      } else {
+        // Create new record
+        await ctx.db.insert("user_exercise_progress", {
+          userId,
+          exerciseId,
+          status,
+          updatedAt: now,
+        });
+      }
+      updatedCount++;
+    }
+
+    return updatedCount;
+  },
+});
+

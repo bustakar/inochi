@@ -3,13 +3,11 @@ import { Doc, Id } from "../_generated/dataModel";
 import { internalQuery, mutation, query, QueryCtx } from "../_generated/server";
 import {
   exerciseLevelValidator,
-  exerciseValidator,
   exerciseVariantValidator,
   progressStatusValidator,
-  validateDifficulty,
 } from "../validators/validators";
 import { getUserId } from "./auth";
-// Get all exercises (public exercises only)
+
 export const getAllExercises = query({
   args: {
     searchQuery: v.optional(v.string()),
@@ -153,12 +151,10 @@ export const getAllExercises = query({
       };
     });
 
-    // Sort by creation time (newest first)
     return enrichedPublic.sort((a, b) => b._creationTime - a._creationTime);
   },
 });
 
-// Helper: Fetch exercise title by ID
 export async function getExerciseTitle(
   ctx: QueryCtx,
   exerciseId: Id<"exercises">,
@@ -170,106 +166,6 @@ export async function getExerciseTitle(
   return { _id: exerciseId, title: exercise.title };
 }
 
-// Helper to check if an ID is a public exercise (exists in exercises table)
-async function isPublicExercise(
-  ctx: QueryCtx,
-  id: Id<"exercises">,
-): Promise<
-  { isPublic: true; exercise: Doc<"exercises"> } | { isPublic: false }
-> {
-  const doc = await ctx.db.get(id);
-  if (!doc) return { isPublic: false };
-  return { isPublic: true, exercise: doc as Doc<"exercises"> };
-}
-
-// Helper: Fetch prerequisites for a public exercise (only public exercises)
-async function getPublicExercisePrerequisites(
-  ctx: QueryCtx,
-  exerciseId: Id<"exercises">,
-): Promise<Array<{ _id: Id<"exercises">; title: string }>> {
-  // Prerequisites are stored in exercise_progressions table
-  // where toExercise = this exercise and fromExercise = prerequisite
-  const prerequisitesProgressions = await ctx.db
-    .query("exercise_progressions")
-    .withIndex("by_to_exercise", (q) => q.eq("toExercise", exerciseId))
-    .collect();
-
-  const result: Array<{ _id: Id<"exercises">; title: string }> = [];
-
-  for (const prog of prerequisitesProgressions) {
-    // Only include public exercises
-    const check = await isPublicExercise(ctx, prog.fromExercise);
-    if (check.isPublic) {
-      result.push({
-        _id: prog.fromExercise as Id<"exercises">,
-        title: check.exercise.title,
-      });
-    }
-    // Private exercises are intentionally excluded
-  }
-
-  return result;
-}
-
-// Helper: Fetch progressions for a public exercise (only public exercises)
-async function getPublicExerciseProgressions(
-  ctx: QueryCtx,
-  exerciseId: Id<"exercises">,
-): Promise<Array<{ _id: Id<"exercises">; title: string }>> {
-  // Query progressions where this exercise is the source (leads to)
-  const progressionToProgressions = await ctx.db
-    .query("exercise_progressions")
-    .withIndex("by_from_exercise", (q) => q.eq("fromExercise", exerciseId))
-    .collect();
-
-  // Query progressions where this exercise is the target (leads from)
-  const progressionFromProgressions = await ctx.db
-    .query("exercise_progressions")
-    .withIndex("by_to_exercise", (q) => q.eq("toExercise", exerciseId))
-    .collect();
-
-  const result: Array<{
-    _id: Id<"exercises">;
-    title: string;
-    type: "from" | "to";
-  }> = [];
-
-  // Process "to" progressions - only include public exercises
-  for (const prog of progressionToProgressions) {
-    const check = await isPublicExercise(ctx, prog.toExercise);
-    if (check.isPublic) {
-      result.push({
-        _id: prog.toExercise as Id<"exercises">,
-        title: check.exercise.title,
-        type: "to",
-      });
-    }
-  }
-
-  // Process "from" progressions - only include public exercises
-  for (const prog of progressionFromProgressions) {
-    const check = await isPublicExercise(ctx, prog.fromExercise);
-    if (check.isPublic) {
-      result.push({
-        _id: prog.fromExercise as Id<"exercises">,
-        title: check.exercise.title,
-        type: "from",
-      });
-    }
-  }
-
-  // Sort: from first, then to, then alphabetically by title
-  return result
-    .sort((a, b) => {
-      if (a.type !== b.type) {
-        return a.type === "from" ? -1 : 1;
-      }
-      return a.title.localeCompare(b.title);
-    })
-    .map(({ type, ...ex }) => ex);
-}
-
-// Helper: Fetch muscles for a public exercise
 async function getPublicExerciseMuscles(
   ctx: QueryCtx,
   exerciseId: Id<"exercises">,
@@ -353,6 +249,7 @@ export const getPublicExerciseById = query({
       description: v.string(),
       level: exerciseLevelValidator,
       difficulty: v.number(),
+      slug: v.string(),
       muscles: v.array(
         v.object({
           _id: v.id("muscles"),

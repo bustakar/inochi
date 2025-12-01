@@ -13,7 +13,7 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Globe, Target } from "lucide-react";
 
-import { Badge, cn } from "@inochi/ui";
+import { Badge, Button, cn } from "@inochi/ui";
 
 import { Search } from "../../../components/search";
 import {
@@ -21,6 +21,7 @@ import {
   getProgressStatusColor,
   getProgressStatusLabel,
 } from "../../../utils/exercise-utils";
+import { BatchProgressDialog } from "./_components/batch-progress-dialog";
 
 // ============================================================================
 // Exercise Card Component
@@ -205,6 +206,7 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
 
 export default function ExercisesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -212,17 +214,28 @@ export default function ExercisesPage() {
         <h1 className="text-foreground text-3xl font-bold">Exercises</h1>
       </div>
 
-      {/* Search */}
-      <div className="max-w-md">
-        <Search
-          initialValue={searchQuery}
-          onSearchUpdate={setSearchQuery}
-          placeholder="Search exercises by title or description..."
-        />
+      {/* Search and Batch Update */}
+      <div className="flex items-center gap-4">
+        <div className="max-w-md flex-1">
+          <Search
+            initialValue={searchQuery}
+            onSearchUpdate={setSearchQuery}
+            placeholder="Search exercises by title or description..."
+          />
+        </div>
+        <Button variant="outline" onClick={() => setIsBatchDialogOpen(true)}>
+          Log Progress
+        </Button>
       </div>
 
       {/* Exercises List */}
       <ExercisesList searchQuery={searchQuery} />
+
+      {/* Batch Progress Dialog */}
+      <BatchProgressDialog
+        open={isBatchDialogOpen}
+        onOpenChange={setIsBatchDialogOpen}
+      />
     </div>
   );
 }

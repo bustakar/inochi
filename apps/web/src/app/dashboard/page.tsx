@@ -1,12 +1,6 @@
-"use client";
-
-import { UserButton } from "@clerk/clerk-react";
+import { redirect } from "next/navigation";
 
 export default function DashboardPage() {
-  return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      dashboard
-      <UserButton />
-    </div>
-  );
+  redirect("/dashboard/exercises");
+  return <></>;
 }
