@@ -33,38 +33,6 @@ import {
   progressStatuses,
 } from "../../../../utils/exercise-utils";
 
-interface BatchProgressDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-// ============================================================================
-// Exercise Search Component
-// ============================================================================
-
-interface ExerciseSearchProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-}
-
-function ExerciseSearch({ searchQuery, onSearchChange }: ExerciseSearchProps) {
-  return (
-    <div className="relative">
-      <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-      <Input
-        placeholder="Search exercises..."
-        value={searchQuery}
-        onChange={(e) => onSearchChange(e.target.value)}
-        className="pl-9"
-      />
-    </div>
-  );
-}
-
-// ============================================================================
-// Exercise List Component
-// ============================================================================
-
 interface Exercise {
   _id: Id<"exercises">;
   title: string;
@@ -74,15 +42,119 @@ interface Exercise {
   userProgress: { status: ProgressStatus } | null;
 }
 
+type ExercisesByLevel = Record<ExerciseLevel, Exercise[]>;
+
+function buildExercisesMap(
+  exercises: ExercisesByLevel,
+): Map<Id<"exercises">, Exercise> {
+  const map = new Map<Id<"exercises">, Exercise>();
+  for (const level of exerciseLevels) {
+    for (const exercise of exercises[level]) {
+      map.set(exercise._id, exercise);
+    }
+  }
+  return map;
+}
+
+function flattenExercises(exercises: ExercisesByLevel): Exercise[] {
+  return exerciseLevels.flatMap((level) => exercises[level]);
+}
+
+interface ExerciseSearchProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+function ExerciseSearch({ value, onChange }: ExerciseSearchProps) {
+  return (
+    <div className="relative">
+      <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+      <Input
+        placeholder="Search exercises..."
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="pl-9"
+      />
+    </div>
+  );
+}
+
+interface ExerciseRowProps {
+  exercise: Exercise;
+  selectedStatus: ProgressStatus | null;
+  hasChanged: boolean;
+  onStatusChange: (status: ProgressStatus | null) => void;
+  disabled?: boolean;
+}
+
+function ExerciseRow({
+  exercise,
+  selectedStatus,
+  hasChanged,
+  onStatusChange,
+  disabled,
+}: ExerciseRowProps) {
+  return (
+    <div
+      className={cn(
+        "hover:bg-muted/50 flex flex-col gap-3 p-4 transition-all md:flex-row md:items-center md:justify-between",
+        hasChanged &&
+          "border-l-primary bg-primary/5 ring-primary/20 border-l-4 ring-1",
+      )}
+    >
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-medium">{exercise.title}</h4>
+          <Badge className={exerciseLevelColors[exercise.level]}>
+            {exercise.level}
+          </Badge>
+        </div>
+        <p className="text-muted-foreground line-clamp-1 text-xs">
+          {exercise.description}
+        </p>
+      </div>
+      <ToggleGroup
+        type="single"
+        value={selectedStatus ?? "none"}
+        onValueChange={(value) => {
+          onStatusChange(
+            value === "none" || !value ? null : (value as ProgressStatus),
+          );
+        }}
+        disabled={disabled}
+        variant="outline"
+        size="sm"
+        spacing={0}
+        className="w-full sm:w-auto"
+      >
+        <ToggleGroupItem
+          value="none"
+          aria-label={`Set ${exercise.title} to Not Started`}
+        >
+          Not Started
+        </ToggleGroupItem>
+        {progressStatuses.map((status) => (
+          <ToggleGroupItem
+            key={status}
+            value={status}
+            aria-label={`Set ${exercise.title} to ${getProgressStatusLabel(status)}`}
+          >
+            {getProgressStatusLabel(status)}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+    </div>
+  );
+}
+
 interface ExerciseListProps {
-  exercises: Record<ExerciseLevel, Exercise[]> | undefined;
+  exercises: ExercisesByLevel | undefined;
   filteredExercises: Exercise[];
   searchQuery: string;
-  exerciseStatuses: Map<Id<"exercises">, ProgressStatus | null>;
+  pendingChanges: Map<Id<"exercises">, ProgressStatus | null>;
   onStatusChange: (
     exerciseId: Id<"exercises">,
     status: ProgressStatus | null,
-    originalStatus: ProgressStatus | null,
   ) => void;
   disabled?: boolean;
 }
@@ -91,7 +163,7 @@ function ExerciseList({
   exercises,
   filteredExercises,
   searchQuery,
-  exerciseStatuses,
+  pendingChanges,
   onStatusChange,
   disabled,
 }: ExerciseListProps) {
@@ -118,84 +190,33 @@ function ExerciseList({
   return (
     <div className="min-h-0 flex-1 divide-y overflow-auto rounded-lg border">
       {filteredExercises.map((exercise) => {
-        const selectedStatus =
-          exerciseStatuses.get(exercise._id) ??
-          exercise.userProgress?.status ??
-          null;
-        const displayValue = selectedStatus ?? "none";
-        // Only highlight if the selected status is different from the original
         const originalStatus = exercise.userProgress?.status ?? null;
-        const hasChangedStatus =
-          exerciseStatuses.has(exercise._id) &&
-          selectedStatus !== originalStatus;
+        const hasPendingChange = pendingChanges.has(exercise._id);
+        const selectedStatus = hasPendingChange
+          ? (pendingChanges.get(exercise._id) ?? null)
+          : originalStatus;
+        const hasChanged =
+          hasPendingChange && selectedStatus !== originalStatus;
 
         return (
-          <div
+          <ExerciseRow
             key={exercise._id}
-            className={cn(
-              "hover:bg-muted/50 flex flex-col gap-3 p-4 transition-all md:flex-row md:items-center md:justify-between",
-              hasChangedStatus &&
-                "border-l-primary bg-primary/5 ring-primary/20 border-l-4 ring-1",
-            )}
-          >
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <h4 className="text-sm font-medium">{exercise.title}</h4>
-                <Badge className={exerciseLevelColors[exercise.level]}>
-                  {exercise.level}
-                </Badge>
-              </div>
-              <p className="text-muted-foreground line-clamp-1 text-xs">
-                {exercise.description}
-              </p>
-            </div>
-            <ToggleGroup
-              type="single"
-              value={displayValue}
-              onValueChange={(value) => {
-                const originalStatus = exercise.userProgress?.status ?? null;
-                if (value === "none" || !value) {
-                  onStatusChange(exercise._id, null, originalStatus);
-                } else {
-                  onStatusChange(
-                    exercise._id,
-                    value as ProgressStatus,
-                    originalStatus,
-                  );
-                }
-              }}
-              disabled={disabled}
-              variant="outline"
-              size="sm"
-              spacing={0}
-              className="w-full sm:w-auto"
-            >
-              <ToggleGroupItem
-                value="none"
-                aria-label={`Set ${exercise.title} to Not Started`}
-              >
-                Not Started
-              </ToggleGroupItem>
-              {progressStatuses.map((status) => (
-                <ToggleGroupItem
-                  key={status}
-                  value={status}
-                  aria-label={`Set ${exercise.title} to ${getProgressStatusLabel(status)}`}
-                >
-                  {getProgressStatusLabel(status)}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
+            exercise={exercise}
+            selectedStatus={selectedStatus}
+            hasChanged={hasChanged}
+            onStatusChange={(status) => onStatusChange(exercise._id, status)}
+            disabled={disabled}
+          />
         );
       })}
     </div>
   );
 }
 
-// ============================================================================
-// Main Dialog Component
-// ============================================================================
+interface BatchProgressDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
 export function BatchProgressDialog({
   open,
@@ -209,81 +230,92 @@ export function BatchProgressDialog({
     api.functions.userExerciseProgress
       .batchUpdateUserExerciseProgressWithStatuses,
   );
+  const batchDelete = useMutation(
+    api.functions.userExerciseProgress.batchDeleteUserExerciseProgress,
+  );
 
-  const [exerciseStatuses, setExerciseStatuses] = useState<
+  const [pendingChanges, setPendingChanges] = useState<
     Map<Id<"exercises">, ProgressStatus | null>
   >(new Map());
   const [searchQuery, setSearchQuery] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Flatten grouped exercises and filter by search query
-  const filteredAndSortedExercises = useMemo(() => {
+  const allExercisesMap = useMemo(
+    () => (exercises ? buildExercisesMap(exercises) : new Map()),
+    [exercises],
+  );
+
+  const filteredExercises = useMemo(() => {
     if (!exercises) return [];
 
-    // Flatten the grouped structure into a single array
-    let result: Exercise[] = [];
-    for (const level of exerciseLevels) {
-      result.push(...exercises[level]);
-    }
+    const all = flattenExercises(exercises);
+    if (!searchQuery.trim()) return all;
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        (exercise) =>
-          exercise.title.toLowerCase().includes(query) ||
-          exercise.description.toLowerCase().includes(query),
-      );
-    }
-
-    // Exercises are already sorted by level, difficulty, then title from backend
-    return result;
+    const query = searchQuery.toLowerCase().trim();
+    return all.filter(
+      (exercise) =>
+        exercise.title.toLowerCase().includes(query) ||
+        exercise.description.toLowerCase().includes(query),
+    );
   }, [exercises, searchQuery]);
 
   const handleStatusChange = (
     exerciseId: Id<"exercises">,
     status: ProgressStatus | null,
-    originalStatus: ProgressStatus | null,
   ) => {
-    const newStatuses = new Map(exerciseStatuses);
-    // If the new status matches the original, remove it from the map
-    // (so it won't be highlighted and won't be included in the update)
-    if (status === originalStatus) {
-      newStatuses.delete(exerciseId);
-    } else if (status === null) {
-      // Setting to null (not started) - remove from map since nulls are filtered out in submit
-      newStatuses.delete(exerciseId);
-    } else {
-      // New status is different from original, add it to the map
-      newStatuses.set(exerciseId, status);
-    }
-    setExerciseStatuses(newStatuses);
+    const exercise = allExercisesMap.get(exerciseId);
+    const originalStatus = exercise?.userProgress?.status ?? null;
+
+    setPendingChanges((prev) => {
+      const next = new Map(prev);
+      if (status === originalStatus) {
+        next.delete(exerciseId);
+      } else {
+        next.set(exerciseId, status);
+      }
+      return next;
+    });
   };
 
-  const handleSubmit = async () => {
-    // Filter out null statuses (not started)
-    const updates: {
-      exerciseId: Id<"exercises">;
-      status: ProgressStatus;
-    }[] = [];
-    for (const [exerciseId, status] of exerciseStatuses.entries()) {
-      if (status !== null) {
+  const { updates, deletions } = useMemo(() => {
+    const updates: { exerciseId: Id<"exercises">; status: ProgressStatus }[] =
+      [];
+    const deletions: Id<"exercises">[] = [];
+
+    for (const [exerciseId, status] of pendingChanges.entries()) {
+      const exercise = allExercisesMap.get(exerciseId);
+      const originalStatus = exercise?.userProgress?.status ?? null;
+
+      if (status === null && originalStatus !== null) {
+        deletions.push(exerciseId);
+      } else if (status !== null) {
         updates.push({ exerciseId, status });
       }
     }
 
-    if (updates.length === 0) {
+    return { updates, deletions };
+  }, [pendingChanges, allExercisesMap]);
+
+  const changeCount = updates.length + deletions.length;
+
+  const handleSubmit = async () => {
+    if (changeCount === 0) {
       toast.error("Please select at least one exercise status");
       return;
     }
 
     setIsUpdating(true);
     try {
-      const count = await batchUpdate({ updates });
+      const [updateCount, deleteCount] = await Promise.all([
+        updates.length > 0 ? batchUpdate({ updates }) : 0,
+        deletions.length > 0 ? batchDelete({ exerciseIds: deletions }) : 0,
+      ]);
+
+      const totalCount = updateCount + deleteCount;
       toast.success(
-        `Successfully updated progress for ${count} exercise${count !== 1 ? "s" : ""}`,
+        `Successfully updated progress for ${totalCount} exercise${totalCount !== 1 ? "s" : ""}`,
       );
-      setExerciseStatuses(new Map());
+      setPendingChanges(new Map());
       onOpenChange(false);
     } catch (error) {
       toast.error("Failed to update progress. Please try again.");
@@ -295,13 +327,11 @@ export function BatchProgressDialog({
 
   const handleClose = () => {
     if (!isUpdating) {
-      setExerciseStatuses(new Map());
+      setPendingChanges(new Map());
       setSearchQuery("");
       onOpenChange(false);
     }
   };
-
-  const selectedCount = exerciseStatuses.size;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -315,16 +345,13 @@ export function BatchProgressDialog({
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <ExerciseSearch
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
+          <ExerciseSearch value={searchQuery} onChange={setSearchQuery} />
 
           <ExerciseList
             exercises={exercises}
-            filteredExercises={filteredAndSortedExercises}
+            filteredExercises={filteredExercises}
             searchQuery={searchQuery}
-            exerciseStatuses={exerciseStatuses}
+            pendingChanges={pendingChanges}
             onStatusChange={handleStatusChange}
             disabled={isUpdating}
           />
@@ -333,8 +360,8 @@ export function BatchProgressDialog({
         <DialogFooter>
           <div className="flex w-full items-center justify-between">
             <span className="text-muted-foreground text-sm">
-              {selectedCount > 0
-                ? `${selectedCount} exercise${selectedCount !== 1 ? "s" : ""} selected`
+              {changeCount > 0
+                ? `${changeCount} exercise${changeCount !== 1 ? "s" : ""} selected`
                 : "No exercises selected"}
             </span>
             <div className="flex gap-2">
@@ -347,11 +374,11 @@ export function BatchProgressDialog({
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={isUpdating || selectedCount === 0}
+                disabled={isUpdating || changeCount === 0}
               >
                 {isUpdating
                   ? "Updating..."
-                  : `Update ${selectedCount} Exercise${selectedCount !== 1 ? "s" : ""}`}
+                  : `Update ${changeCount} Exercise${changeCount !== 1 ? "s" : ""}`}
               </Button>
             </div>
           </div>

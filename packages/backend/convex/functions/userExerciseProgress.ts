@@ -201,3 +201,38 @@ export const batchUpdateUserExerciseProgressWithStatuses = mutation({
   },
 });
 
+// Batch delete user's progress for multiple exercises
+export const batchDeleteUserExerciseProgress = mutation({
+  args: {
+    exerciseIds: v.array(v.id("exercises")),
+  },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    if (args.exerciseIds.length === 0) {
+      return 0;
+    }
+
+    let deletedCount = 0;
+
+    for (const exerciseId of args.exerciseIds) {
+      const existingProgress = await ctx.db
+        .query("user_exercise_progress")
+        .withIndex("by_user_and_exercise", (q) =>
+          q.eq("userId", userId).eq("exerciseId", exerciseId),
+        )
+        .first();
+
+      if (existingProgress) {
+        await ctx.db.delete(existingProgress._id);
+        deletedCount++;
+      }
+    }
+
+    return deletedCount;
+  },
+});
