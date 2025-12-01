@@ -241,7 +241,10 @@ export function BatchProgressDialog({
   const [isUpdating, setIsUpdating] = useState(false);
 
   const allExercisesMap = useMemo(
-    () => (exercises ? buildExercisesMap(exercises) : new Map()),
+    () =>
+      exercises
+        ? buildExercisesMap(exercises)
+        : new Map<Id<"exercises">, Exercise>(),
     [exercises],
   );
 
@@ -264,7 +267,8 @@ export function BatchProgressDialog({
     status: ProgressStatus | null,
   ) => {
     const exercise = allExercisesMap.get(exerciseId);
-    const originalStatus = exercise?.userProgress?.status ?? null;
+    const originalStatus: ProgressStatus | null =
+      exercise?.userProgress?.status ?? null;
 
     setPendingChanges((prev) => {
       const next = new Map(prev);
@@ -284,7 +288,8 @@ export function BatchProgressDialog({
 
     for (const [exerciseId, status] of pendingChanges.entries()) {
       const exercise = allExercisesMap.get(exerciseId);
-      const originalStatus = exercise?.userProgress?.status ?? null;
+      const originalStatus: ProgressStatus | null =
+        exercise?.userProgress?.status ?? null;
 
       if (status === null && originalStatus !== null) {
         deletions.push(exerciseId);
