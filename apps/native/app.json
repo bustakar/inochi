@@ -12,9 +12,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#0D87E1"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.karelbusta.NotesContract"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +28,10 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font", "expo-router"],
+    "plugins": [
+      "expo-font",
+      "expo-router"
+    ],
     "scheme": "inochi"
   }
 }

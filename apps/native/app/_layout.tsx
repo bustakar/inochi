@@ -1,12 +1,12 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { LogBox, Platform, StatusBar, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import ConvexClientProvider from "../ConvexClientProvider";
 
 export default function RootLayout() {
-  LogBox.ignoreLogs(["Warning: ..."]);
-  LogBox.ignoreAllLogs();
-
   const [loaded] = useFonts({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     Bold: require("../src/assets/fonts/Inter-Bold.ttf"),
@@ -16,7 +16,6 @@ export default function RootLayout() {
     Medium: require("../src/assets/fonts/Inter-Medium.ttf"),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     Regular: require("../src/assets/fonts/Inter-Regular.ttf"),
-
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     MBold: require("../src/assets/fonts/Montserrat-Bold.ttf"),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -33,25 +32,23 @@ export default function RootLayout() {
     return null;
   }
 
-  const STATUS_BAR_HEIGHT =
-    Platform.OS === "ios" ? 50 : StatusBar.currentHeight;
-
   return (
-    <ConvexClientProvider>
-      <View style={{ flex: 1 }}>
-        <View style={{ height: STATUS_BAR_HEIGHT, backgroundColor: "#0D87E1" }}>
-          <StatusBar
-            translucent
-            backgroundColor={"#0D87E1"}
-            barStyle="light-content"
-          />
-        </View>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        />
-      </View>
-    </ConvexClientProvider>
+    <GestureHandlerRootView style={styles.container}>
+      <SafeAreaProvider>
+        <ConvexClientProvider>
+          <StatusBar style="auto" />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+        </ConvexClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

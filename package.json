@@ -31,19 +31,20 @@
   },
   "devDependencies": {
     "@inochi/prettier-config": "workspace:*",
+    "@t3-oss/env-core": "^0.13.8",
     "@turbo/gen": "^2.6.1",
+    "expo": "~54.0.25",
     "prettier": "3.6.2",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
     "turbo": "^2.6.1",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "zod": "catalog:"
   },
   "pnpm": {
     "overrides": {
       "csstype": "^3.2.3",
       "@types/react": "^19.2.7"
     }
-  },
-  "dependencies": {
-    "@t3-oss/env-core": "^0.13.8",
-    "zod": "catalog:"
   }
 }
