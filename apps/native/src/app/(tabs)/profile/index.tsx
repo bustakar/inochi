@@ -1,3 +1,4 @@
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import {
   ContentUnavailableView,
   Host,
@@ -16,29 +17,19 @@ import {
 } from "@expo/ui/swift-ui/modifiers";
 import { api } from "@packages/backend/convex/_generated/api";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
-import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import {
-  exerciseLevelColors,
-} from "../../../utils/exercise-utils";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
+import { exerciseLevelColors } from "../../../utils/exercise-utils";
 
-type Trophy = {
+interface Trophy {
   _id: Id<"exercises">;
   title: string;
   level: string;
   difficulty: number;
   status: string;
-};
-
+}
 
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -98,13 +89,12 @@ function ArchetypeDisplay({
 }: {
   archetype: { slug: string; title: string; description: string };
 }) {
-
   // Map archetype to emoji
   const archetypeEmojis: Record<string, string> = {
     "hand-balancer": "🤲",
     "bar-warrior": "💪",
     "ring-master": "🎯",
-    "gymnast": "🤸",
+    gymnast: "🤸",
     "street-athlete": "⚡",
     "the-t-rex": "🦖",
     "push-specialist": "👊",
@@ -112,7 +102,7 @@ function ArchetypeDisplay({
     "core-specialist": "🔥",
     "leg-specialist": "🦵",
     "skill-specialist": "⭐",
-    "beginner": "🌱",
+    beginner: "🌱",
   };
   const emoji = archetypeEmojis[archetype.slug] ?? "⭐";
 
@@ -146,9 +136,7 @@ function ArchetypeDisplay({
 function StatRow({ label, value }: { label: string; value: number }) {
   return (
     <HStack alignment="center" spacing={8}>
-      <SwiftUIText size={17}>
-        {label}
-      </SwiftUIText>
+      <SwiftUIText size={17}>{label}</SwiftUIText>
       <Spacer />
       <SwiftUIText size={17} weight="semibold" color="#0D87E1">
         {value.toLocaleString()}
@@ -162,8 +150,7 @@ function TrophyRow({ trophy, index }: { trophy: Trophy; index: number }) {
   const emoji = trophyEmojis[index] ?? "⭐";
 
   const levelColors =
-    exerciseLevelColors[trophy.level as keyof typeof exerciseLevelColors] ??
-    exerciseLevelColors.beginner;
+    exerciseLevelColors[trophy.level as keyof typeof exerciseLevelColors];
 
   return (
     <HStack spacing={12} alignment="center">
@@ -234,7 +221,7 @@ export default function ProfileScreen() {
 
   const stats = useQuery(api.functions.userProfile.getUserProfileStats);
 
-  const handleSignOut = async () => {
+  const handleSignOut = () => {
     Alert.alert(
       "Sign Out",
       "Are you sure you want to sign out?",
@@ -246,9 +233,10 @@ export default function ProfileScreen() {
         {
           text: "Sign Out",
           style: "destructive",
-          onPress: async () => {
-            await signOut();
-            router.replace("/");
+          onPress: () => {
+            void signOut().then(() => {
+              router.replace("/");
+            });
           },
         },
       ],
@@ -282,7 +270,9 @@ export default function ProfileScreen() {
           <Section title="Account">
             {user?.emailAddresses[0]?.emailAddress && (
               <VStack spacing={4}>
-                <SwiftUIText size={17}>{user.emailAddresses[0].emailAddress}</SwiftUIText>
+                <SwiftUIText size={17}>
+                  {user.emailAddresses[0].emailAddress}
+                </SwiftUIText>
               </VStack>
             )}
             <VStack
@@ -325,7 +315,11 @@ export default function ProfileScreen() {
         {/* Trophy Case Section */}
         <Section title="Trophy Case">
           {stats.trophyCase.length === 0 ? (
-            <VStack spacing={8} alignment="center" modifiers={[padding({ all: 32 })]}>
+            <VStack
+              spacing={8}
+              alignment="center"
+              modifiers={[padding({ all: 32 })]}
+            >
               <SwiftUIText size={48}>🏆</SwiftUIText>
               <SwiftUIText size={14} color="#71717A">
                 Master exercises to earn trophies!
@@ -342,7 +336,9 @@ export default function ProfileScreen() {
         <Section title="Account">
           {user?.emailAddresses[0]?.emailAddress && (
             <VStack spacing={4}>
-              <SwiftUIText size={17}>{user.emailAddresses[0].emailAddress}</SwiftUIText>
+              <SwiftUIText size={17}>
+                {user.emailAddresses[0].emailAddress}
+              </SwiftUIText>
             </VStack>
           )}
           <VStack
