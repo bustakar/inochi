@@ -18,12 +18,17 @@ next-env.d.ts
 .output/
 
 # expo
+.expo/
 .native/
 native-env.d.ts
-apps/native/.gitignore
-apps/native/.expo
-apps/native/ios
-apps/native/android
+ios/
+android/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
 # production
 build

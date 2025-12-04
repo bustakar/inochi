@@ -27,7 +27,7 @@ export default function LoginScreen() {
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      router.replace("/skills");
+      router.replace("/(tabs)/exercises");
     }
   }, [isLoaded, isSignedIn, router]);
 
@@ -38,7 +38,7 @@ export default function LoginScreen() {
       });
       if (createdSessionId && setActive) {
         void setActive({ session: createdSessionId });
-        router.replace("/skills");
+        router.replace("/(tabs)/exercises");
       }
     } catch (err) {
       console.error("OAuth error", err);
