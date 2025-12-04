@@ -1,7 +1,6 @@
 import { useSSO, useUser } from "@clerk/clerk-expo";
 import { AntDesign } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { Redirect } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 
@@ -23,13 +22,6 @@ const getOAuthStrategy = (
 export default function LoginScreen() {
   const { startSSOFlow } = useSSO();
   const { isSignedIn, isLoaded } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      router.replace("/(tabs)/exercises");
-    }
-  }, [isLoaded, isSignedIn, router]);
 
   const onPress = async (authType: string) => {
     try {
@@ -38,7 +30,6 @@ export default function LoginScreen() {
       });
       if (createdSessionId && setActive) {
         void setActive({ session: createdSessionId });
-        router.replace("/(tabs)/exercises");
       }
     } catch (err) {
       console.error("OAuth error", err);
@@ -49,12 +40,16 @@ export default function LoginScreen() {
     return null;
   }
 
+  if (isSignedIn) {
+    return <Redirect href="/(tabs)/exercises" />;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
         <Image
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          source={require("../src/assets/icons/logo.png")}
+          source={require("../assets/icons/logo.png")}
           style={styles.logo}
         />
         <Text style={styles.title}>Log in to your account</Text>
@@ -79,7 +74,7 @@ export default function LoginScreen() {
           <Image
             style={styles.googleIcon}
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            source={require("../src/assets/icons/google.png")}
+            source={require("../assets/icons/google.png")}
           />
           <Text style={{ ...styles.buttonText, color: "#344054" }}>
             Continue with Google

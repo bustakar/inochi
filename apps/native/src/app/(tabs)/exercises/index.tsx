@@ -1,17 +1,10 @@
 import { ContentUnavailableView } from "@expo/ui/swift-ui";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { api } from "@packages/backend/convex/_generated/api";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { ExerciseLevel } from "@packages/backend/convex/validators/validators";
 import { useQuery } from "convex/react";
 import { useLocalSearchParams } from "expo-router";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -19,12 +12,11 @@ import {
   Platform,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ExerciseRow } from "../../../src/components/ExerciseRow";
-import { exerciseLevels } from "../../../src/utils/exercise-utils";
+import { exerciseLevels } from "../../../utils/exercise-utils";
+import { ExerciseRow } from "./_components/ExerciseRow";
 
 type Exercise = {
   _id: Id<"exercises">;
@@ -45,24 +37,9 @@ type Exercise = {
   } | null;
 };
 
-function sortExercises(exercises: Exercise[]): Exercise[] {
-  return [...exercises].sort((a, b) => {
-    // Sort by level (using exerciseLevels array order)
-    const levelA = exerciseLevels.indexOf(a.level);
-    const levelB = exerciseLevels.indexOf(b.level);
-    if (levelA !== levelB) {
-      return levelA - levelB;
-    }
-
-    // Then by difficulty (ascending)
-    if (a.difficulty !== b.difficulty) {
-      return a.difficulty - b.difficulty;
-    }
-
-    // Finally by title (alphabetically)
-    return a.title.localeCompare(b.title);
-  });
-}
+type ListItem =
+  | { type: "header"; level: ExerciseLevel }
+  | { type: "exercise"; exercise: Exercise };
 
 export default function ExercisesScreen() {
   const params = useLocalSearchParams<{ q?: string }>();
@@ -72,34 +49,13 @@ export default function ExercisesScreen() {
     searchQuery: searchQuery,
   });
 
-  const sortedExercises = useMemo(() => {
-    if (!exercises) return undefined;
-    return sortExercises(exercises);
-  }, [exercises]);
-
-  // Flatten exercises with section headers for FlatList
-  type ListItem =
-    | { type: "header"; level: ExerciseLevel }
-    | { type: "exercise"; exercise: Exercise };
-
   const listItems = useMemo(() => {
-    if (!sortedExercises) return undefined;
+    if (!exercises) return undefined;
 
     const items: ListItem[] = [];
-    const grouped = new Map<ExerciseLevel, Exercise[]>();
 
-    // Group exercises by level
-    for (const exercise of sortedExercises) {
-      const level = exercise.level;
-      if (!grouped.has(level)) {
-        grouped.set(level, []);
-      }
-      grouped.get(level)!.push(exercise);
-    }
-
-    // Create list items with headers
     for (const level of exerciseLevels) {
-      const levelExercises = grouped.get(level);
+      const levelExercises = exercises[level];
       if (levelExercises && levelExercises.length > 0) {
         items.push({ type: "header", level });
         for (const exercise of levelExercises) {
@@ -109,7 +65,12 @@ export default function ExercisesScreen() {
     }
 
     return items;
-  }, [sortedExercises]);
+  }, [exercises]);
+
+  const hasNoExercises = useMemo(() => {
+    if (!exercises) return false;
+    return exerciseLevels.every((level) => exercises[level]?.length === 0);
+  }, [exercises]);
 
   const { bottom } = useSafeAreaInsets();
 
@@ -142,25 +103,12 @@ export default function ExercisesScreen() {
     Keyboard.dismiss();
   }, []);
 
-  if (sortedExercises === undefined) {
+  if (exercises === undefined) {
     return (
       <View style={styles.container}>
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#0D87E1" />
           <Text style={styles.emptyText}>Loading exercises...</Text>
-        </View>
-      </View>
-    );
-  }
-
-  if (sortedExercises.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.centerContainer}>
-          <ContentUnavailableView
-            title="No exercises found"
-            description="No exercises found matching your search."
-          />
         </View>
       </View>
     );
@@ -213,30 +161,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 16,
-  },
-  searchWrapper: {
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F4F4F5",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#E4E4E7",
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: "Regular",
-    color: "#18181B",
-    padding: 0,
   },
   sectionHeader: {
     paddingVertical: 12,

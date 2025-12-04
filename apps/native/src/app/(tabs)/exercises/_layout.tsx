@@ -19,7 +19,7 @@ export default function ExercisesLayout() {
             tintColor: "#0D87E1",
             textColor: "#0D87E1",
             hintTextColor: "#0D87E1",
-            placeholder: "Search speakers",
+            placeholder: "Search exercises",
             onChangeText: (event) => {
               router.setParams({
                 q: event.nativeEvent.text,

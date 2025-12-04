@@ -9,7 +9,7 @@ import {
   exerciseLevelColors,
   getProgressStatusColor,
   getProgressStatusLabel,
-} from "../utils/exercise-utils";
+} from "../../../../utils/exercise-utils";
 
 interface ExerciseRowProps {
   exercise: {

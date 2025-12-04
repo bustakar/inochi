@@ -12,9 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#0D87E1"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.karelbusta.inochi",
@@ -31,13 +29,12 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-font",
-      "expo-router"
-    ],
+    "plugins": ["expo-font", "expo-router"],
     "scheme": "inochi",
     "extra": {
-      "router": {},
+      "router": {
+        "root": "src/app"
+      },
       "eas": {
         "projectId": "a7d74c10-6609-4721-9bbd-66cfcb74ca45"
       }
