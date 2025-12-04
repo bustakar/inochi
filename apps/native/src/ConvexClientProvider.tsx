@@ -3,7 +3,7 @@ import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import type { ReactNode } from "react";
-import { env } from "./env";
+import { env } from "../env";
 
 const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL);
 
