@@ -5,7 +5,7 @@ import { ConvexProviderWithClerk } from "convex/react-clerk";
 import type { ReactNode } from "react";
 import { env } from "../env";
 
-const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL as string);
+const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL);
 
 export default function ConvexClientProvider({
   children,
@@ -15,7 +15,7 @@ export default function ConvexClientProvider({
   return (
     <ClerkProvider
       tokenCache={tokenCache}
-      publishableKey={env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string}
+      publishableKey={env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
     >
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
         {children}

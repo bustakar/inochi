@@ -7,57 +7,27 @@ import {
   Text as SwiftUIText,
   VStack,
 } from "@expo/ui/swift-ui";
-import {
-  background,
-  cornerRadius,
-  foregroundStyle,
-  padding,
-} from "@expo/ui/swift-ui/modifiers";
+import { background, cornerRadius, padding } from "@expo/ui/swift-ui/modifiers";
 import { api } from "@packages/backend/convex/_generated/api";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
-import type { ExerciseLevel } from "@packages/backend/convex/validators/validators";
 import { useQuery } from "convex/react";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { useMemo } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import {
   exerciseLevelColors,
   exerciseLevels,
+  getProgressStatusColor,
+  getProgressStatusLabel,
 } from "../../../utils/exercise-utils";
-
-type Exercise = {
-  _id: Id<"exercises">;
-  _creationTime: number;
-  title: string;
-  description: string;
-  level: ExerciseLevel;
-  difficulty: number;
-  musclesData: {
-    _id: Id<"muscles">;
-    name: string;
-    muscleGroup?: string;
-    role?: "primary" | "secondary" | "stabilizer";
-  }[];
-  primaryMuscleGroups: string[];
-  userProgress: {
-    status: "novice" | "apprentice" | "journeyman" | "master";
-  } | null;
-};
 
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 export default function ExercisesScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams<{ q?: string }>();
-  const searchQuery = params.q?.trim() || undefined;
+  const searchQuery = params.q?.trim() ?? undefined;
 
   const exercises = useQuery(api.functions.exercises.getAllExercises, {
     searchQuery: searchQuery,
@@ -65,10 +35,10 @@ export default function ExercisesScreen() {
 
   const hasNoExercises = useMemo(() => {
     if (!exercises) return false;
-    return exerciseLevels.every((level) => exercises[level]?.length === 0);
+    return exerciseLevels.every((level) => exercises[level].length === 0);
   }, [exercises]);
 
-  const handleExercisePress = (exerciseId: Id<"exercises">) => {
+  const handleExercisePress = (_exerciseId: Id<"exercises">) => {
     // TODO: Navigate to exercise detail when implemented
     // router.push(`/(tabs)/exercises/${exerciseId}`);
   };
@@ -106,7 +76,9 @@ export default function ExercisesScreen() {
       <List listStyle="plain">
         {exerciseLevels.map((level) => {
           const levelExercises = exercises[level];
-          if (!levelExercises || levelExercises.length === 0) return null;
+          if (levelExercises.length === 0) {
+            return null;
+          }
 
           return (
             <Section key={level} title={capitalize(level)}>
@@ -117,6 +89,31 @@ export default function ExercisesScreen() {
                   spacing={8}
                   onPress={() => handleExercisePress(exercise._id)}
                 >
+                  {/* Progress Badge */}
+                  {exercise.userProgress && (
+                    <HStack
+                      spacing={4}
+                      modifiers={[
+                        padding({ all: 4 }),
+                        background(
+                          getProgressStatusColor(exercise.userProgress.status)
+                            .bg,
+                        ),
+                        cornerRadius(8),
+                      ]}
+                    >
+                      <SwiftUIText
+                        size={12}
+                        color={
+                          getProgressStatusColor(exercise.userProgress.status)
+                            .text
+                        }
+                      >
+                        {getProgressStatusLabel(exercise.userProgress.status)}
+                      </SwiftUIText>
+                    </HStack>
+                  )}
+
                   <HStack spacing={8}>
                     {/* Title */}
                     <SwiftUIText weight="semibold" size={17}>
