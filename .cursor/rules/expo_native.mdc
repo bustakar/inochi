@@ -1,0 +1,1153 @@
+---
+description: Expo UI (SwiftUI) and Expo Router patterns for native app development
+globs: **/apps/native/**/*.tsx,**/apps/native/**/*.ts
+---
+
+# Expo Native Guidelines
+
+Comprehensive guide for using `@expo/ui` (SwiftUI components) and `expo-router` in the native app.
+
+## Package Versions
+
+- `@expo/ui`: `0.2.0-beta.7` (beta - iOS SwiftUI support)
+- `expo-router`: `~6.0.15`
+- `expo`: `~54.0.25`
+
+**Note**: `@expo/ui` SwiftUI components are iOS-only. Android support via Jetpack Compose is planned for future releases.
+
+## Expo Router Navigation
+
+### File-Based Routing
+
+Expo Router uses a file-based routing system where the `app/` directory structure determines navigation paths.
+
+```
+app/
+  _layout.tsx              # Root layout (Stack navigator)
+  index.tsx                # Home/auth screen (/)
+  (tabs)/                  # Route group (not part of URL)
+    _layout.tsx            # Tab navigator layout
+    exercises/
+      _layout.tsx          # Stack navigator for exercises tab
+      index.tsx            # Exercises list (/exercises)
+      [id].tsx             # Exercise detail (/exercises/[id])
+    profile/
+      _layout.tsx          # Stack navigator for profile tab
+      index.tsx            # Profile screen (/profile)
+  (modals)/                # Route group for modals
+    settings.tsx           # Settings modal (/settings)
+```
+
+### Stack Navigator
+
+Use `Stack` from `expo-router` for hierarchical navigation:
+
+```typescript
+import { Stack } from "expo-router";
+
+export default function Layout() {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(tabs)" />
+    </Stack>
+  );
+}
+```
+
+**Stack.Screen Options:**
+- `title`: Header title
+- `headerShown`: Show/hide header (default: true)
+- `headerLargeTitle`: iOS large title style
+- `headerStyle`: Header styling object
+- `presentation`: Modal presentation style (see Modals section)
+- `headerSearchBarOptions`: Native iOS search bar (see Search Bars section)
+
+### Tab Navigation
+
+#### Regular Tabs (JavaScript-based)
+
+```typescript
+import { Tabs } from "expo-router";
+
+export default function TabLayout() {
+  return (
+    <Tabs screenOptions={{ tabBarActiveTintColor: "blue" }}>
+      <Tabs.Screen name="index" options={{ title: "Home" }} />
+      <Tabs.Screen name="settings" options={{ title: "Settings" }} />
+    </Tabs>
+  );
+}
+```
+
+#### Native Tabs (Native iOS/Android tabs)
+
+Use `NativeTabs` from `expo-router/unstable-native-tabs` for true native tab bars:
+
+```typescript
+import {
+  Icon,
+  Label,
+  NativeTabs,
+  VectorIcon,
+} from "expo-router/unstable-native-tabs";
+import { Platform } from "react-native";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+
+type VectorIconFamily = {
+  getImageSource: (
+    name: string,
+    size: number,
+    color: ColorValue,
+  ) => Promise<ImageSourcePropType>;
+};
+
+export default function TabsLayout() {
+  return (
+    <NativeTabs
+      tintColor="#0D87E1"              // Active tab color
+      iconColor="#71717A"               // Inactive icon color
+      labelStyle={{ color: "#71717A" }} // Label text style
+      labelVisibilityMode="labeled"      // "labeled" | "unlabeled" | "automatic"
+    >
+      <NativeTabs.Trigger name="exercises">
+        {Platform.select({
+          ios: <Icon sf="dumbbell.fill" />, // SF Symbols on iOS
+          android: (
+            <Icon
+              src={
+                <VectorIcon
+                  family={MaterialCommunityIcons as VectorIconFamily}
+                  name="dumbbell"
+                />
+              }
+              selectedColor="#0D87E1"
+            />
+          ),
+        })}
+        <Label>Exercises</Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
+  );
+}
+```
+
+**NativeTabs Props:**
+- `tintColor`: Active tab tint color
+- `iconColor`: Inactive icon color
+- `labelStyle`: Style object for labels
+- `labelVisibilityMode`: `"labeled"` | `"unlabeled"` | `"automatic"`
+
+**Icon Component:**
+- `sf`: SF Symbol name (iOS only)
+- `src`: Custom icon component (use `VectorIcon` for Android)
+- `selectedColor`: Color when tab is active
+
+**Platform-Specific Icons:**
+- iOS: Use SF Symbols via `sf` prop (`"dumbbell.fill"`, `"person.fill"`, etc.)
+- Android: Use `VectorIcon` with icon families like `MaterialCommunityIcons`
+
+### Route Groups
+
+Use parentheses `(groupName)` to organize routes without affecting URLs:
+
+- `(tabs)/` - Tab navigation group
+- `(modals)/` - Modal screens group
+- `(authenticated)/` - Protected routes group
+
+Groups don't appear in the URL path.
+
+### Modal Presentations
+
+Configure modal presentation styles in `Stack.Screen` options:
+
+```typescript
+<Stack.Screen
+  name="settings"
+  options={{
+    presentation: "modal", // or "formSheet" | "fullScreenModal" | "containedModal"
+  }}
+/>
+```
+
+**Presentation Styles:**
+- `"modal"`: Standard modal (slides up from bottom on iOS)
+- `"formSheet"`: Form sheet style (smaller modal on iPad)
+- `"fullScreenModal"`: Full screen modal
+- `"containedModal"`: Contained modal presentation
+
+### Navigation Hooks
+
+```typescript
+import { useRouter, useLocalSearchParams, usePathname } from "expo-router";
+
+function MyScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ id?: string }>();
+  const pathname = usePathname();
+
+  // Navigate
+  router.push("/exercises/123");
+  router.replace("/profile");
+  router.back();
+  router.setParams({ q: "search" });
+
+  // Access params
+  const exerciseId = params.id;
+}
+```
+
+## Native iOS Headers
+
+### Large Title Style
+
+Enable iOS large title style:
+
+```typescript
+<Stack.Screen
+  name="index"
+  options={{
+    headerLargeTitle: true,
+    title: "Exercises",
+  }}
+/>
+```
+
+### Native Search Bar
+
+Use `headerSearchBarOptions` for native iOS search integration:
+
+```typescript
+import { router, Stack } from "expo-router";
+
+export default function ExercisesLayout() {
+  return (
+    <Stack>
+      <Stack.Screen
+        name="index"
+        options={{
+          title: "Exercises",
+          headerLargeTitle: true,
+          headerSearchBarOptions: {
+            placeholder: "Search exercises",
+            headerIconColor: "#0D87E1",
+            tintColor: "#0D87E1",
+            textColor: "#0D87E1",
+            hintTextColor: "#0D87E1",
+            onChangeText: (event) => {
+              router.setParams({
+                q: event.nativeEvent.text,
+              });
+            },
+          },
+        }}
+      />
+    </Stack>
+  );
+}
+```
+
+**Access search query in screen:**
+
+```typescript
+import { useLocalSearchParams } from "expo-router";
+
+export default function ExercisesScreen() {
+  const params = useLocalSearchParams<{ q?: string }>();
+  const searchQuery = params.q?.trim() || undefined;
+  // Use searchQuery for filtering
+}
+```
+
+### Header Styling
+
+```typescript
+<Stack.Screen
+  name="index"
+  options={{
+    headerStyle: {
+      backgroundColor: isLiquidGlassAvailable() ? "transparent" : "#0D87E1",
+    },
+    headerTintColor: "#fff",
+    headerTitleStyle: {
+      fontWeight: "bold",
+    },
+  }}
+/>
+```
+
+## @expo/ui SwiftUI Components
+
+### Host Component (Required)
+
+All SwiftUI components must be wrapped in a `Host` component. This bridges React Native (UIKit) to SwiftUI.
+
+```typescript
+import { Host } from "@expo/ui/swift-ui";
+
+export default function MyScreen() {
+  return (
+    <Host style={{ flex: 1 }}>
+      {/* SwiftUI components here */}
+    </Host>
+  );
+}
+```
+
+**Important:**
+- `Host` is required for all SwiftUI components
+- Apply flexbox styles to `Host`, not SwiftUI components
+- Once inside SwiftUI context, use `HStack`/`VStack` for layout, not flexbox
+
+### Layout Components
+
+#### HStack (Horizontal Stack)
+
+```typescript
+import { HStack, Text } from "@expo/ui/swift-ui";
+
+<HStack spacing={8} alignment="center">
+  <Text>Left</Text>
+  <Text>Right</Text>
+</HStack>
+```
+
+**Props:**
+- `spacing`: Space between children (number)
+- `alignment`: `"leading"` | `"center"` | `"trailing"` | `"top"` | `"bottom"` | `"firstTextBaseline"` | `"lastTextBaseline"`
+
+#### VStack (Vertical Stack)
+
+```typescript
+import { VStack, Text } from "@expo/ui/swift-ui";
+
+<VStack spacing={16} alignment="leading">
+  <Text>Top</Text>
+  <Text>Bottom</Text>
+</VStack>
+```
+
+**Props:**
+- `spacing`: Space between children (number)
+- `alignment`: `"leading"` | `"center"` | `"trailing"` | `"top"` | `"bottom"` | `"firstTextBaseline"` | `"lastTextBaseline"`
+
+#### Spacer
+
+```typescript
+import { Spacer } from "@expo/ui/swift-ui";
+
+<HStack>
+  <Text>Left</Text>
+  <Spacer />
+  <Text>Right</Text>
+</HStack>
+```
+
+### Text Component
+
+```typescript
+import { Text } from "@expo/ui/swift-ui";
+
+<Text
+  size={17}                    // Font size
+  weight="semibold"            // "regular" | "medium" | "semibold" | "bold"
+  color="#71717A"              // Text color (hex or named color)
+  lineLimit={2}                // Max lines (undefined = unlimited)
+>
+  Hello World
+</Text>
+```
+
+**Props:**
+- `size`: Font size (number)
+- `weight`: Font weight
+- `color`: Text color (hex string or named color)
+- `lineLimit`: Maximum number of lines
+
+### List Component
+
+Native iOS list with sections:
+
+```typescript
+import { Host, List, Section, Text, VStack } from "@expo/ui/swift-ui";
+
+<Host style={{ flex: 1 }}>
+  <List listStyle="insetGrouped">
+    <Section title="Section 1">
+      <VStack spacing={4}>
+        <Text size={17}>Item 1</Text>
+      </VStack>
+    </Section>
+    <Section title="Section 2">
+      <VStack spacing={4}>
+        <Text size={17}>Item 2</Text>
+      </VStack>
+    </Section>
+  </List>
+</Host>
+```
+
+**List Styles:**
+- `"plain"`: Plain list style
+- `"insetGrouped"`: Inset grouped (iOS Settings style)
+- `"grouped"`: Grouped style
+- `"sidebar"`: Sidebar style
+
+**Section Props:**
+- `title`: Section header text
+- `footer`: Section footer text (optional)
+
+**List Items:**
+- Use `VStack` or `HStack` for list item content
+- Add `onPress` to make items tappable
+- Use modifiers for styling (padding, background, etc.)
+
+### Form Component
+
+Settings-style form layout:
+
+```typescript
+import { Form, Section, Switch, Text, HStack, Spacer } from "@expo/ui/swift-ui";
+import { useState } from "react";
+
+export default function SettingsScreen() {
+  const [enabled, setEnabled] = useState(false);
+
+  return (
+    <Host style={{ flex: 1 }}>
+      <Form>
+        <Section>
+          <HStack spacing={8}>
+            <Text>Airplane Mode</Text>
+            <Spacer />
+            <Switch value={enabled} onValueChange={setEnabled} />
+          </HStack>
+        </Section>
+      </Form>
+    </Host>
+  );
+}
+```
+
+### Button Component
+
+```typescript
+import { Button, Host } from "@expo/ui/swift-ui";
+
+<Host>
+  <Button variant="default" onPress={() => console.log("Pressed")}>
+    <Text>Press Me</Text>
+  </Button>
+</Host>
+```
+
+**Variants:**
+- `"default"`: Default button style
+- `"bordered"`: Bordered button
+- `"plain"`: Plain button style
+
+### ContentUnavailableView
+
+Empty state component:
+
+```typescript
+import { ContentUnavailableView, Host } from "@expo/ui/swift-ui";
+
+<Host style={{ flex: 1 }}>
+  <ContentUnavailableView
+    title="No exercises found"
+    description="No exercises found matching your search."
+  />
+</Host>
+```
+
+**Props:**
+- `title`: Main title text
+- `description`: Description text below title
+
+### BottomSheet
+
+Modal sheet component:
+
+```typescript
+import { BottomSheet, Host, Text, Button } from "@expo/ui/swift-ui";
+import { useState } from "react";
+
+export default function MyScreen() {
+  const [isOpened, setIsOpened] = useState(false);
+
+  return (
+    <Host>
+      <Button onPress={() => setIsOpened(true)}>Open Sheet</Button>
+      <BottomSheet isOpened={isOpened} onIsOpenedChange={setIsOpened}>
+        <Text>Sheet Content</Text>
+      </BottomSheet>
+    </Host>
+  );
+}
+```
+
+### Switch Component
+
+```typescript
+import { Switch } from "@expo/ui/swift-ui";
+
+<Switch value={isEnabled} onValueChange={setIsEnabled} />
+```
+
+### TextField / SecureField
+
+```typescript
+import { TextField, SecureField } from "@expo/ui/swift-ui";
+import { useState } from "react";
+
+export default function LoginScreen() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  return (
+    <Host>
+      <TextField
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <SecureField
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+      />
+    </Host>
+  );
+}
+```
+
+### Image Component
+
+```typescript
+import { Image } from "@expo/ui/swift-ui";
+
+// SF Symbol (iOS)
+<Image systemName="star.fill" size={24} color="#0D87E1" />
+
+// Regular image
+<Image source={{ uri: "https://example.com/image.png" }} />
+```
+
+**Props:**
+- `systemName`: SF Symbol name (iOS)
+- `size`: Icon size (for SF Symbols)
+- `color`: Icon color
+- `source`: Image source (React Native ImageSource)
+
+### Progress Components
+
+```typescript
+import { CircularProgress, LinearProgress } from "@expo/ui/swift-ui";
+
+// Circular progress
+<CircularProgress />
+
+// Linear progress
+<LinearProgress progress={0.5} color="orange" />
+```
+
+**LinearProgress Props:**
+- `progress`: Progress value (0-1)
+- `color`: Progress bar color
+
+### Other Components
+
+- **Picker**: Selection picker (`<Picker>`)
+- **DatePicker**: Date/time selection (`<DatePicker>`)
+- **Slider**: Range slider (`<Slider>`)
+- **Gauge**: Progress gauge (`<Gauge>`)
+- **ContextMenu**: Long-press menu (`<ContextMenu>`)
+- **DisclosureGroup**: Expandable sections (`<DisclosureGroup>`)
+- **Divider**: Visual separator (`<Divider>`)
+- **ColorPicker**: Color selection (`<ColorPicker>`)
+- **Label**: Form label (`<Label>`)
+- **LabeledContent**: Labeled content (`<LabeledContent>`)
+- **ShareLink**: Share sheet link (`<ShareLink>`)
+
+## SwiftUI Modifiers
+
+Modifiers are applied via the `modifiers` prop (array):
+
+```typescript
+import { padding, background, cornerRadius } from "@expo/ui/swift-ui/modifiers";
+
+<VStack
+  modifiers={[
+    padding({ all: 16 }),
+    background("#F4F4F5"),
+    cornerRadius(12),
+  ]}
+>
+  <Text>Content</Text>
+</VStack>
+```
+
+### Layout Modifiers
+
+#### padding
+
+```typescript
+padding({ all: 16 })                           // All sides
+padding({ top: 8, bottom: 8 })                 // Top and bottom
+padding({ horizontal: 16, vertical: 8 })      // Horizontal and vertical
+padding({ leading: 16, trailing: 16 })         // Leading and trailing
+```
+
+#### frame
+
+```typescript
+frame({
+  width: 100,
+  height: 100,
+  minWidth: 50,
+  maxWidth: 200,
+  alignment: "center", // "leading" | "center" | "trailing" | "top" | "bottom" | etc.
+})
+```
+
+#### fixedSize
+
+```typescript
+fixedSize({ horizontal: true, vertical: false })
+```
+
+#### ignoreSafeArea
+
+```typescript
+ignoreSafeArea({
+  regions: "all", // "all" | "container" | "keyboard"
+  edges: "all",  // "all" | "top" | "bottom" | "leading" | "trailing" | "horizontal" | "vertical"
+})
+```
+
+### Visual Modifiers
+
+#### background
+
+```typescript
+background("#FF0000")        // Hex color
+background("red")            // Named color
+background("primary")        // System color
+```
+
+#### cornerRadius
+
+```typescript
+cornerRadius(12)
+```
+
+#### shadow
+
+```typescript
+shadow({
+  radius: 8,
+  x: 0,
+  y: 4,
+  color: "#000000",
+})
+```
+
+#### border
+
+```typescript
+border({ color: "#000000", width: 1 })
+```
+
+#### clipShape
+
+```typescript
+clipShape("roundedRectangle", 12)  // "rectangle" | "circle" | "roundedRectangle"
+clipShape("circle")
+```
+
+#### opacity
+
+```typescript
+opacity(0.5)  // 0-1
+```
+
+### Foreground Style
+
+Advanced foreground styling with colors, gradients, and hierarchical styles:
+
+```typescript
+import { foregroundStyle } from "@expo/ui/swift-ui/modifiers";
+
+// Simple color
+foregroundStyle("#FF0000")
+
+// Hierarchical style (adapts to light/dark mode)
+foregroundStyle({ type: "hierarchical", style: "secondary" })
+// Options: "primary" | "secondary" | "tertiary" | "quaternary" | "quinary"
+
+// Linear gradient
+foregroundStyle({
+  type: "linearGradient",
+  colors: ["#FF0000", "#0000FF"],
+  startPoint: { x: 0, y: 0 },
+  endPoint: { x: 1, y: 1 },
+})
+
+// Radial gradient
+foregroundStyle({
+  type: "radialGradient",
+  colors: ["#FF0000", "#0000FF"],
+  center: { x: 0.5, y: 0.5 },
+  startRadius: 0,
+  endRadius: 100,
+})
+
+// Angular gradient
+foregroundStyle({
+  type: "angularGradient",
+  colors: ["#FF0000", "#00FF00", "#0000FF"],
+  center: { x: 0.5, y: 0.5 },
+})
+```
+
+### Transform Modifiers
+
+#### scaleEffect
+
+```typescript
+scaleEffect(1.5)  // Scale factor (1.0 = normal)
+```
+
+#### rotationEffect
+
+```typescript
+rotationEffect(45)  // Degrees
+```
+
+#### offset
+
+```typescript
+offset({ x: 10, y: 20 })
+```
+
+### Gesture Modifiers
+
+#### onTapGesture
+
+```typescript
+onTapGesture(() => {
+  console.log("Tapped");
+})
+```
+
+#### onLongPressGesture
+
+```typescript
+onLongPressGesture(() => {
+  console.log("Long pressed");
+}, 0.5)  // Minimum duration in seconds
+```
+
+### Other Modifiers
+
+- `tint(color)`: Tint color
+- `hidden(boolean)`: Hide/show view
+- `disabled(boolean)`: Disable/enable view
+- `zIndex(number)`: Z-index
+- `blur(radius)`: Blur effect
+- `brightness(amount)`: Brightness (-1 to 1)
+- `contrast(amount)`: Contrast multiplier
+- `saturation(amount)`: Saturation multiplier
+- `hueRotation(angle)`: Hue rotation in degrees
+- `colorInvert(boolean)`: Invert colors
+- `grayscale(amount)`: Grayscale (0-1)
+- `buttonStyle(style)`: Button style
+- `accessibilityLabel(label)`: Accessibility label
+- `accessibilityHint(hint)`: Accessibility hint
+- `accessibilityValue(value)`: Accessibility value
+- `layoutPriority(priority)`: Layout priority
+- `mask(shape, cornerRadius)`: Apply mask
+- `overlay({ color, alignment })`: Overlay view
+- `backgroundOverlay({ color, alignment })`: Background overlay
+- `aspectRatio({ ratio, contentMode })`: Aspect ratio
+- `clipped(boolean)`: Clip to bounds
+- `glassEffect({ glass, shape })`: Glass effect (requires `expo-glass-effect`)
+- `glassEffectId(id, namespaceId)`: Liquid Glass identity
+
+## Code Examples
+
+### Native Tabs Layout
+
+```typescript
+// apps/native/src/app/(tabs)/_layout.tsx
+import { useAuth } from "@clerk/clerk-expo";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Redirect } from "expo-router";
+import {
+  Icon,
+  Label,
+  NativeTabs,
+  VectorIcon,
+} from "expo-router/unstable-native-tabs";
+import { ActivityIndicator, ColorValue, ImageSourcePropType, Platform, View } from "react-native";
+
+type VectorIconFamily = {
+  getImageSource: (
+    name: string,
+    size: number,
+    color: ColorValue,
+  ) => Promise<ImageSourcePropType>;
+};
+
+const TINT_COLOR = "#0D87E1";
+const INACTIVE_COLOR = "#71717A";
+
+export default function TabsLayout() {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={TINT_COLOR} />
+      </View>
+    );
+  }
+
+  if (!isSignedIn) {
+    return <Redirect href="/" />;
+  }
+
+  return (
+    <NativeTabs
+      tintColor={TINT_COLOR}
+      iconColor={INACTIVE_COLOR}
+      labelStyle={{ color: INACTIVE_COLOR }}
+      labelVisibilityMode="labeled"
+    >
+      <NativeTabs.Trigger name="exercises">
+        {Platform.select({
+          ios: <Icon sf="dumbbell.fill" />,
+          android: (
+            <Icon
+              src={
+                <VectorIcon
+                  family={MaterialCommunityIcons as VectorIconFamily}
+                  name="dumbbell"
+                />
+              }
+              selectedColor={TINT_COLOR}
+            />
+          ),
+        })}
+        <Label>Exercises</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="profile">
+        {Platform.select({
+          ios: <Icon sf="person.fill" />,
+          android: (
+            <Icon
+              src={
+                <VectorIcon
+                  family={MaterialCommunityIcons as VectorIconFamily}
+                  name="account"
+                />
+              }
+              selectedColor={TINT_COLOR}
+            />
+          ),
+        })}
+        <Label>Profile</Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
+  );
+}
+```
+
+### Search Bar Integration
+
+```typescript
+// apps/native/src/app/(tabs)/exercises/_layout.tsx
+import { isLiquidGlassAvailable } from "expo-glass-effect";
+import { router, Stack } from "expo-router";
+
+export default function ExercisesLayout() {
+  return (
+    <Stack>
+      <Stack.Screen
+        name="index"
+        options={{
+          title: "Exercises",
+          headerStyle: {
+            backgroundColor: isLiquidGlassAvailable()
+              ? "transparent"
+              : "#0D87E1",
+          },
+          headerLargeTitle: true,
+          headerSearchBarOptions: {
+            headerIconColor: "#0D87E1",
+            tintColor: "#0D87E1",
+            textColor: "#0D87E1",
+            hintTextColor: "#0D87E1",
+            placeholder: "Search exercises",
+            onChangeText: (event) => {
+              router.setParams({
+                q: event.nativeEvent.text,
+              });
+            },
+          },
+        }}
+      />
+    </Stack>
+  );
+}
+```
+
+### List with Sections
+
+```typescript
+// apps/native/src/app/(tabs)/exercises/index.tsx
+import {
+  Host,
+  HStack,
+  List,
+  Section,
+  Text as SwiftUIText,
+  VStack,
+} from "@expo/ui/swift-ui";
+import {
+  background,
+  cornerRadius,
+  padding,
+} from "@expo/ui/swift-ui/modifiers";
+import { useLocalSearchParams } from "expo-router";
+
+export default function ExercisesScreen() {
+  const params = useLocalSearchParams<{ q?: string }>();
+  const searchQuery = params.q?.trim() || undefined;
+
+  const exercises = [
+    { id: "1", title: "Push-up", level: "beginner" },
+    { id: "2", title: "Pull-up", level: "intermediate" },
+  ];
+
+  return (
+    <Host style={{ flex: 1 }}>
+      <List listStyle="plain">
+        <Section title="Beginner">
+          {exercises
+            .filter((e) => e.level === "beginner")
+            .map((exercise) => (
+              <VStack
+                key={exercise.id}
+                alignment="leading"
+                spacing={8}
+                onPress={() => console.log("Pressed", exercise.id)}
+              >
+                <HStack spacing={8}>
+                  <SwiftUIText weight="semibold" size={17}>
+                    {exercise.title}
+                  </SwiftUIText>
+                  <HStack
+                    spacing={4}
+                    modifiers={[
+                      padding({ all: 4 }),
+                      background("#F4F4F5"),
+                      cornerRadius(8),
+                    ]}
+                  >
+                    <SwiftUIText size={13} color="#71717A">
+                      Beginner
+                    </SwiftUIText>
+                  </HStack>
+                </HStack>
+              </VStack>
+            ))}
+        </Section>
+      </List>
+    </Host>
+  );
+}
+```
+
+### Loading and Empty States
+
+```typescript
+import {
+  ContentUnavailableView,
+  Host,
+} from "@expo/ui/swift-ui";
+import { ActivityIndicator, View, Text, StyleSheet } from "react-native";
+
+export default function MyScreen() {
+  const data = undefined; // Loading
+  // const data = []; // Empty
+
+  if (data === undefined) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#0D87E1" />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <Host style={styles.container}>
+        <View style={styles.centerContainer}>
+          <ContentUnavailableView
+            title="No items found"
+            description="No items match your criteria."
+          />
+        </View>
+      </Host>
+    );
+  }
+
+  return (
+    <Host style={styles.container}>
+      {/* Render data */}
+    </Host>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  centerContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 32,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: "#71717A",
+    marginTop: 16,
+  },
+});
+```
+
+## Best Practices
+
+### When to Use SwiftUI vs React Native Components
+
+**Use SwiftUI (`@expo/ui`) for:**
+- Lists and forms (Settings-style UI)
+- Native iOS look and feel
+- Empty states (`ContentUnavailableView`)
+- Native buttons and switches
+- When you need platform-specific native components
+
+**Use React Native components for:**
+- Loading indicators (`ActivityIndicator`)
+- Complex custom layouts
+- Cross-platform consistency
+- When SwiftUI doesn't have the component you need
+
+### Host Component Requirements
+
+- **Always wrap SwiftUI components in `Host`**
+- Apply flexbox styles to `Host`, not SwiftUI components
+- `Host` can have React Native `style` prop
+- Once inside SwiftUI context, use `HStack`/`VStack` for layout
+
+### Mixing React Native and SwiftUI
+
+You can mix components, but be aware of limitations:
+
+```typescript
+<Host>
+  <VStack>
+    <Text>SwiftUI Text</Text>
+    {/* React Native component */}
+    <View style={{ padding: 16 }}>
+      <ActivityIndicator />
+    </View>
+  </VStack>
+</Host>
+```
+
+**Limitations:**
+- SwiftUI controls layout of React Native views
+- Don't set layout properties directly on React Native views inside SwiftUI
+- Keep boundaries clear between SwiftUI and React Native sections
+
+### Platform-Specific Code
+
+Use `Platform.select()` for platform differences:
+
+```typescript
+import { Platform } from "react-native";
+
+{Platform.select({
+  ios: <Icon sf="star.fill" />,
+  android: <Icon src={<VectorIcon family={MaterialIcons} name="star" />} />,
+})}
+```
+
+### Loading and Empty State Patterns
+
+1. **Loading**: Use React Native `ActivityIndicator` with `View` wrapper
+2. **Empty**: Use SwiftUI `ContentUnavailableView` inside `Host`
+3. **Error**: Use React Native `Alert` or custom error UI
+
+### List Item Patterns
+
+```typescript
+// Tappable list item
+<VStack
+  spacing={8}
+  alignment="leading"
+  onPress={() => handlePress(item)}
+>
+  <HStack spacing={8}>
+    <Text weight="semibold">{item.title}</Text>
+    <Spacer />
+    <Text color="#71717A">{item.subtitle}</Text>
+  </HStack>
+</VStack>
+
+// List item with badge/chip
+<HStack spacing={8}>
+  <Text>{item.title}</Text>
+  <HStack
+    modifiers={[
+      padding({ all: 4 }),
+      background("#F4F4F5"),
+      cornerRadius(8),
+    ]}
+  >
+    <Text size={12} color="#71717A">
+      Badge
+    </Text>
+  </HStack>
+</HStack>
+```
+
+### Modifier Best Practices
+
+- Apply modifiers as an array to the `modifiers` prop
+- Order matters: later modifiers can override earlier ones
+- Use TypeScript for type safety
+- Import modifiers from `@expo/ui/swift-ui/modifiers`
+
+### Performance Considerations
+
+- `List` component handles virtualization automatically
+- Use `lineLimit` on `Text` to prevent layout issues
+- Avoid deep nesting of `HStack`/`VStack`
+- Use `Spacer` for flexible spacing instead of fixed widths
+
+## References
+
+- [Expo UI SwiftUI Guide](https://docs.expo.dev/guides/expo-ui-swift-ui/)
+- [Expo UI API Reference](https://docs.expo.dev/versions/latest/sdk/ui/swift-ui/)
+- [Expo Router Introduction](https://docs.expo.dev/router/introduction/)
+- [Expo Router API Reference](https://docs.expo.dev/versions/latest/sdk/router/)
+- [React Conf App Example](https://github.com/expo/react-conf-app)
