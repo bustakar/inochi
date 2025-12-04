@@ -7,7 +7,10 @@ import type {
 /**
  * Color values for exercise levels (React Native compatible)
  */
-export const exerciseLevelColors: Record<ExerciseLevel, { bg: string; text: string }> = {
+export const exerciseLevelColors: Record<
+  ExerciseLevel,
+  { bg: string; text: string }
+> = {
   beginner: {
     bg: "#DCFCE7", // green-100
     text: "#166534", // green-800
@@ -37,7 +40,10 @@ export const exerciseLevelColors: Record<ExerciseLevel, { bg: string; text: stri
 /**
  * Get color values for an exercise level
  */
-export function getExerciseLevelColor(level: ExerciseLevel): { bg: string; text: string } {
+export function getExerciseLevelColor(level: ExerciseLevel): {
+  bg: string;
+  text: string;
+} {
   return exerciseLevelColors[level];
 }
 
@@ -94,7 +100,10 @@ export function getProgressStatusLabel(status: ProgressStatus): string {
 /**
  * Color values for progress statuses (React Native compatible)
  */
-export const progressStatusColors: Record<ProgressStatus, { bg: string; text: string }> = {
+export const progressStatusColors: Record<
+  ProgressStatus,
+  { bg: string; text: string }
+> = {
   novice: {
     bg: "#6B7280", // gray-500
     text: "#FFFFFF",
@@ -116,7 +125,10 @@ export const progressStatusColors: Record<ProgressStatus, { bg: string; text: st
 /**
  * Get color values for a progress status
  */
-export function getProgressStatusColor(status: ProgressStatus): { bg: string; text: string } {
+export function getProgressStatusColor(status: ProgressStatus): {
+  bg: string;
+  text: string;
+} {
   return progressStatusColors[status];
 }
 
@@ -129,5 +141,3 @@ export const progressStatuses: ProgressStatus[] = [
   "journeyman",
   "master",
 ];
-
-

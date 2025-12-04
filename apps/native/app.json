@@ -1,8 +1,8 @@
 {
   "expo": {
     "newArchEnabled": true,
-    "name": "NotesContract",
-    "slug": "NotesContract",
+    "name": "Inochi",
+    "slug": "inochi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +17,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.karelbusta.NotesContract"
+      "bundleIdentifier": "com.karelbusta.inochi",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -32,6 +35,12 @@
       "expo-font",
       "expo-router"
     ],
-    "scheme": "inochi"
+    "scheme": "inochi",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a7d74c10-6609-4721-9bbd-66cfcb74ca45"
+      }
+    }
   }
 }

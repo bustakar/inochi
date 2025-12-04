@@ -1,13 +1,14 @@
+import { Host, Text, VStack } from "@expo/ui/swift-ui";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type {
   ExerciseLevel,
   MuscleRole,
   ProgressStatus,
 } from "@packages/backend/convex/validators/validators";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import {
   exerciseLevelColors,
   getProgressStatusColor,
@@ -36,15 +37,19 @@ interface ExerciseCardProps {
 function ProgressRibbon({ status }: { status: ProgressStatus }) {
   const colors = getProgressStatusColor(status);
   return (
-    <View
-      style={[
-        styles.progressRibbon,
-        { backgroundColor: colors.bg },
-      ]}
-    >
+    <View style={[styles.progressRibbon, { backgroundColor: colors.bg }]}>
       <Text style={[styles.progressRibbonText, { color: colors.text }]}>
         {getProgressStatusLabel(status)}
       </Text>
+    </View>
+  );
+}
+
+function LevelBadge({ level }: { level: ExerciseLevel }) {
+  const colors = exerciseLevelColors[level];
+  return (
+    <View style={[styles.badge, { backgroundColor: colors.bg }]}>
+      <Text>{level}</Text>
     </View>
   );
 }
@@ -71,77 +76,84 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
   };
 
   return (
-    <Pressable
-      style={[
-        styles.card,
-        !exercise.userProgress && styles.cardInactive,
-      ]}
-      onPress={handlePress}
-    >
-      {/* Progress ribbon */}
-      {exercise.userProgress && (
-        <ProgressRibbon status={exercise.userProgress.status} />
-      )}
+    <Host>
+      <VStack>
+        <Text>{exercise.title}</Text>
+        <LevelBadge level={exercise.level} />
+        <Text>{displayDescription}</Text>
+      </VStack>
+    </Host>
+    // <Pressable
+    //   style={[
+    //     styles.card,
+    //     !exercise.userProgress && styles.cardInactive,
+    //   ]}
+    //   onPress={handlePress}
+    // >
+    //   {/* Progress ribbon */}
+    //   {exercise.userProgress && (
+    //     <ProgressRibbon status={exercise.userProgress.status} />
+    //   )}
 
-      {/* Header with title */}
-      <View style={styles.header}>
-        <Text style={styles.title} numberOfLines={2}>
-          {exercise.title}
-        </Text>
-      </View>
+    //   {/* Header with title */}
+    //   <View style={styles.header}>
+    //     <Text style={styles.title} numberOfLines={2}>
+    //       {exercise.title}
+    //     </Text>
+    //   </View>
 
-      {/* Level and visibility badges */}
-      <View style={styles.badgesRow}>
-        <View
-          style={[
-            styles.badge,
-            { backgroundColor: levelColors.bg },
-          ]}
-        >
-          <Text style={[styles.badgeText, { color: levelColors.text }]}>
-            {exercise.level}
-          </Text>
-        </View>
-        <View style={[styles.badge, styles.publicBadge]}>
-          <MaterialCommunityIcons name="earth" size={12} color="#059669" />
-          <Text style={styles.publicBadgeText}>Public</Text>
-        </View>
-      </View>
+    //   {/* Level and visibility badges */}
+    //   <View style={styles.badgesRow}>
+    //     <View
+    //       style={[
+    //         styles.badge,
+    //         { backgroundColor: levelColors.bg },
+    //       ]}
+    //     >
+    //       <Text style={[styles.badgeText, { color: levelColors.text }]}>
+    //         {exercise.level}
+    //       </Text>
+    //     </View>
+    //     <View style={[styles.badge, styles.publicBadge]}>
+    //       <MaterialCommunityIcons name="earth" size={12} color="#059669" />
+    //       <Text style={styles.publicBadgeText}>Public</Text>
+    //     </View>
+    //   </View>
 
-      {/* Description */}
-      <Text style={styles.description} numberOfLines={2}>
-        {displayDescription}
-      </Text>
+    //   {/* Description */}
+    //   <Text style={styles.description} numberOfLines={2}>
+    //     {displayDescription}
+    //   </Text>
 
-      {/* Difficulty */}
-      <View style={styles.difficultyRow}>
-        <Text style={styles.difficultyLabel}>Difficulty:</Text>
-        <View style={styles.difficultyDots}>
-          {Array.from({ length: 10 }).map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.difficultyDot,
-                i < exercise.difficulty ? styles.difficultyDotFilled : styles.difficultyDotEmpty,
-              ]}
-            />
-          ))}
-        </View>
-        <Text style={styles.difficultyValue}>{exercise.difficulty}/10</Text>
-      </View>
+    //   {/* Difficulty */}
+    //   <View style={styles.difficultyRow}>
+    //     <Text style={styles.difficultyLabel}>Difficulty:</Text>
+    //     <View style={styles.difficultyDots}>
+    //       {Array.from({ length: 10 }).map((_, i) => (
+    //         <View
+    //           key={i}
+    //           style={[
+    //             styles.difficultyDot,
+    //             i < exercise.difficulty ? styles.difficultyDotFilled : styles.difficultyDotEmpty,
+    //           ]}
+    //         />
+    //       ))}
+    //     </View>
+    //     <Text style={styles.difficultyValue}>{exercise.difficulty}/10</Text>
+    //   </View>
 
-      {/* Primary muscle groups */}
-      {exercise.primaryMuscleGroups.length > 0 && (
-        <View style={styles.muscleGroupsRow}>
-          {exercise.primaryMuscleGroups.map((groupName, index) => (
-            <View key={`group-${index}`} style={styles.muscleGroupBadge}>
-              <MaterialCommunityIcons name="target" size={12} color="#71717A" />
-              <Text style={styles.muscleGroupText}>{groupName}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </Pressable>
+    //   {/* Primary muscle groups */}
+    //   {exercise.primaryMuscleGroups.length > 0 && (
+    //     <View style={styles.muscleGroupsRow}>
+    //       {exercise.primaryMuscleGroups.map((groupName, index) => (
+    //         <View key={`group-${index}`} style={styles.muscleGroupBadge}>
+    //           <MaterialCommunityIcons name="target" size={12} color="#71717A" />
+    //           <Text style={styles.muscleGroupText}>{groupName}</Text>
+    //         </View>
+    //       ))}
+    //     </View>
+    //   )}
+    // </Pressable>
   );
 }
 
@@ -275,5 +287,3 @@ const styles = StyleSheet.create({
     color: "#71717A",
   },
 });
-
-
