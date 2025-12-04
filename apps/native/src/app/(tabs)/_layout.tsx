@@ -7,15 +7,16 @@ import {
   NativeTabs,
   VectorIcon,
 } from "expo-router/unstable-native-tabs";
-import { ActivityIndicator, ColorValue, ImageSourcePropType, Platform, View } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
+import type { ColorValue, ImageSourcePropType } from "react-native";
 
-type VectorIconFamily = {
+interface VectorIconFamily {
   getImageSource: (
     name: string,
     size: number,
     color: ColorValue,
   ) => Promise<ImageSourcePropType>;
-};
+}
 
 const TINT_COLOR = "#0D87E1";
 const INACTIVE_COLOR = "#71717A";
@@ -79,4 +80,3 @@ export default function TabsLayout() {
     </NativeTabs>
   );
 }
-
