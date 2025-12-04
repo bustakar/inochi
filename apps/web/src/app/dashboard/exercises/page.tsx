@@ -13,14 +13,16 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Globe, Target } from "lucide-react";
 
-import { Badge, cn } from "@inochi/ui";
+import { Badge, Button, cn } from "@inochi/ui";
 
 import { Search } from "../../../components/search";
 import {
   exerciseLevelColors,
+  exerciseLevels,
   getProgressStatusColor,
   getProgressStatusLabel,
 } from "../../../utils/exercise-utils";
+import { BatchProgressDialog } from "./_components/batch-progress-dialog";
 
 // ============================================================================
 // Exercise Card Component
@@ -158,6 +160,19 @@ function ExerciseCard({ exercise }: ExerciseCardProps) {
 }
 
 // ============================================================================
+// Level Section Header Component
+// ============================================================================
+
+function LevelSectionHeader({ level }: { level: ExerciseLevel }) {
+  return (
+    <div className="flex items-center gap-3 py-4">
+      <h2 className="text-xl font-semibold capitalize">{level}</h2>
+      <Badge className={exerciseLevelColors[level]}>{level}</Badge>
+    </div>
+  );
+}
+
+// ============================================================================
 // Exercises List Component
 // ============================================================================
 
@@ -166,11 +181,11 @@ interface ExercisesListProps {
 }
 
 function ExercisesList({ searchQuery }: ExercisesListProps) {
-  const exercises = useQuery(api.functions.exercises.getAllExercises, {
+  const exercisesByLevel = useQuery(api.functions.exercises.getAllExercises, {
     searchQuery: searchQuery.trim() || undefined,
   });
 
-  if (exercises === undefined) {
+  if (exercisesByLevel === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading exercises...</p>
@@ -178,7 +193,12 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
     );
   }
 
-  if (exercises.length === 0) {
+  // Check if all levels are empty
+  const hasAnyExercises = exerciseLevels.some(
+    (level) => exercisesByLevel[level].length > 0,
+  );
+
+  if (!hasAnyExercises) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">
@@ -191,10 +211,24 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {exercises.map((exercise) => (
-        <ExerciseCard key={exercise._id} exercise={exercise} />
-      ))}
+    <div className="space-y-8">
+      {exerciseLevels.map((level) => {
+        const exercises = exercisesByLevel[level];
+        if (exercises.length === 0) {
+          return null;
+        }
+
+        return (
+          <div key={level}>
+            <LevelSectionHeader level={level} />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {exercises.map((exercise) => (
+                <ExerciseCard key={exercise._id} exercise={exercise} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -205,6 +239,7 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
 
 export default function ExercisesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -212,17 +247,28 @@ export default function ExercisesPage() {
         <h1 className="text-foreground text-3xl font-bold">Exercises</h1>
       </div>
 
-      {/* Search */}
-      <div className="max-w-md">
-        <Search
-          initialValue={searchQuery}
-          onSearchUpdate={setSearchQuery}
-          placeholder="Search exercises by title or description..."
-        />
+      {/* Search and Batch Update */}
+      <div className="flex items-center gap-4">
+        <div className="max-w-md flex-1">
+          <Search
+            initialValue={searchQuery}
+            onSearchUpdate={setSearchQuery}
+            placeholder="Search exercises by title or description..."
+          />
+        </div>
+        <Button variant="outline" onClick={() => setIsBatchDialogOpen(true)}>
+          Log Progress
+        </Button>
       </div>
 
       {/* Exercises List */}
       <ExercisesList searchQuery={searchQuery} />
+
+      {/* Batch Progress Dialog */}
+      <BatchProgressDialog
+        open={isBatchDialogOpen}
+        onOpenChange={setIsBatchDialogOpen}
+      />
     </div>
   );
 }
