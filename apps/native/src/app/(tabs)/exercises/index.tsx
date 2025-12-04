@@ -29,6 +29,8 @@ import {
 import {
   exerciseLevelColors,
   exerciseLevels,
+  getProgressStatusColor,
+  getProgressStatusLabel,
 } from "../../../utils/exercise-utils";
 
 type Exercise = {
@@ -117,6 +119,31 @@ export default function ExercisesScreen() {
                   spacing={8}
                   onPress={() => handleExercisePress(exercise._id)}
                 >
+                  {/* Progress Badge */}
+                  {exercise.userProgress && (
+                    <HStack
+                      spacing={4}
+                      modifiers={[
+                        padding({ all: 4 }),
+                        background(
+                          getProgressStatusColor(exercise.userProgress.status)
+                            .bg,
+                        ),
+                        cornerRadius(8),
+                      ]}
+                    >
+                      <SwiftUIText
+                        size={12}
+                        color={
+                          getProgressStatusColor(exercise.userProgress.status)
+                            .text
+                        }
+                      >
+                        {getProgressStatusLabel(exercise.userProgress.status)}
+                      </SwiftUIText>
+                    </HStack>
+                  )}
+
                   <HStack spacing={8}>
                     {/* Title */}
                     <SwiftUIText weight="semibold" size={17}>
