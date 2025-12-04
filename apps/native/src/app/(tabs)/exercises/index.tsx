@@ -1,22 +1,35 @@
-import { ContentUnavailableView } from "@expo/ui/swift-ui";
+import {
+  ContentUnavailableView,
+  Host,
+  HStack,
+  List,
+  Section,
+  Text as SwiftUIText,
+  VStack,
+} from "@expo/ui/swift-ui";
+import {
+  background,
+  cornerRadius,
+  foregroundStyle,
+  padding,
+} from "@expo/ui/swift-ui/modifiers";
 import { api } from "@packages/backend/convex/_generated/api";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { ExerciseLevel } from "@packages/backend/convex/validators/validators";
 import { useQuery } from "convex/react";
-import { useLocalSearchParams } from "expo-router";
-import React, { useCallback, useMemo } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useMemo } from "react";
 import {
   ActivityIndicator,
-  FlatList,
-  Keyboard,
   Platform,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { exerciseLevels } from "../../../utils/exercise-utils";
-import { ExerciseRow } from "./_components/ExerciseRow";
+import {
+  exerciseLevelColors,
+  exerciseLevels,
+} from "../../../utils/exercise-utils";
 
 type Exercise = {
   _id: Id<"exercises">;
@@ -37,11 +50,12 @@ type Exercise = {
   } | null;
 };
 
-type ListItem =
-  | { type: "header"; level: ExerciseLevel }
-  | { type: "exercise"; exercise: Exercise };
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 export default function ExercisesScreen() {
+  const router = useRouter();
   const params = useLocalSearchParams<{ q?: string }>();
   const searchQuery = params.q?.trim() || undefined;
 
@@ -49,59 +63,15 @@ export default function ExercisesScreen() {
     searchQuery: searchQuery,
   });
 
-  const listItems = useMemo(() => {
-    if (!exercises) return undefined;
-
-    const items: ListItem[] = [];
-
-    for (const level of exerciseLevels) {
-      const levelExercises = exercises[level];
-      if (levelExercises && levelExercises.length > 0) {
-        items.push({ type: "header", level });
-        for (const exercise of levelExercises) {
-          items.push({ type: "exercise", exercise });
-        }
-      }
-    }
-
-    return items;
-  }, [exercises]);
-
   const hasNoExercises = useMemo(() => {
     if (!exercises) return false;
     return exerciseLevels.every((level) => exercises[level]?.length === 0);
   }, [exercises]);
 
-  const { bottom } = useSafeAreaInsets();
-
-  const renderItem = useCallback(({ item }: { item: ListItem }) => {
-    if (item.type === "header") {
-      return (
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionHeaderText}>
-            {item.level.charAt(0).toUpperCase() + item.level.slice(1)}
-          </Text>
-        </View>
-      );
-    }
-
-    return (
-      <ExerciseRow
-        exercise={item.exercise}
-        onPress={() => {
-          // TODO: Navigate to exercise detail when implemented
-        }}
-      />
-    );
-  }, []);
-
-  const renderSeparator = useCallback(() => {
-    return <View style={styles.separator} />;
-  }, []);
-
-  const dismissKeyboard = useCallback(() => {
-    Keyboard.dismiss();
-  }, []);
+  const handleExercisePress = (exerciseId: Id<"exercises">) => {
+    // TODO: Navigate to exercise detail when implemented
+    // router.push(`/(tabs)/exercises/${exerciseId}`);
+  };
 
   if (exercises === undefined) {
     return (
@@ -114,40 +84,105 @@ export default function ExercisesScreen() {
     );
   }
 
-  return (
-    <FlatList
-      contentInsetAdjustmentBehavior="automatic"
-      onScrollBeginDrag={dismissKeyboard}
-      keyboardShouldPersistTaps="handled"
-      style={styles.list}
-      contentContainerStyle={[
-        styles.contentContainer,
-        {
-          paddingBottom: Platform.select({
-            android: 100 + bottom,
-            default: 0,
-          }),
-        },
-      ]}
-      ItemSeparatorComponent={renderSeparator}
-      renderItem={renderItem}
-      data={listItems || []}
-      keyExtractor={(item, index) => {
-        if (item.type === "header") {
-          return `header-${item.level}`;
-        }
-        return item.exercise._id;
-      }}
-      ListEmptyComponent={
+  if (hasNoExercises) {
+    return (
+      <Host style={styles.container}>
         <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>
-            {searchQuery
-              ? "No exercises found matching your search."
-              : "No exercises found."}
-          </Text>
+          <ContentUnavailableView
+            title="No exercises found"
+            description={
+              searchQuery
+                ? "No exercises found matching your search."
+                : "No exercises found."
+            }
+          />
         </View>
-      }
-    />
+      </Host>
+    );
+  }
+
+  return (
+    <Host style={styles.container}>
+      <List listStyle="plain">
+        {exerciseLevels.map((level) => {
+          const levelExercises = exercises[level];
+          if (!levelExercises || levelExercises.length === 0) return null;
+
+          return (
+            <Section key={level} title={capitalize(level)}>
+              {levelExercises.map((exercise) => (
+                <VStack
+                  key={exercise._id}
+                  alignment="leading"
+                  spacing={8}
+                  onPress={() => handleExercisePress(exercise._id)}
+                >
+                  <HStack spacing={8}>
+                    {/* Title */}
+                    <SwiftUIText weight="semibold" size={17}>
+                      {exercise.title}
+                    </SwiftUIText>
+                    {/* Level and Difficulty */}
+                    <HStack
+                      spacing={4}
+                      modifiers={[
+                        padding({ all: 4 }),
+                        background(exerciseLevelColors[exercise.level].bg),
+                        cornerRadius(8),
+                      ]}
+                    >
+                      <SwiftUIText
+                        size={13}
+                        color={exerciseLevelColors[exercise.level].text}
+                      >
+                        {capitalize(exercise.level)}
+                      </SwiftUIText>
+                      <SwiftUIText size={13} color="#71717A">
+                        •
+                      </SwiftUIText>
+                      <SwiftUIText
+                        size={13}
+                        color={exerciseLevelColors[exercise.level].text}
+                      >
+                        {`${exercise.difficulty}/12`}
+                      </SwiftUIText>
+                    </HStack>
+                  </HStack>
+
+                  {/* Description */}
+                  <SwiftUIText size={14} color="#71717A" lineLimit={2}>
+                    {exercise.description}
+                  </SwiftUIText>
+
+                  {/* Primary Muscle Groups */}
+                  {exercise.primaryMuscleGroups.length > 0 && (
+                    <HStack spacing={6}>
+                      {exercise.primaryMuscleGroups.map(
+                        (muscleGroup, index) => (
+                          <HStack
+                            key={`${exercise._id}-muscle-${index}`}
+                            spacing={4}
+                            modifiers={[
+                              padding({ all: 4 }),
+                              background("#F4F4F5"),
+                              cornerRadius(8),
+                            ]}
+                          >
+                            <SwiftUIText size={12} color="#71717A">
+                              {muscleGroup}
+                            </SwiftUIText>
+                          </HStack>
+                        ),
+                      )}
+                    </HStack>
+                  )}
+                </VStack>
+              ))}
+            </Section>
+          );
+        })}
+      </List>
+    </Host>
   );
 }
 
@@ -155,25 +190,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-  },
-  list: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingHorizontal: 16,
-  },
-  sectionHeader: {
-    paddingVertical: 12,
-    paddingTop: 16,
-  },
-  sectionHeaderText: {
-    fontSize: 22,
-    fontFamily: "Bold",
-    color: "#000000",
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#E4E4E7",
   },
   centerContainer: {
     flex: 1,
