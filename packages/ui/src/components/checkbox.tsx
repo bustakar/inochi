@@ -1,31 +1,54 @@
-"use client";
-
 import type * as React from "react";
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
-import { CheckIcon } from "lucide-react";
+
+import type * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { type VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
 
-function Checkbox({
-  className,
-  ...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
+import { Checkbox as ShadcnCheckbox } from "../checkbox";
+
+import "./styles/retro.css";
+
+export const checkboxVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+  },
+});
+
+export interface BitCheckboxProps
+  extends React.ComponentProps<typeof CheckboxPrimitive.Root>,
+    VariantProps<typeof checkboxVariants> {
+  asChild?: boolean;
+}
+
+function Checkbox({ className, font, ...props }: BitCheckboxProps) {
   return (
-    <CheckboxPrimitive.Root
-      data-slot="checkbox"
+    <div
       className={cn(
-        "peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
-        className,
+        "relative flex items-center justify-center border-y-6 border-foreground dark:border-ring",
+        className
       )}
-      {...props}
     >
-      <CheckboxPrimitive.Indicator
-        data-slot="checkbox-indicator"
-        className="grid place-content-center text-current transition-none"
-      >
-        <CheckIcon className="size-3.5" />
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
+      <ShadcnCheckbox
+        className={cn(
+          "rounded-none size-5 ring-0 border-none",
+          font !== "normal" && "retro",
+          className
+        )}
+        {...props}
+      />
+
+      <div
+        className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+        aria-hidden="true"
+      />
+    </div>
   );
 }
 

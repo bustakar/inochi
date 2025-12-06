@@ -1,20 +1,53 @@
-import type * as React from "react";
+import { type VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+import { Input as ShadcnInput } from "../input";
+
+import "./styles/retro.css";
+
+export const inputVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+  },
+});
+
+export interface BitInputProps
+  extends React.InputHTMLAttributes<HTMLInputElement>,
+    VariantProps<typeof inputVariants> {
+  asChild?: boolean;
+}
+
+function Input({ ...props }: BitInputProps) {
+  const { className, font } = props;
+
   return (
-    <input
-      type={type}
-      data-slot="input"
+    <div
       className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        className,
+        "relative border-y-6 border-foreground dark:border-ring !p-0 flex items-center",
+        className
       )}
-      {...props}
-    />
+    >
+      <ShadcnInput
+        {...props}
+        className={cn(
+          "rounded-none ring-0 !w-full",
+          font !== "normal" && "retro",
+          className
+        )}
+      />
+
+      <div
+        className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+        aria-hidden="true"
+      />
+    </div>
   );
 }
 

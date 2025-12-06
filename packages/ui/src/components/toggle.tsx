@@ -1,47 +1,75 @@
 "use client";
 
-import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
-import * as TogglePrimitive from "@radix-ui/react-toggle";
-import { cva } from "class-variance-authority";
+
+import type * as TogglePrimitive from "@radix-ui/react-toggle";
+import { type VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
 
-const toggleVariants = cva(
-  "hover:bg-muted hover:text-muted-foreground data-[state=on]:bg-accent data-[state=on]:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-  {
-    variants: {
-      variant: {
-        default: "bg-transparent",
-        outline:
-          "border-input hover:bg-accent hover:text-accent-foreground border bg-transparent shadow-xs",
-      },
-      size: {
-        default: "h-9 min-w-9 px-2",
-        sm: "h-8 min-w-8 px-1.5",
-        lg: "h-10 min-w-10 px-2.5",
-      },
+import { Toggle as ShadcnToggle } from "../toggle";
+
+import "./styles/retro.css";
+
+const toggleVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
+    variant: {
+      default: "bg-transparent",
+      outline:
+        "bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
+    },
+    size: {
+      default: "h-9 px-2 min-w-9",
+      sm: "h-8 px-1.5 min-w-8",
+      lg: "h-10 px-2.5 min-w-10",
     },
   },
-);
+  defaultVariants: {
+    variant: "default",
+    font: "retro",
+    size: "default",
+  },
+});
 
-function Toggle({
-  className,
-  variant,
-  size,
-  ...props
-}: React.ComponentProps<typeof TogglePrimitive.Root> &
-  VariantProps<typeof toggleVariants>) {
+export interface BitToggleProps
+  extends React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root>,
+    VariantProps<typeof toggleVariants> {}
+
+function Toggle({ children, font, ...props }: BitToggleProps) {
+  const { variant, className } = props;
+
   return (
-    <TogglePrimitive.Root
-      data-slot="toggle"
-      className={cn(toggleVariants({ variant, size, className }))}
+    <ShadcnToggle
       {...props}
-    />
+      className={cn(
+        "rounded-none active:translate-y-1 transition-transform relative border-none active:translate-x-1",
+        "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
+        font !== "normal" && "retro",
+        className
+      )}
+    >
+      {children}
+
+      <>
+        {variant === "outline" && (
+          <>
+            <div
+              className="absolute inset-0 border-y-6 -my-1.5 border-foreground dark:border-ring pointer-events-none"
+              aria-hidden="true"
+            />
+
+            <div
+              className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+              aria-hidden="true"
+            />
+          </>
+        )}
+      </>
+    </ShadcnToggle>
   );
 }
 

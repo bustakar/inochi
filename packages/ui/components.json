@@ -14,5 +14,8 @@
     "utils": "@inochi/ui",
     "components": "src/",
     "ui": "src/"
+  },
+  "registries": {
+    "@8bitcn": "https://8bitcn.com/r/{name}.json"
   }
 }

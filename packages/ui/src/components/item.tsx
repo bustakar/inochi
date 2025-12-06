@@ -1,10 +1,12 @@
-import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
+
 import { Slot } from "@radix-ui/react-slot";
-import { cva } from "class-variance-authority";
-import { Separator } from "src/components/separator";
+import { type VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
+
+import { Separator } from "./separator";
+import "./styles/retro.css";
 
 function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -32,7 +34,7 @@ function ItemSeparator({
 }
 
 const itemVariants = cva(
-  "group/item [a]:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 flex flex-wrap items-center rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:ring-[3px] [a]:transition-colors",
+  "group/item flex items-center border border-transparent text-sm rounded-md transition-colors [a]:hover:bg-accent/50 [a]:transition-colors duration-100 flex-wrap outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
   {
     variants: {
       variant: {
@@ -41,21 +43,27 @@ const itemVariants = cva(
         muted: "bg-muted/50",
       },
       size: {
-        default: "gap-4 p-4",
-        sm: "gap-2.5 px-4 py-3",
+        default: "p-4 gap-4 ",
+        sm: "py-3 px-4 gap-2.5",
+      },
+      font: {
+        normal: "",
+        retro: "retro",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      font: "retro",
     },
-  },
+  }
 );
 
 function Item({
   className,
   variant = "default",
   size = "default",
+  font = "retro",
   asChild = false,
   ...props
 }: React.ComponentProps<"div"> &
@@ -66,27 +74,28 @@ function Item({
       data-slot="item"
       data-variant={variant}
       data-size={size}
-      className={cn(itemVariants({ variant, size, className }))}
+      data-font={font}
+      className={cn(itemVariants({ variant, size, font, className }))}
       {...props}
     />
   );
 }
 
 const itemMediaVariants = cva(
-  "flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start [&_svg]:pointer-events-none",
+  "flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:self-start [&_svg]:pointer-events-none group-has-[[data-slot=item-description]]/item:translate-y-0.5",
   {
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "bg-muted size-8 rounded-sm border [&_svg:not([class*='size-'])]:size-4",
+        icon: "size-8 border rounded-sm bg-muted [&_svg:not([class*='size-'])]:size-4",
         image:
-          "size-10 overflow-hidden rounded-sm [&_img]:size-full [&_img]:object-cover",
+          "size-10 rounded-sm overflow-hidden [&_img]:size-full [&_img]:object-cover",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 function ItemMedia({
@@ -110,7 +119,7 @@ function ItemContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="item-content"
       className={cn(
         "flex flex-1 flex-col gap-1 [&+[data-slot=item-content]]:flex-none",
-        className,
+        className
       )}
       {...props}
     />
@@ -123,7 +132,7 @@ function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="item-title"
       className={cn(
         "flex w-fit items-center gap-2 text-sm leading-snug font-medium",
-        className,
+        className
       )}
       {...props}
     />
@@ -137,7 +146,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
       className={cn(
         "text-muted-foreground line-clamp-2 text-sm leading-normal font-normal text-balance",
         "[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
-        className,
+        className
       )}
       {...props}
     />
@@ -160,7 +169,7 @@ function ItemHeader({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="item-header"
       className={cn(
         "flex basis-full items-center justify-between gap-2",
-        className,
+        className
       )}
       {...props}
     />
@@ -173,7 +182,7 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="item-footer"
       className={cn(
         "flex basis-full items-center justify-between gap-2",
-        className,
+        className
       )}
       {...props}
     />
@@ -182,13 +191,13 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemFooter,
-  ItemGroup,
-  ItemHeader,
   ItemMedia,
+  ItemContent,
+  ItemActions,
+  ItemGroup,
   ItemSeparator,
   ItemTitle,
+  ItemDescription,
+  ItemHeader,
+  ItemFooter,
 };
