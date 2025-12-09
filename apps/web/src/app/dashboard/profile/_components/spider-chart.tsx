@@ -15,51 +15,39 @@ interface SpiderChartProps {
     pull: number;
     core: number;
     legs: number;
-    skill: number;
   };
 }
 
 export function SpiderChart({ stats }: SpiderChartProps) {
-  // Calculate max value for consistent scaling
-  const maxValue = Math.max(
-    stats.push,
-    stats.pull,
-    stats.core,
-    stats.legs,
-    stats.skill,
-    100, // Minimum scale
-  );
+  const maxValue = Math.max(stats.push, stats.pull, stats.core, stats.legs, 1);
+
+  const viewportMax = maxValue + 1;
 
   const data = [
     {
       category: "Push",
       value: stats.push,
-      fullMark: maxValue,
+      fullMark: viewportMax,
     },
     {
       category: "Pull",
       value: stats.pull,
-      fullMark: maxValue,
+      fullMark: viewportMax,
     },
     {
       category: "Core",
       value: stats.core,
-      fullMark: maxValue,
+      fullMark: viewportMax,
     },
     {
       category: "Legs",
       value: stats.legs,
-      fullMark: maxValue,
-    },
-    {
-      category: "Skill",
-      value: stats.skill,
-      fullMark: maxValue,
+      fullMark: viewportMax,
     },
   ];
 
   return (
-    <div className="h-[400px] w-full">
+    <div className="h-[400px] min-h-[400px] w-full min-w-0">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart data={data}>
           <PolarGrid stroke="hsl(var(--muted-foreground))" />
@@ -69,8 +57,10 @@ export function SpiderChart({ stats }: SpiderChartProps) {
           />
           <PolarRadiusAxis
             angle={90}
-            domain={[0, maxValue]}
+            domain={[0, viewportMax]}
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+            tickFormatter={(value: number) => value.toFixed(1)}
+            allowDuplicatedCategory={false}
           />
           <Radar
             name="Stats"

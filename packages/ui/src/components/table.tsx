@@ -1,64 +1,91 @@
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
+import {
+  Table as ShadcnTable,
+  TableBody as ShadcnTableBody,
+  TableCaption as ShadcnTableCaption,
+  TableCell as ShadcnTableCell,
+  TableFooter as ShadcnTableFooter,
+  TableHead as ShadcnTableHead,
+  TableHeader as ShadcnTableHeader,
+  TableRow as ShadcnTableRow,
+} from "../table";
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+import "./styles/retro.css";
+
+export const tableVariants = cva("", {
+  variants: {
+    variant: {
+      default: "border-foreground dark:border-ring border-y-6 p-4 py-2.5",
+      borderless: "",
+    },
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+    variant: "default",
+  },
+});
+
+function Table({
+  className,
+  font,
+  variant,
+  ...props
+}: React.ComponentProps<"table"> & {
+  font?: VariantProps<typeof tableVariants>["font"];
+  variant?: VariantProps<typeof tableVariants>["variant"];
+}) {
   return (
     <div
-      data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn(
+        "relative flex w-fit justify-center",
+        tableVariants({ font, variant }),
+      )}
     >
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
+      <ShadcnTable className={className} {...props} />
+
+      {variant !== "borderless" && (
+        <div
+          className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
+          aria-hidden="true"
+        />
+      )}
     </div>
   );
 }
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
-    <thead
-      data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+    <ShadcnTableHeader
+      className={cn(className, "border-foreground dark:border-ring border-b-4")}
       {...props}
     />
   );
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
-  return (
-    <tbody
-      data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
-      {...props}
-    />
-  );
+  return <ShadcnTableBody className={cn(className)} {...props} />;
 }
 
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
-  return (
-    <tfoot
-      data-slot="table-footer"
-      className={cn(
-        "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <ShadcnTableFooter className={cn(className)} {...props} />;
 }
 
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
-    <tr
-      data-slot="table-row"
+    <ShadcnTableRow
       className={cn(
-        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
         className,
+        "border-foreground dark:border-ring border-b-4 border-dashed",
       )}
       {...props}
     />
@@ -66,51 +93,27 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
 }
 
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
-  return (
-    <th
-      data-slot="table-head"
-      className={cn(
-        "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <ShadcnTableHead className={cn(className)} {...props} />;
 }
 
 function TableCell({ className, ...props }: React.ComponentProps<"td">) {
-  return (
-    <td
-      data-slot="table-cell"
-      className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <ShadcnTableCell className={cn(className)} {...props} />;
 }
 
 function TableCaption({
   className,
   ...props
 }: React.ComponentProps<"caption">) {
-  return (
-    <caption
-      data-slot="table-caption"
-      className={cn("text-muted-foreground mt-4 text-sm", className)}
-      {...props}
-    />
-  );
+  return <ShadcnTableCaption className={cn(className)} {...props} />;
 }
 
 export {
   Table,
+  TableHeader,
   TableBody,
-  TableCaption,
-  TableCell,
   TableFooter,
   TableHead,
-  TableHeader,
   TableRow,
+  TableCell,
+  TableCaption,
 };

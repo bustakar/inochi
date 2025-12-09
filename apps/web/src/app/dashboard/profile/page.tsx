@@ -5,8 +5,7 @@ import { useQuery } from "convex/react";
 
 import { Card } from "@inochi/ui";
 
-import { ArchetypeDisplay } from "./_components/archetype-display";
-import { PowerLevelDisplay } from "./_components/power-level-display";
+import { CharacterHeader } from "./_components/character-header";
 import { SpiderChart } from "./_components/spider-chart";
 import { TrophyCase } from "./_components/trophy-case";
 
@@ -22,16 +21,15 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-foreground text-3xl font-bold">Profile</h1>
-      </div>
-
-      {/* Power Level */}
-      <PowerLevelDisplay powerLevel={stats.powerLevel} />
-
-      {/* Archetype */}
-      <ArchetypeDisplay archetype={stats.archetype} />
+    <div className="mx-auto w-full max-w-4xl space-y-6">
+      {/* Character Header with Level and XP */}
+      <CharacterHeader
+        level={stats.level}
+        currentXP={stats.currentXP}
+        xpForNextLevel={stats.xpForNextLevel}
+        xpProgress={stats.xpProgress}
+        archetype={stats.archetype}
+      />
 
       {/* Main Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2">

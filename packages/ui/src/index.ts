@@ -37,5 +37,21 @@ export * from "./components/tooltip";
 // Sidebar components
 export * from "./components/sidebar";
 
+// 8bit components
+export { Badge as BitBadge } from "./components/ui/8bit/badge";
+export { Button as BitButton } from "./components/ui/8bit/button";
+export {
+  Card as BitCard,
+  CardAction as BitCardAction,
+  CardContent as BitCardContent,
+  CardDescription as BitCardDescription,
+  CardFooter as BitCardFooter,
+  CardHeader as BitCardHeader,
+  CardTitle as BitCardTitle,
+} from "./components/ui/8bit/card";
+export { HealthBar } from "./components/ui/8bit/health-bar";
+export { Separator as BitSeparator } from "./components/ui/8bit/separator";
+export { toast } from "./components/ui/8bit/toast";
+
 // Hooks
 export * from "./hooks/use-mobile";

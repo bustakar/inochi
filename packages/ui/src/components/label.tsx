@@ -1,21 +1,37 @@
 "use client";
 
+import type * as LabelPrimitive from "@radix-ui/react-label";
+import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
-import * as LabelPrimitive from "@radix-ui/react-label";
+import { cva } from "class-variance-authority";
 
+import { Label as ShadcnLabel } from "../label";
 import { cn } from "../lib/utils";
 
-function Label({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+import "./styles/retro.css";
+
+export const labelVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+  },
+});
+
+interface BitLabelProps
+  extends React.ComponentProps<typeof LabelPrimitive.Root>,
+    VariantProps<typeof labelVariants> {
+  asChild?: boolean;
+}
+
+function Label({ className, font, ...props }: BitLabelProps) {
   return (
-    <LabelPrimitive.Root
-      data-slot="label"
-      className={cn(
-        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
-        className,
-      )}
+    <ShadcnLabel
+      className={cn(className, font !== "normal" && "retro")}
       {...props}
     />
   );

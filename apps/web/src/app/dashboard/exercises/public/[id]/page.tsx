@@ -10,12 +10,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { Globe } from "lucide-react";
 
-import { Badge, Button } from "@inochi/ui";
+import { Badge, Button, Card, CardContent, HealthBar } from "@inochi/ui";
 
 import {
-  exerciseLevelColors,
+  exerciseLevelHealthBarColors,
   getMuscleRoleLabel,
   muscleRoles,
 } from "../../../../../utils/exercise-utils";
@@ -29,32 +28,47 @@ import { UserProgressSection } from "./_components/user-progress-section";
 interface ExerciseHeaderProps {
   exercise: {
     title: string;
-    level: ExerciseLevel;
-    difficulty: number;
   };
 }
 
 function ExerciseHeader({ exercise }: ExerciseHeaderProps) {
   return (
     <div className="flex items-center justify-between">
-      <div className="flex flex-col items-start gap-4 md:flex-row md:items-center">
-        <h1 className="text-foreground text-3xl font-bold">{exercise.title}</h1>
-        <div className="flex items-center gap-1">
-          <Badge className={exerciseLevelColors[exercise.level]}>
-            {exercise.level}
-          </Badge>
-          <Badge className={exerciseLevelColors[exercise.level]}>
-            {exercise.difficulty}/10
-          </Badge>
-          <Badge
-            variant="outline"
-            className="border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400"
-          >
-            <Globe className="mr-1 h-3 w-3" />
-            Public
-          </Badge>
-        </div>
+      <h1 className="text-foreground retro text-3xl font-bold">
+        {exercise.title}
+      </h1>
+    </div>
+  );
+}
+
+// ============================================================================
+// Difficulty Section Component
+// ============================================================================
+
+interface DifficultySectionProps {
+  exercise: {
+    level: ExerciseLevel;
+    difficulty: number;
+  };
+}
+
+function DifficultySection({ exercise }: DifficultySectionProps) {
+  return (
+    <div className="flex flex-col items-start gap-2">
+      <div className="flex w-full justify-between gap-2">
+        <span className="text-muted-foreground retro text-xs font-medium">
+          Difficulty:
+        </span>
+        <span className="text-muted-foreground retro text-xs">
+          {exercise.difficulty}/12
+        </span>
       </div>
+      <HealthBar
+        value={(exercise.difficulty / 12) * 100}
+        sections={12}
+        className="h-3"
+        progressBg={exerciseLevelHealthBarColors[exercise.level]}
+      />
     </div>
   );
 }
@@ -70,7 +84,9 @@ interface DescriptionSectionProps {
 function DescriptionSection({ description }: DescriptionSectionProps) {
   return (
     <div>
-      <p className="text-muted-foreground whitespace-pre-wrap">{description}</p>
+      <p className="text-muted-foreground retro whitespace-pre-wrap">
+        {description}
+      </p>
     </div>
   );
 }
@@ -123,74 +139,83 @@ function MusclesSection({ muscles }: MusclesSectionProps) {
   if (!hasAnyMuscles) {
     return (
       <div>
-        <h2 className="text-foreground mb-2 text-lg font-semibold">Muscles</h2>
-        <p className="text-muted-foreground text-sm">None</p>
+        <h2 className="text-foreground retro mb-2 text-lg font-semibold">
+          Muscles
+        </h2>
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-muted-foreground retro text-sm">None</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div>
-      <h2 className="text-foreground mb-4 text-lg font-semibold">Muscles</h2>
-      <div className="space-y-4">
-        {muscleRoles.map((role: MuscleRole) => {
-          const roleGroups = groupedMuscles[role];
-          if (roleGroups.size === 0) return null;
+      <h2 className="text-foreground retro mb-4 text-lg font-semibold">
+        Muscles
+      </h2>
+      <Card>
+        <CardContent className="space-y-4 py-4">
+          {muscleRoles.map((role: MuscleRole) => {
+            const roleGroups = groupedMuscles[role];
+            if (roleGroups.size === 0) return null;
 
-          return (
-            <div key={role} className="space-y-2">
-              <h3 className="text-muted-foreground text-sm font-medium">
-                {getMuscleRoleLabel(role)}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {Array.from(roleGroups.entries()).map(
-                  ([group, groupMuscles]: [
-                    string,
-                    { _id: Id<"muscles">; name: string }[],
-                  ]) => {
-                    const displayGroupName =
-                      group === "Other"
-                        ? "Other"
-                        : group
-                            .split(" ")
-                            .map(
-                              (word: string) =>
-                                word.charAt(0).toUpperCase() + word.slice(1),
-                            )
-                            .join(" ");
+            return (
+              <div key={role} className="space-y-2">
+                <h3 className="text-muted-foreground retro text-sm font-medium">
+                  {getMuscleRoleLabel(role)}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(roleGroups.entries()).map(
+                    ([group, groupMuscles]: [
+                      string,
+                      { _id: Id<"muscles">; name: string }[],
+                    ]) => {
+                      const displayGroupName =
+                        group === "Other"
+                          ? "Other"
+                          : group
+                              .split(" ")
+                              .map(
+                                (word: string) =>
+                                  word.charAt(0).toUpperCase() + word.slice(1),
+                              )
+                              .join(" ");
 
-                    return (
-                      <div
-                        key={`${role}-${group}`}
-                        className="bg-muted/50 inline-flex items-center gap-1 rounded-lg border px-2 py-1"
-                      >
-                        <Badge
-                          variant="outline"
-                          className="border-0 bg-transparent px-1 py-0 text-xs font-semibold"
+                      return (
+                        <div
+                          key={`${role}-${group}`}
+                          className="bg-muted/50 border-foreground/20 inline-flex items-center gap-1 border px-2 py-1"
                         >
-                          {displayGroupName}
-                        </Badge>
-                        <span className="text-muted-foreground text-xs">•</span>
-                        <div className="flex flex-wrap gap-1">
-                          {groupMuscles.map((muscle) => (
-                            <Badge
-                              key={muscle._id}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {muscle.name}
-                            </Badge>
-                          ))}
+                          <Badge
+                            variant="outline"
+                            className="border-0 bg-transparent px-1 py-0 text-xs font-semibold"
+                          >
+                            {displayGroupName}
+                          </Badge>
+                          <div className="flex flex-wrap gap-4">
+                            {groupMuscles.map((muscle) => (
+                              <Badge
+                                key={muscle._id}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {muscle.name}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  },
-                )}
+                      );
+                    },
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -229,6 +254,7 @@ export default function PublicExerciseDetailPage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
       <ExerciseHeader exercise={exercise} />
+      <DifficultySection exercise={exercise} />
 
       <div className="space-y-6">
         <UserProgressSection

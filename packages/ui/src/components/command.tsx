@@ -1,31 +1,58 @@
 "use client";
 
-import type * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
-import { SearchIcon } from "lucide-react";
+
+import type { Dialog } from "../dialog";
 import {
-  Dialog,
+  Command as ShadcnCommand,
+  CommandDialog as ShadcnCommandDialog,
+  CommandEmpty as ShadcnCommandEmpty,
+  CommandGroup as ShadcnCommandGroup,
+  CommandItem as ShadcnCommandItem,
+  CommandList as ShadcnCommandList,
+  CommandSeparator as ShadcnCommandSeparator,
+  CommandShortcut as ShadcnCommandShortcut,
+} from "../command";
+import {
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "src/components/dialog";
-
+} from "../dialog";
 import { cn } from "../lib/utils";
+import { Separator } from "./separator";
+
+import "./styles/retro.css";
 
 function Command({
   className,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive>) {
   return (
-    <CommandPrimitive
-      data-slot="command"
-      className={cn(
-        "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md",
-        className,
-      )}
-      {...props}
-    />
+    <div className={cn("relative !p-0", className)}>
+      <ShadcnCommand
+        data-slot="command"
+        className={cn(
+          "bg-popover text-popover-foreground flex h-full !w-full flex-col overflow-hidden rounded-md",
+          "retro",
+          className,
+        )}
+        {...props}
+      />
+
+      <div className="bg-foreground dark:bg-ring absolute -top-1.5 left-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute -top-1.5 right-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute -bottom-1.5 left-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute right-1.5 -bottom-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute top-0 left-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-0 right-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute bottom-0 left-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute right-0 bottom-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-1.5 -left-1.5 h-1/2 w-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-1.5 -right-1.5 h-1/2 w-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute bottom-1.5 -left-1.5 h-1/2 w-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute -right-1.5 bottom-1.5 h-1/2 w-1.5" />
+    </div>
   );
 }
 
@@ -33,30 +60,23 @@ function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
   children,
-  className,
-  showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof Dialog> & {
   title?: string;
   description?: string;
-  className?: string;
-  showCloseButton?: boolean;
 }) {
   return (
-    <Dialog {...props}>
+    <ShadcnCommandDialog {...props}>
       <DialogHeader className="sr-only">
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
-      <DialogContent
-        className={cn("overflow-hidden p-0", className)}
-        showCloseButton={showCloseButton}
-      >
+      <DialogContent className="overflow-hidden p-0">
         <Command className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
           {children}
         </Command>
       </DialogContent>
-    </Dialog>
+    </ShadcnCommandDialog>
   );
 }
 
@@ -67,9 +87,38 @@ function CommandInput({
   return (
     <div
       data-slot="command-input-wrapper"
-      className="flex h-9 items-center gap-2 border-b px-3"
+      className="flex h-10 items-center gap-2 border-b px-3"
     >
-      <SearchIcon className="size-4 shrink-0 opacity-50" />
+      <svg
+        width="30"
+        height="30"
+        viewBox="0 0 256 256"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="0.25"
+        aria-label="search"
+      >
+        <rect x="88" y="56" width="14" height="14" rx="1"></rect>
+        <rect x="72" y="72" width="14" height="14" rx="1"></rect>
+        <rect x="56" y="88" width="14" height="14" rx="1"></rect>
+        <rect x="56" y="104" width="14" height="14" rx="1"></rect>
+        <rect x="56" y="120" width="14" height="14" rx="1"></rect>
+        <rect x="72" y="136" width="14" height="14" rx="1"></rect>
+        <rect x="88" y="152" width="14" height="14" rx="1"></rect>
+        <rect x="104" y="152" width="14" height="14" rx="1"></rect>
+        <rect x="120" y="152" width="14" height="14" rx="1"></rect>
+        <rect x="136" y="136" width="14" height="14" rx="1"></rect>
+        <rect x="152" y="120" width="14" height="14" rx="1"></rect>
+        <rect x="152" y="104" width="14" height="14" rx="1"></rect>
+        <rect x="152" y="88" width="14" height="14" rx="1"></rect>
+        <rect x="136" y="72" width="14" height="14" rx="1"></rect>
+        <rect x="120" y="56" width="14" height="14" rx="1"></rect>
+        <rect x="104" y="56" width="14" height="14" rx="1"></rect>
+        <rect x="152" y="152" width="14" height="14" rx="1"></rect>
+        <rect x="168" y="168" width="14" height="14" rx="1"></rect>
+        <rect x="184" y="184" width="14" height="14" rx="1"></rect>
+      </svg>
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
@@ -87,10 +136,11 @@ function CommandList({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.List>) {
   return (
-    <CommandPrimitive.List
+    <ShadcnCommandList
       data-slot="command-list"
       className={cn(
-        "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto",
+        "max-h-[320px] scroll-py-1 overflow-x-hidden overflow-y-auto",
+        "retro",
         className,
       )}
       {...props}
@@ -102,7 +152,7 @@ function CommandEmpty({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Empty>) {
   return (
-    <CommandPrimitive.Empty
+    <ShadcnCommandEmpty
       data-slot="command-empty"
       className="py-6 text-center text-sm"
       {...props}
@@ -115,10 +165,11 @@ function CommandGroup({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Group>) {
   return (
-    <CommandPrimitive.Group
+    <ShadcnCommandGroup
       data-slot="command-group"
       className={cn(
         "text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium",
+        "retro",
         className,
       )}
       {...props}
@@ -131,11 +182,17 @@ function CommandSeparator({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Separator>) {
   return (
-    <CommandPrimitive.Separator
+    <ShadcnCommandSeparator
       data-slot="command-separator"
-      className={cn("bg-border -mx-1 h-px", className)}
+      className={cn(
+        "shrink-0 data-[orientation=horizontal]:h-0.5 data-[orientation=horizontal]:w-full data-[orientation=horizontal]:bg-[linear-gradient(90deg,var(--foreground)_75%,transparent_75%)] data-[orientation=horizontal]:bg-[length:16px_8px] data-[orientation=vertical]:h-full data-[orientation=vertical]:w-0.5 data-[orientation=vertical]:bg-[linear-gradient(0deg,var(--foreground)_75%,transparent_75%)] data-[orientation=vertical]:bg-[length:2px_16px] dark:data-[orientation=horizontal]:bg-[linear-gradient(90deg,var(--ring)_75%,transparent_75%)] dark:data-[orientation=vertical]:bg-[linear-gradient(0deg,var(--ring)_75%,transparent_75%)]",
+        "retro",
+        className,
+      )}
       {...props}
-    />
+    >
+      <Separator />
+    </ShadcnCommandSeparator>
   );
 }
 
@@ -144,10 +201,10 @@ function CommandItem({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Item>) {
   return (
-    <CommandPrimitive.Item
+    <ShadcnCommandItem
       data-slot="command-item"
       className={cn(
-        "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "border-ring/0 hover:border-foreground dark:hover:border-ring rounded-none border-y-3 border-dashed",
         className,
       )}
       {...props}
@@ -160,25 +217,18 @@ function CommandShortcut({
   ...props
 }: React.ComponentProps<"span">) {
   return (
-    <span
-      data-slot="command-shortcut"
-      className={cn(
-        "text-muted-foreground ml-auto text-xs tracking-widest",
-        className,
-      )}
-      {...props}
-    />
+    <ShadcnCommandShortcut className={cn("", "retro", className)} {...props} />
   );
 }
 
 export {
   Command,
   CommandDialog,
+  CommandInput,
+  CommandList,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
-  CommandList,
-  CommandSeparator,
   CommandShortcut,
+  CommandSeparator,
 };

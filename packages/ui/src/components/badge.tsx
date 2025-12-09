@@ -1,47 +1,98 @@
 import type { VariantProps } from "class-variance-authority";
-import type * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 
+import { Badge as ShadcnBadge } from "../badge";
 import { cn } from "../lib/utils";
 
-const badgeVariants = cva(
-  "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] [&>svg]:pointer-events-none [&>svg]:size-3",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 border-transparent",
-        secondary:
-          "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 border-transparent",
-        destructive:
-          "bg-destructive [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 border-transparent text-white",
-        outline:
-          "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-      },
+export const badgeVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
     },
-    defaultVariants: {
-      variant: "default",
+    variant: {
+      default: "border-primary bg-primary",
+      destructive: "border-destructive bg-destructive",
+      outline: "border-background bg-background",
+      secondary: "border-secondary bg-secondary",
     },
   },
-);
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+export interface BitBadgeProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof badgeVariants> {
+  asChild?: boolean;
+}
 
 function Badge({
-  className,
+  children,
+  className = "",
+  font,
   variant,
-  asChild = false,
   ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : "span";
+}: BitBadgeProps) {
+  const color = badgeVariants({ variant, font });
+
+  const classes = className.split(" ");
+
+  // visual classes for badge and sidebars
+  const visualClasses = classes.filter(
+    (c) =>
+      c.startsWith("bg-") ||
+      c.startsWith("border-") ||
+      c.startsWith("text-") ||
+      c.startsWith("rounded-"),
+  );
+
+  // Container should accept all non-visual utility classes (e.g., size, spacing, layout)
+  const containerClasses = classes.filter(
+    (c) =>
+      !(
+        c.startsWith("bg-") ||
+        c.startsWith("border-") ||
+        c.startsWith("text-") ||
+        c.startsWith("rounded-")
+      ),
+  );
 
   return (
-    <Comp
-      data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
-      {...props}
-    />
+    <div className={cn("relative inline-flex items-stretch", containerClasses)}>
+      <ShadcnBadge
+        {...props}
+        className={cn(
+          "h-full",
+          "rounded-none",
+          "w-full",
+          font !== "normal" && "retro",
+          visualClasses,
+        )}
+        variant={variant}
+      >
+        {children}
+      </ShadcnBadge>
+
+      {/* Left pixel bar */}
+      <div
+        className={cn(
+          "absolute inset-y-[4px] -left-1.5 w-1.5",
+          color,
+          visualClasses,
+        )}
+      />
+      {/* Right pixel bar */}
+      <div
+        className={cn(
+          "absolute inset-y-[4px] -right-1.5 w-1.5",
+          color,
+          visualClasses,
+        )}
+      />
+    </div>
   );
 }
 
-export { Badge, badgeVariants };
+export { Badge };

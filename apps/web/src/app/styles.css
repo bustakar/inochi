@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@inochi/tailwind-config/theme";
+@import "./styles/retro.css";
 
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 

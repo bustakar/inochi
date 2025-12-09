@@ -1,66 +1,97 @@
-"use client";
-
-import type * as React from "react";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
+import type * as TabsPrimitive from "@radix-ui/react-tabs";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
+import {
+  Tabs as ShadcnTabs,
+  TabsContent as ShadcnTabsContent,
+  TabsList as ShadcnTabsList,
+  TabsTrigger as ShadcnTabsTrigger,
+} from "../tabs";
 
-function Tabs({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+import "./styles/retro.css";
+
+export const tabsVariants = cva("", {
+  variants: {
+    variant: {
+      default: "bg-primary",
+      retro: "retro",
+    },
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+  },
+});
+
+export interface BitTabsProps
+  extends React.ComponentProps<typeof TabsPrimitive.Root>,
+    VariantProps<typeof tabsVariants> {
+  asChild?: boolean;
+}
+
+function Tabs({ className, ...props }: BitTabsProps) {
+  const { font } = props;
+
   return (
-    <TabsPrimitive.Root
-      data-slot="tabs"
-      className={cn("flex flex-col gap-2", className)}
+    <ShadcnTabs
       {...props}
+      className={cn("relative", font !== "normal" && "retro", className)}
     />
   );
 }
 
 function TabsList({
   className,
+  children,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+}: React.ComponentProps<typeof ShadcnTabsList>) {
   return (
-    <TabsPrimitive.List
-      data-slot="tabs-list"
-      className={cn(
-        "bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
-        className,
-      )}
+    <ShadcnTabsList
       {...props}
-    />
+      className={cn("bg-card relative rounded-none", className)}
+    >
+      <div
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -my-1.5 border-y-6"
+        aria-hidden="true"
+      />
+
+      <div
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
+        aria-hidden="true"
+      />
+      {children}
+    </ShadcnTabsList>
   );
 }
 
 function TabsTrigger({
   className,
+  children,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+}: React.ComponentProps<typeof ShadcnTabsTrigger>) {
   return (
-    <TabsPrimitive.Trigger
-      data-slot="tabs-trigger"
+    <ShadcnTabsTrigger
       className={cn(
-        "data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "data-[state=active]:bg-accent data-[state=active]:text-foreground text-muted-foreground rounded-none border-none",
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+    </ShadcnTabsTrigger>
   );
 }
 
 function TabsContent({
   className,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Content>) {
-  return (
-    <TabsPrimitive.Content
-      data-slot="tabs-content"
-      className={cn("flex-1 outline-none", className)}
-      {...props}
-    />
-  );
+}: React.ComponentProps<typeof ShadcnTabsContent>) {
+  return <ShadcnTabsContent className={cn("", className)} {...props} />;
 }
 
-export { Tabs, TabsContent, TabsList, TabsTrigger };
+export { Tabs, TabsList, TabsContent, TabsTrigger };

@@ -2,9 +2,11 @@ import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
-import { Separator } from "src/components/separator";
 
 import { cn } from "../lib/utils";
+import { Separator } from "./separator";
+
+import "./styles/retro.css";
 
 function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -44,10 +46,15 @@ const itemVariants = cva(
         default: "gap-4 p-4",
         sm: "gap-2.5 px-4 py-3",
       },
+      font: {
+        normal: "",
+        retro: "retro",
+      },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      font: "retro",
     },
   },
 );
@@ -56,6 +63,7 @@ function Item({
   className,
   variant = "default",
   size = "default",
+  font = "retro",
   asChild = false,
   ...props
 }: React.ComponentProps<"div"> &
@@ -66,7 +74,8 @@ function Item({
       data-slot="item"
       data-variant={variant}
       data-size={size}
-      className={cn(itemVariants({ variant, size, className }))}
+      data-font={font}
+      className={cn(itemVariants({ variant, size, font, className }))}
       {...props}
     />
   );
@@ -182,13 +191,13 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemFooter,
-  ItemGroup,
-  ItemHeader,
   ItemMedia,
+  ItemContent,
+  ItemActions,
+  ItemGroup,
   ItemSeparator,
   ItemTitle,
+  ItemDescription,
+  ItemHeader,
+  ItemFooter,
 };

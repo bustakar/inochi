@@ -6,6 +6,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
 
+import type { BitTooltipContentProps } from "../components/tooltip";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
 import { Separator } from "../components/separator";
@@ -507,7 +508,7 @@ function SidebarMenuButton({
 }: React.ComponentProps<"button"> & {
   asChild?: boolean;
   isActive?: boolean;
-  tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+  tooltip?: string | BitTooltipContentProps;
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot : "button";
   const { isMobile, state } = useSidebar();
@@ -527,10 +528,13 @@ function SidebarMenuButton({
     return button;
   }
 
+  let tooltipProps: BitTooltipContentProps;
   if (typeof tooltip === "string") {
-    tooltip = {
+    tooltipProps = {
       children: tooltip,
     };
+  } else {
+    tooltipProps = tooltip;
   }
 
   return (
@@ -540,7 +544,7 @@ function SidebarMenuButton({
         side="right"
         align="center"
         hidden={state !== "collapsed" || isMobile}
-        {...tooltip}
+        {...tooltipProps}
       />
     </Tooltip>
   );

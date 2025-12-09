@@ -1,17 +1,53 @@
-import type * as React from "react";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
+import { Textarea as ShadcnTextarea } from "../textarea";
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+import "./styles/retro.css";
+
+export const textareaVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+  },
+});
+
+export interface BitTextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+    VariantProps<typeof textareaVariants> {
+  asChild?: boolean;
+}
+
+function Textarea({ ...props }: BitTextareaProps) {
+  const { className, font } = props;
+
   return (
-    <textarea
-      data-slot="textarea"
-      className={cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className,
-      )}
-      {...props}
-    />
+    <div className={cn("relative w-full", className)}>
+      <ShadcnTextarea
+        {...props}
+        className={cn(
+          "rounded-none border-0 ring-0 transition-transform",
+          font !== "normal" && "retro",
+          className,
+        )}
+      />
+
+      <div
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -my-1.5 border-y-6"
+        aria-hidden="true"
+      />
+
+      <div
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
+        aria-hidden="true"
+      />
+    </div>
   );
 }
 

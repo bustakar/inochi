@@ -1,48 +1,62 @@
-"use client";
-
-import type * as React from "react";
-import * as PopoverPrimitive from "@radix-ui/react-popover";
+import type * as PopoverPrimitive from "@radix-ui/react-popover";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
+import {
+  Popover as ShadcnPopover,
+  PopoverAnchor as ShadcnPopoverAnchor,
+  PopoverContent as ShadcnPopoverContent,
+  PopoverTrigger as ShadcnPopoverTrigger,
+} from "../popover";
 
-function Popover({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Root>) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />;
-}
+import "./styles/retro.css";
 
-function PopoverTrigger({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
-}
+const Popover = ShadcnPopover;
+
+const PopoverTrigger = ShadcnPopoverTrigger;
+
+const PopoverAnchor = ShadcnPopoverAnchor;
+
+export const popOverVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+  },
+});
+
+export interface BitPopoverProps
+  extends React.ComponentProps<typeof PopoverPrimitive.Content>,
+    VariantProps<typeof popOverVariants> {}
 
 function PopoverContent({
+  children,
+  font,
   className,
-  align = "center",
-  sideOffset = 4,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+}: BitPopoverProps) {
   return (
-    <PopoverPrimitive.Portal>
-      <PopoverPrimitive.Content
-        data-slot="popover-content"
-        align={align}
-        sideOffset={sideOffset}
-        className={cn(
-          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-72 origin-(--radix-popover-content-transform-origin) rounded-md border p-4 shadow-md outline-hidden",
-          className,
-        )}
-        {...props}
+    <ShadcnPopoverContent
+      className={cn(
+        "bg-card border-foreground dark:border-ring relative mt-1 rounded-none border-y-6",
+        font !== "normal" && "retro",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+
+      <div
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
+        aria-hidden="true"
       />
-    </PopoverPrimitive.Portal>
+    </ShadcnPopoverContent>
   );
 }
 
-function PopoverAnchor({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
-  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />;
-}
-
-export { Popover, PopoverAnchor, PopoverContent, PopoverTrigger };
+export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor };

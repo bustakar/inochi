@@ -1,26 +1,45 @@
-"use client";
-
-import type * as React from "react";
+import type { VariantProps } from "class-variance-authority";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
-import { XIcon } from "lucide-react";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
+import {
+  Sheet as ShadcnSheet,
+  SheetClose as ShadcnSheetClose,
+  SheetDescription as ShadcnSheetDescription,
+  SheetFooter as ShadcnSheetFooter,
+  SheetHeader as ShadcnSheetHeader,
+  SheetTitle as ShadcnSheetTitle,
+  SheetTrigger as ShadcnSheetTrigger,
+} from "../sheet";
 
-function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
-  return <SheetPrimitive.Root data-slot="sheet" {...props} />;
-}
+import "./styles/retro.css";
 
-function SheetTrigger({
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
-  return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
-}
+const Sheet = ShadcnSheet;
 
-function SheetClose({
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Close>) {
-  return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
-}
+const SheetTrigger = ShadcnSheetTrigger;
+
+const SheetClose = ShadcnSheetClose;
+
+const SheetDescription = ShadcnSheetDescription;
+
+const SheetFooter = ShadcnSheetFooter;
+
+const SheetHeader = ShadcnSheetHeader;
+
+const SheetTitle = ShadcnSheetTitle;
+
+export const sheetVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+  },
+});
 
 function SheetPortal({
   ...props
@@ -44,14 +63,20 @@ function SheetOverlay({
   );
 }
 
+export type BitSheetProps = React.ComponentProps<
+  typeof SheetPrimitive.Content
+> &
+  VariantProps<typeof sheetVariants> & {
+    side?: "top" | "right" | "bottom" | "left";
+  };
+
 function SheetContent({
   className,
   children,
   side = "right",
+  font,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Content> & {
-  side?: "top" | "right" | "bottom" | "left";
-}) {
+}: BitSheetProps) {
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -60,20 +85,182 @@ function SheetContent({
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
           side === "right" &&
-            "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 sm:max-w-sm",
           side === "left" &&
-            "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 sm:max-w-sm",
           side === "top" &&
-            "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
+            "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto",
           side === "bottom" &&
-            "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t",
-          className,
+            "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto",
+          sheetVariants({
+            font,
+            className,
+          }),
         )}
         {...props}
       >
-        {children}
-        <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
-          <XIcon className="size-4" />
+        <div className="relative h-full w-full">
+          {children}
+          {/* 8 bit borders */}
+          {side !== "top" && (
+            <div
+              className="bg-foreground dark:bg-ring pointer-events-none absolute top-0 left-0 h-1.5 w-full"
+              aria-hidden="true"
+            />
+          )}
+          {side !== "bottom" && (
+            <div
+              className="bg-foreground dark:bg-ring pointer-events-none absolute bottom-0 h-1.5 w-full"
+              aria-hidden="true"
+            />
+          )}
+          {side !== "left" && (
+            <>
+              <div
+                className="bg-foreground dark:bg-ring pointer-events-none absolute top-1 -left-1 h-1/2 w-1.5"
+                aria-hidden="true"
+              />
+              <div
+                className="bg-foreground dark:bg-ring pointer-events-none absolute bottom-1 -left-1 h-1/2 w-1.5"
+                aria-hidden="true"
+              />
+            </>
+          )}
+          {side !== "right" && (
+            <>
+              <div
+                className="bg-foreground dark:bg-ring pointer-events-none absolute top-1 -right-1 h-1/2 w-1.5"
+                aria-hidden="true"
+              />
+              <div
+                className="bg-foreground dark:bg-ring pointer-events-none absolute -right-1 bottom-1 h-1/2 w-1.5"
+                aria-hidden="true"
+              />
+            </>
+          )}
+        </div>
+        <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+          <svg
+            width={50}
+            height={50}
+            viewBox="0 0 256 256"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="currentColor"
+            strokeWidth={0.25}
+            color=""
+            className="h-6 w-6"
+            aria-label="x"
+          >
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 120 152)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 104 168)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 184 184)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 88 184)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 168 104)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 184 88)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 200 72)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 200 200)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 152 120)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 152 152)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 136 136)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 120 120)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 136 136)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 168 168)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 88 88)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 72 72)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 72 200)"
+            />
+            <rect
+              width={14}
+              height={14}
+              rx={1}
+              transform="matrix(0 -1 -1 0 104 104)"
+            />
+          </svg>
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
@@ -81,59 +268,13 @@ function SheetContent({
   );
 }
 
-function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="sheet-header"
-      className={cn("flex flex-col gap-1.5 p-4", className)}
-      {...props}
-    />
-  );
-}
-
-function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="sheet-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
-      {...props}
-    />
-  );
-}
-
-function SheetTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Title>) {
-  return (
-    <SheetPrimitive.Title
-      data-slot="sheet-title"
-      className={cn("text-foreground font-semibold", className)}
-      {...props}
-    />
-  );
-}
-
-function SheetDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Description>) {
-  return (
-    <SheetPrimitive.Description
-      data-slot="sheet-description"
-      className={cn("text-muted-foreground text-sm", className)}
-      {...props}
-    />
-  );
-}
-
 export {
   Sheet,
+  SheetTrigger,
   SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 };

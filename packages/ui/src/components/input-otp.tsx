@@ -1,78 +1,100 @@
-"use client";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
-import * as React from "react";
-import { OTPInput, OTPInputContext } from "input-otp";
-import { MinusIcon } from "lucide-react";
-
+import {
+  InputOTP as ShadcnInputOTP,
+  InputOTPGroup as ShadcnInputOTPGroup,
+  InputOTPSeparator as ShadcnInputOTPSeparator,
+  InputOTPSlot as ShadcnInputOTPSlot,
+} from "../input-otp";
 import { cn } from "../lib/utils";
 
-function InputOTP({
-  className,
-  containerClassName,
-  ...props
-}: React.ComponentProps<typeof OTPInput> & {
-  containerClassName?: string;
-}) {
-  return (
-    <OTPInput
-      data-slot="input-otp"
-      containerClassName={cn(
-        "flex items-center gap-2 has-disabled:opacity-50",
-        containerClassName,
-      )}
-      className={cn("disabled:cursor-not-allowed", className)}
-      {...props}
-    />
-  );
+import "./styles/retro.css";
+
+export const inputOtpVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+  },
+});
+
+interface SharedProps
+  extends React.ComponentProps<"div">,
+    VariantProps<typeof inputOtpVariants> {
+  className?: string;
+  children?: React.ReactNode;
 }
 
-function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="input-otp-group"
-      className={cn("flex items-center", className)}
-      {...props}
-    />
-  );
+interface InputOTPProps {
+  maxLength: number;
+  value?: string;
+  onChange?: (value: string) => unknown;
+  children?: React.ReactNode;
+  className?: string;
+  font?: "normal" | "retro";
 }
 
-function InputOTPSlot({
-  index,
+export const InputOTP = ({
   className,
-  ...props
-}: React.ComponentProps<"div"> & {
-  index: number;
-}) {
-  const inputOTPContext = React.useContext(OTPInputContext);
-  const slot = inputOTPContext.slots[index];
-  const { char, hasFakeCaret, isActive } = slot ?? {};
-
+  font,
+  maxLength,
+  value,
+  onChange,
+  children,
+  ...otherProps
+}: InputOTPProps) => {
   return (
-    <div
-      data-slot="input-otp-slot"
-      data-active={isActive}
-      className={cn(
-        "data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive dark:bg-input/30 border-input relative flex h-9 w-9 items-center justify-center border-y border-r text-sm shadow-xs transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10 data-[active=true]:ring-[3px]",
-        className,
-      )}
-      {...props}
-    >
-      {char}
-      {hasFakeCaret && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="animate-caret-blink bg-foreground h-4 w-px duration-1000" />
-        </div>
-      )}
+    <div className={cn("relative w-fit", className)}>
+      <ShadcnInputOTP
+        maxLength={maxLength}
+        value={value}
+        onChange={onChange}
+        {...otherProps}
+        className={cn(font !== "normal" && "retro", className)}
+      >
+        {children}
+      </ShadcnInputOTP>
     </div>
   );
-}
+};
 
-function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
+export const InputOTPGroup = ({ className, ...props }: SharedProps) => {
   return (
-    <div data-slot="input-otp-separator" role="separator" {...props}>
-      <MinusIcon />
+    <ShadcnInputOTPGroup {...props} className={cn("flex gap-2", className)} />
+  );
+};
+
+export const InputOTPSlot = ({
+  className,
+  font,
+  index = 0,
+  ...props
+}: SharedProps & { index?: number }) => {
+  return (
+    <div className="border-foreground dark:border-ring relative size-12 border-y-6">
+      <ShadcnInputOTPSlot
+        index={index}
+        {...props}
+        className={cn(
+          "z-0 size-full border-transparent pl-1 text-center text-xl tracking-widest ring-0",
+          font !== "normal" && "retro",
+          className,
+        )}
+      />
+
+      <div
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
+        aria-hidden="true"
+      />
     </div>
   );
-}
+};
 
-export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot };
+export const InputOTPSeparator = ({ className, ...props }: SharedProps) => {
+  return <ShadcnInputOTPSeparator {...props} className={cn("", className)} />;
+};

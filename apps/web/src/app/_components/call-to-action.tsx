@@ -7,15 +7,17 @@ export default function CallToAction() {
     <section className="py-16 md:py-32">
       <div className="mx-auto max-w-5xl px-6">
         <div className="text-center">
-          <h2 className="text-4xl font-semibold text-balance lg:text-5xl">
-            Get Started
+          <h2 className="retro text-4xl font-semibold text-balance lg:text-5xl">
+            Your Adventure Awaits
           </h2>
-          <p className="mt-4">See all exercises for free</p>
+          <p className="retro mt-4">
+            Many exercises to unlock. Zero gold required to start.
+          </p>
 
           <div className="mt-12 flex flex-wrap justify-center gap-4">
             <Button asChild size="lg">
               <Link href="/login">
-                <span>Get Started</span>
+                <span>Begin Your Quest</span>
               </Link>
             </Button>
           </div>

@@ -1,60 +1,118 @@
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
+import {
+  Tooltip as ShadcnTooltip,
+  TooltipContent as ShadcnTooltipContent,
+  TooltipProvider as ShadcnTooltipProvider,
+  TooltipTrigger as ShadcnTooltipTrigger,
+} from "../tooltip";
 
-function TooltipProvider({
-  delayDuration = 0,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
-  return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
-      {...props}
-    />
-  );
-}
+import "./styles/retro.css";
 
-function Tooltip({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
-  );
-}
+export const tooltipVariants = cva("", {
+  variants: {
+    font: {
+      normal: "",
+      retro: "retro",
+    },
+  },
+  defaultVariants: {
+    font: "retro",
+  },
+});
 
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+export interface BitTooltipContentProps
+  extends React.ComponentPropsWithoutRef<typeof ShadcnTooltipContent>,
+    VariantProps<typeof tooltipVariants> {
+  children?: React.ReactNode;
+  className?: string;
 }
 
 function TooltipContent({
   className,
-  sideOffset = 0,
   children,
+  font,
   ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+}: BitTooltipContentProps) {
+  const color = tooltipVariants({ font });
+
   return (
-    <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
-        data-slot="tooltip-content"
-        sideOffset={sideOffset}
-        className={cn(
-          "bg-foreground text-background animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-md px-3 py-1.5 text-xs text-balance",
-          className,
-        )}
+    <div className={cn("relative inline-flex", className)}>
+      <ShadcnTooltipContent
         {...props}
+        data-slot="tooltip-content"
+        className={cn("rounded-none", color, className)}
       >
         {children}
-        <TooltipPrimitive.Arrow className="bg-foreground fill-foreground z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]" />
-      </TooltipPrimitive.Content>
-    </TooltipPrimitive.Portal>
+        <div
+          className={cn(
+            "bg-primary absolute top-1.5 bottom-1.5 -left-1.5 w-1.5",
+            color,
+          )}
+        />
+        <div
+          className={cn(
+            "bg-primary absolute top-1.5 -right-1.5 bottom-1.5 w-1.5",
+            color,
+          )}
+        />
+      </ShadcnTooltipContent>
+    </div>
+  );
+}
+
+export interface BitTooltipProps
+  extends React.ComponentPropsWithoutRef<typeof ShadcnTooltip>,
+    VariantProps<typeof tooltipVariants> {
+  children?: React.ReactNode;
+}
+
+function Tooltip({ children, ...props }: BitTooltipProps) {
+  return (
+    <ShadcnTooltip data-slot="tooltip" {...props}>
+      {children}
+    </ShadcnTooltip>
+  );
+}
+
+export interface BitTooltipProviderProps
+  extends Omit<
+    React.ComponentPropsWithoutRef<typeof ShadcnTooltipProvider>,
+    "delayDuration"
+  > {
+  delayDuration?: number;
+}
+
+function TooltipProvider({
+  children,
+  delayDuration = 0,
+  ...props
+}: BitTooltipProviderProps) {
+  return (
+    <ShadcnTooltipProvider delayDuration={delayDuration} {...props}>
+      {children}
+    </ShadcnTooltipProvider>
+  );
+}
+
+function TooltipTrigger({
+  children,
+  asChild = true,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof ShadcnTooltipTrigger>) {
+  return (
+    <ShadcnTooltipTrigger
+      data-slot="tooltip-trigger"
+      asChild={asChild}
+      {...props}
+    >
+      {children}
+    </ShadcnTooltipTrigger>
   );
 }
 

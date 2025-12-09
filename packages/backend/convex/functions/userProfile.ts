@@ -43,18 +43,38 @@ function calculatePowerLevel(exercises: ExerciseWithProgress[]): number {
   return Math.round(exercises.reduce((sum, ex) => sum + ex.weightedPoints, 0));
 }
 
+function calculateLevel(xp: number): {
+  level: number;
+  currentXP: number;
+  xpForNextLevel: number;
+  xpProgress: number;
+} {
+  const calculatedLevel = Math.floor(Math.sqrt(xp / 100));
+  const level = Math.max(1, calculatedLevel);
+  const xpForCurrentLevel = level * level * 100;
+  const xpForNextLevel = (level + 1) * (level + 1) * 100;
+  const xpProgress =
+    xpForNextLevel > xpForCurrentLevel
+      ? ((xp - xpForCurrentLevel) / (xpForNextLevel - xpForCurrentLevel)) * 100
+      : 0;
+  return {
+    level,
+    currentXP: xp,
+    xpForNextLevel,
+    xpProgress: Math.max(0, Math.min(100, xpProgress)),
+  };
+}
+
 function calculateSpiderStats(exercises: ExerciseWithProgress[]): {
   push: number;
   pull: number;
   core: number;
   legs: number;
-  skill: number;
 } {
   const pushExercises: number[] = [];
   const pullExercises: number[] = [];
   const coreExercises: number[] = [];
   const legsExercises: number[] = [];
-  const skillExercises: number[] = [];
 
   for (const ex of exercises) {
     const hasPush = ex.muscleGroups.some((mg) => PUSH_MUSCLES.includes(mg));
@@ -66,19 +86,16 @@ function calculateSpiderStats(exercises: ExerciseWithProgress[]): {
     if (hasPull) pullExercises.push(ex.weightedDifficulty);
     if (hasCore) coreExercises.push(ex.weightedDifficulty);
     if (hasLegs) legsExercises.push(ex.weightedDifficulty);
-    // All exercises contribute to skill
-    skillExercises.push(ex.weightedDifficulty);
   }
 
   const average = (arr: number[]) =>
     arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
   return {
-    push: Math.round(average(pushExercises)),
-    pull: Math.round(average(pullExercises)),
-    core: Math.round(average(coreExercises)),
-    legs: Math.round(average(legsExercises)),
-    skill: Math.round(average(skillExercises)),
+    push: average(pushExercises),
+    pull: average(pullExercises),
+    core: average(coreExercises),
+    legs: average(legsExercises),
   };
 }
 
@@ -153,16 +170,15 @@ function determineArchetype(stats: {
   pull: number;
   core: number;
   legs: number;
-  skill: number;
 }): { slug: string; title: string; description: string } {
-  const { push, pull, core, legs, skill } = stats;
+  const { push, pull, core, legs } = stats;
 
   // Find max stat
-  const maxStat = Math.max(push, pull, core, legs, skill);
+  const maxStat = Math.max(push, pull, core, legs);
   const threshold = maxStat * 0.8; // 80% of max to be considered "high"
 
   // Check for balanced stats (all within 20% of each other)
-  const statsArray = [push, pull, core, legs, skill];
+  const statsArray = [push, pull, core, legs];
   const minStat = Math.min(...statsArray);
   const isBalanced = maxStat - minStat < maxStat * 0.3;
 
@@ -171,8 +187,8 @@ function determineArchetype(stats: {
     return ARCHETYPE_DEFINITIONS["the-t-rex"]!;
   }
 
-  // High Push + High Skill
-  if (push >= threshold && skill >= threshold) {
+  // High Push + High Core (hand balancing requires both)
+  if (push >= threshold && core >= threshold) {
     return ARCHETYPE_DEFINITIONS["hand-balancer"]!;
   }
 
@@ -181,8 +197,8 @@ function determineArchetype(stats: {
     return ARCHETYPE_DEFINITIONS["bar-warrior"]!;
   }
 
-  // High Pull + High Skill
-  if (pull >= threshold && skill >= threshold) {
+  // High Pull + High Push (ring mastery requires both)
+  if (pull >= threshold && push >= threshold) {
     return ARCHETYPE_DEFINITIONS["ring-master"]!;
   }
 
@@ -201,19 +217,22 @@ function determineArchetype(stats: {
   if (pull === maxStat) return ARCHETYPE_DEFINITIONS["pull-specialist"]!;
   if (core === maxStat) return ARCHETYPE_DEFINITIONS["core-specialist"]!;
   if (legs === maxStat) return ARCHETYPE_DEFINITIONS["leg-specialist"]!;
-  return ARCHETYPE_DEFINITIONS["skill-specialist"]!;
+  return ARCHETYPE_DEFINITIONS["street-athlete"]!;
 }
 
 export const getUserProfileStats = query({
   args: {},
   returns: v.object({
     powerLevel: v.number(),
+    level: v.number(),
+    currentXP: v.number(),
+    xpForNextLevel: v.number(),
+    xpProgress: v.number(),
     spiderStats: v.object({
       push: v.number(),
       pull: v.number(),
       core: v.number(),
       legs: v.number(),
-      skill: v.number(),
     }),
     archetype: v.object({
       slug: v.string(),
@@ -243,14 +262,18 @@ export const getUserProfileStats = query({
       .collect();
 
     if (userProgress.length === 0) {
+      const levelData = calculateLevel(0);
       return {
         powerLevel: 0,
+        level: levelData.level,
+        currentXP: levelData.currentXP,
+        xpForNextLevel: levelData.xpForNextLevel,
+        xpProgress: levelData.xpProgress,
         spiderStats: {
           push: 0,
           pull: 0,
           core: 0,
           legs: 0,
-          skill: 0,
         },
         archetype: ARCHETYPE_DEFINITIONS["beginner"]!,
         trophyCase: [],
@@ -315,8 +338,12 @@ export const getUserProfileStats = query({
       });
     }
 
-    // Calculate power level
+    // Calculate power level (XP) from all exercises with progress
+    // This is the total XP the user has earned
     const powerLevel = calculatePowerLevel(exercisesWithProgress);
+
+    // Calculate level from XP (powerLevel is the total XP earned)
+    const levelData = calculateLevel(powerLevel);
 
     // Calculate spider stats
     const spiderStats = calculateSpiderStats(exercisesWithProgress);
@@ -345,6 +372,10 @@ export const getUserProfileStats = query({
 
     return {
       powerLevel,
+      level: levelData.level,
+      currentXP: levelData.currentXP,
+      xpForNextLevel: levelData.xpForNextLevel,
+      xpProgress: levelData.xpProgress,
       spiderStats,
       archetype,
       trophyCase: masteredExercises,
