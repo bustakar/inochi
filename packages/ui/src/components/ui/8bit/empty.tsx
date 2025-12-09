@@ -2,7 +2,7 @@
 
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import "./styles/retro.css";
 

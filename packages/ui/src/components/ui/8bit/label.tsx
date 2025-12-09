@@ -5,9 +5,9 @@ import type * as React from "react";
 import type * as LabelPrimitive from "@radix-ui/react-label";
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
-import { Label as ShadcnLabel } from "src//label";
+import { Label as ShadcnLabel } from "../../label";
 
 import "./styles/retro.css";
 

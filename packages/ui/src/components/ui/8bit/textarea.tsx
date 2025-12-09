@@ -1,8 +1,8 @@
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
-import { Textarea as ShadcnTextarea } from "src//textarea";
+import { Textarea as ShadcnTextarea } from "../../textarea";
 
 import "./styles/retro.css";
 

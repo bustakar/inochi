@@ -1,7 +1,7 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import { MoreHorizontal } from "lucide-react";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import {
   Pagination as ShadcnPagination,
@@ -9,7 +9,7 @@ import {
   PaginationEllipsis as ShadcnPaginationEllipsis,
   PaginationItem as ShadcnPaginationItem,
   PaginationLink as ShadcnPaginationLink,
-} from "src//components/ui/8bit/pagination";
+} from "../../pagination";
 
 import type { Button } from "../button";
 import "./styles/retro.css";

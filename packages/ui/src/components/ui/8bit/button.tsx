@@ -1,8 +1,8 @@
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
-import { Button as ShadcnButton } from "src//button";
+import { Button as ShadcnButton } from "../../button";
 
 import "./styles/retro.css";
 

@@ -1,12 +1,12 @@
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import {
   Alert as ShadcnAlert,
   AlertDescription as ShadcnAlertDescription,
   AlertTitle as ShadcnAlertTitle,
-} from "src//alert";
+} from "../../alert";
 
 export const alertVariants = cva("", {
   variants: {

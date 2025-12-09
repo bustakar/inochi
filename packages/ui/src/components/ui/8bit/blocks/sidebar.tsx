@@ -9,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "src//components/ui/8bit/blocks/sidebar";
+} from "../../../sidebar";
 
 import "./styles/retro.css";
 
@@ -45,7 +45,7 @@ const items = [
 export function AppSidebar() {
   return (
     <Sidebar
-      className={`${"retro"} border-r-4 border-foreground dark:border-ring`}
+      className={`${"retro"} border-foreground dark:border-ring border-r-4`}
     >
       <SidebarContent>
         <SidebarGroup>

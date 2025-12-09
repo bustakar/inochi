@@ -1,7 +1,7 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import { Drawer as DrawerPrimitive } from "vaul";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import {
   Drawer as ShadcnDrawer,
@@ -13,7 +13,7 @@ import {
   DrawerPortal as ShadcnDrawerPortal,
   DrawerTitle as ShadcnDrawerTitle,
   DrawerTrigger as ShadcnDrawerTrigger,
-} from "src//drawer";
+} from "../../drawer";
 
 import "./styles/retro.css";
 

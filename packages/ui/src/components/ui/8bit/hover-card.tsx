@@ -1,13 +1,13 @@
 import type * as HoverCardPrimitive from "@radix-ui/react-hover-card";
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import {
   HoverCard as ShadcnHoverCard,
   HoverCardContent as ShadcnHoverCardContent,
   HoverCardTrigger as ShadcnHoverCardTrigger,
-} from "src//hover-card";
+} from "../../hover-card";
 
 import "./styles/retro.css";
 

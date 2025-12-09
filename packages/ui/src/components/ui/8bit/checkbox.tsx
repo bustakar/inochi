@@ -3,9 +3,9 @@ import type * as React from "react";
 import type * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
-import { Checkbox as ShadcnCheckbox } from "src//checkbox";
+import { Checkbox as ShadcnCheckbox } from "../../checkbox";
 
 import "./styles/retro.css";
 

@@ -2,7 +2,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps, cva } from "class-variance-authority";
 import { MoreHorizontal } from "lucide-react";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import {
   Breadcrumb as ShadcnBreadcrumb,
@@ -11,7 +11,7 @@ import {
   BreadcrumbList as ShadcnBreadcrumbList,
   BreadcrumbPage as ShadcnBreadcrumbPage,
   BreadcrumbSeparator as ShadcnBreadcrumbSeparator,
-} from "src//breadcrumb";
+} from "../../breadcrumb";
 
 import "./styles/retro.css";
 

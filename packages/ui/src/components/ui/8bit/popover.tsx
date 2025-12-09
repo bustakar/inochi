@@ -1,14 +1,14 @@
 import type * as PopoverPrimitive from "@radix-ui/react-popover";
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import {
   Popover as ShadcnPopover,
   PopoverAnchor as ShadcnPopoverAnchor,
   PopoverContent as ShadcnPopoverContent,
   PopoverTrigger as ShadcnPopoverTrigger,
-} from "src//popover";
+} from "../../popover";
 
 import "./styles/retro.css";
 

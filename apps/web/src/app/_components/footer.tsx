@@ -52,7 +52,7 @@ export default function FooterSection() {
             </svg>
           </Link>
         </div>
-        <span className="text-muted-foreground block text-center text-sm">
+        <span className="retro text-muted-foreground block text-center text-sm">
           {" "}
           © {new Date().getFullYear()} Inochi, All rights reserved
         </span>

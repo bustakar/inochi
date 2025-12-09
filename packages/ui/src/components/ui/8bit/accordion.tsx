@@ -4,14 +4,14 @@ import type * as React from "react";
 
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import {
   Accordion as ShadcnAccordion,
   AccordionContent as ShadcnAccordionContent,
   AccordionItem as ShadcnAccordionItem,
   AccordionTrigger as ShadcnAccordionTrigger,
-} from "src//accordion";
+} from "../../accordion";
 
 import "./styles/retro.css";
 

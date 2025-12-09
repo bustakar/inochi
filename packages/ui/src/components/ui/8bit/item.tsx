@@ -3,7 +3,7 @@ import type * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import { Separator } from "./separator";
 import "./styles/retro.css";

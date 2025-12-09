@@ -3,7 +3,7 @@ import type * as React from "react";
 import { Indicator, Root, Viewport } from "@radix-ui/react-navigation-menu";
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import {
   NavigationMenuContent as ShadcnNavigationMenuContent,
@@ -12,7 +12,7 @@ import {
   NavigationMenuLink as ShadcnNavigationMenuLink,
   NavigationMenuList as ShadcnNavigationMenuList,
   NavigationMenuTrigger as ShadcnNavigationMenuTrigger,
-} from "src//navigation-menu";
+} from "../../navigation-menu";
 
 import "./styles/retro.css";
 

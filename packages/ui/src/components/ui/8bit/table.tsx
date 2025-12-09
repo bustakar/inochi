@@ -4,7 +4,7 @@ import type * as React from "react";
 
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
 import {
   Table as ShadcnTable,
@@ -15,7 +15,7 @@ import {
   TableHead as ShadcnTableHead,
   TableHeader as ShadcnTableHeader,
   TableRow as ShadcnTableRow,
-} from "src//table";
+} from "../../table";
 
 import "./styles/retro.css";
 

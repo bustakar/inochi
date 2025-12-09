@@ -1,9 +1,9 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import type { DayPicker } from "react-day-picker";
 
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
-import { Calendar as ShadcnCalendar } from "src//components/ui/8bit/calendar";
+import { Calendar as ShadcnCalendar } from "../../calendar";
 
 import { buttonVariants } from "./button";
 import {

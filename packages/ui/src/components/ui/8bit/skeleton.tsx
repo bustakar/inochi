@@ -1,6 +1,6 @@
-import { cn } from "src//lib/utils";
+import { cn } from "../../../lib/utils";
 
-import { Skeleton as ShadcnSkeleton } from "src//skeleton";
+import { Skeleton as ShadcnSkeleton } from "../../skeleton";
 
 import "./styles/retro.css";
 
