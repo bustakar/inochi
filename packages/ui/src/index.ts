@@ -37,5 +37,8 @@ export * from "./components/tooltip";
 // Sidebar components
 export * from "./components/sidebar";
 
+// 8bit components
+export { HealthBar } from "./components/ui/8bit/health-bar";
+
 // Hooks
 export * from "./hooks/use-mobile";

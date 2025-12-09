@@ -7,13 +7,13 @@ import type {
   ProgressStatus,
 } from "@packages/backend/convex/validators/validators";
 import * as React from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Globe, Target } from "lucide-react";
 
-import { Badge, cn } from "@inochi/ui";
+import { Card, CardContent, cn, HealthBar } from "@inochi/ui";
 
 import {
-  exerciseLevelColors,
+  exerciseLevelHealthBarColors,
   getProgressStatusColor,
   getProgressStatusLabel,
 } from "../../../../utils/exercise-utils";
@@ -45,16 +45,118 @@ export interface ExerciseCardProps {
 // Progress Ribbon Component
 // ============================================================================
 
-function ProgressRibbon({ status }: { status: ProgressStatus }) {
+function ProgressRibbon({ status }: { status: ProgressStatus | null }) {
   return (
-    <div
-      className={cn(
-        "absolute top-0 right-0 rounded-bl-lg px-3 py-1 text-xs font-bold shadow-sm",
-        getProgressStatusColor(status),
+    <>
+      {status && (
+        <div
+          className={cn(
+            "retro absolute top-2 right-2 px-2 py-1 text-xs font-bold",
+            getProgressStatusColor(status),
+          )}
+        >
+          {getProgressStatusLabel(status)}
+        </div>
       )}
-    >
-      {getProgressStatusLabel(status)}
+    </>
+  );
+}
+
+// ============================================================================
+// Exercise Title Component
+// ============================================================================
+
+function ExerciseTitle({
+  title,
+  iconNumber,
+}: {
+  title: string;
+  iconNumber: number;
+}) {
+  return (
+    <div className="mb-2 flex items-start gap-3">
+      <div className="relative h-12 w-12 flex-shrink-0">
+        <Image
+          src={`/icons/exercises/Icon${iconNumber}.png`}
+          alt={title}
+          fill
+          className="object-contain"
+        />
+      </div>
+      <h3 className="text-card-foreground retro flex-1 text-lg font-semibold">
+        {title}
+      </h3>
     </div>
+  );
+}
+
+// ============================================================================
+// Exercise Description Component
+// ============================================================================
+
+function ExerciseDescription({ description }: { description: string }) {
+  return (
+    <p className="text-muted-foreground/70 mb-3 line-clamp-2 font-mono text-xs">
+      {description}
+    </p>
+  );
+}
+
+// ============================================================================
+// Difficulty Bar Component
+// ============================================================================
+
+function DifficultyBar({
+  difficulty,
+  level,
+}: {
+  difficulty: number;
+  level: ExerciseLevel;
+}) {
+  return (
+    <div className="mb-6 flex flex-col items-center gap-2">
+      <div className="flex w-full justify-between gap-2">
+        <span className="text-muted-foreground retro text-xs font-medium">
+          Difficulty:
+        </span>
+        <span className="text-muted-foreground retro text-xs">
+          {difficulty}/12
+        </span>
+      </div>
+      <HealthBar
+        value={(difficulty / 12) * 100}
+        sections={12}
+        className="h-3"
+        progressBg={exerciseLevelHealthBarColors[level]}
+      />
+    </div>
+  );
+}
+
+// ============================================================================
+// Primary Muscle Groups Component
+// ============================================================================
+
+function PrimaryMuscleGroups({
+  primaryMuscleGroups,
+}: {
+  primaryMuscleGroups: string[];
+}) {
+  return (
+    <>
+      {primaryMuscleGroups.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {primaryMuscleGroups.map((groupName, index) => (
+            <span
+              key={`group-${index}`}
+              className="retro border-foreground/20 bg-muted/50 inline-flex items-center gap-1 border px-2 py-0.5 text-xs"
+            >
+              {groupName}
+            </span>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -78,78 +180,35 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
     return exercise.description.substring(0, cutoff) + "...";
   }, [exercise.description]);
 
+  const iconNumber = React.useMemo(() => {
+    const hash = exercise._id
+      .split("")
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return (hash % 47) + 1; // Icon1.png through Icon47.png
+  }, [exercise._id]);
+
   return (
-    <div
-      className={cn(
-        "bg-card relative cursor-pointer rounded-lg border p-4 transition-shadow hover:shadow-md",
-        !exercise.userProgress && "opacity-90 grayscale",
-      )}
-      onClick={handleCardClick}
-    >
-      {/* Progress ribbon */}
-      {exercise.userProgress && (
-        <ProgressRibbon status={exercise.userProgress.status} />
-      )}
-
-      {/* Header with title */}
-      <div className="mb-2 flex items-start justify-between">
-        <h3 className="text-card-foreground flex-1 pr-8 text-lg font-semibold">
-          {exercise.title}
-        </h3>
-      </div>
-
-      {/* Level and visibility badges */}
-      <div className="mb-2 flex flex-wrap items-center gap-2">
-        <Badge className={exerciseLevelColors[exercise.level]}>
-          {exercise.level}
-        </Badge>
-        <Badge
-          variant="outline"
-          className="border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400"
-        >
-          <Globe className="mr-1 h-3 w-3" />
-          Public
-        </Badge>
-      </div>
-
-      <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
-        {displayDescription}
-      </p>
-
-      <div className="mb-3 flex items-center gap-2">
-        <span className="text-muted-foreground text-xs font-medium">
-          Difficulty:
-        </span>
-        <div className="flex gap-1">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div
-              key={i}
-              className={`h-2 w-2 rounded-full ${
-                i < exercise.difficulty ? "bg-primary" : "bg-muted"
-              }`}
-            />
-          ))}
-        </div>
-        <span className="text-muted-foreground text-xs">
-          {exercise.difficulty}/10
-        </span>
-      </div>
-
-      {exercise.primaryMuscleGroups.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {exercise.primaryMuscleGroups.map((groupName, index) => (
-            <Badge
-              key={`group-${index}`}
-              variant="outline"
-              className="flex items-center gap-1 text-xs"
-            >
-              <Target className="h-3 w-3" />
-              {groupName}
-            </Badge>
-          ))}
-        </div>
-      )}
-    </div>
+    <>
+      <Card
+        className={cn(
+          "cursor-pointer transition-transform active:translate-y-1",
+          !exercise.userProgress && "opacity-90 grayscale-70",
+        )}
+        onClick={handleCardClick}
+      >
+        <ProgressRibbon status={exercise.userProgress?.status ?? null} />
+        <CardContent className="pt-4">
+          <ExerciseTitle title={exercise.title} iconNumber={iconNumber} />
+          <ExerciseDescription description={displayDescription} />
+          <DifficultyBar
+            difficulty={exercise.difficulty}
+            level={exercise.level}
+          />
+          <PrimaryMuscleGroups
+            primaryMuscleGroups={exercise.primaryMuscleGroups}
+          />
+        </CardContent>
+      </Card>
+    </>
   );
 }
-

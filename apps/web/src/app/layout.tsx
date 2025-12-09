@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Space_Mono } from "next/font/google";
 
 import { cn, Toaster } from "@inochi/ui";
 
@@ -45,6 +45,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
 });
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-space-mono",
+});
 
 export default function RootLayout({
   children,
@@ -58,6 +63,7 @@ export default function RootLayout({
           "bg-background text-foreground min-h-screen font-sans antialiased",
           geistSans.variable,
           geistMono.variable,
+          spaceMono.variable,
         )}
       >
         <ThemeProvider>

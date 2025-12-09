@@ -22,6 +22,18 @@ export const exerciseLevelColors: Record<ExerciseLevel, string> = {
 };
 
 /**
+ * Non-muted background color classes for exercise levels (for health bars, etc.)
+ */
+export const exerciseLevelHealthBarColors: Record<ExerciseLevel, string> = {
+  beginner: "bg-green-500",
+  intermediate: "bg-blue-500",
+  advanced: "bg-purple-500",
+  expert: "bg-orange-500",
+  elite: "bg-red-500",
+  legendary: "bg-yellow-500",
+};
+
+/**
  * Get color classes for an exercise level
  */
 export function getExerciseLevelColor(level: ExerciseLevel): string {
