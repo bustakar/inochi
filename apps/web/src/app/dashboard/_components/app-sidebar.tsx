@@ -1,7 +1,6 @@
 "use client";
 
 import type * as React from "react";
-import { Dumbbell, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -11,36 +10,33 @@ import {
   SidebarRail,
 } from "@inochi/ui";
 
+import "../../styles/retro.css";
+
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { PixelGrid, PixelUser } from "./pixel-icons";
 
 const platformData = {
   navMain: [
     {
-      title: "Exercises",
+      title: "Inventory",
       url: "/dashboard/exercises",
-      icon: Dumbbell,
+      icon: PixelGrid,
     },
-  ],
-};
-
-const userData = {
-  navMain: [
     {
-      title: "Profile",
+      title: "Character",
       url: "/dashboard/profile",
-      icon: User,
+      icon: PixelUser,
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" className="retro" {...props}>
       <SidebarHeader></SidebarHeader>
       <SidebarContent>
         <NavMain items={platformData.navMain} />
-        <NavMain items={userData.navMain} groupLabel="User" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

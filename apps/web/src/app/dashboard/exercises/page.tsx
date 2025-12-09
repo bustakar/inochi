@@ -7,9 +7,11 @@ import { useQuery } from "convex/react";
 
 import { Badge, Button } from "@inochi/ui";
 
+import { PixelLog } from "../_components/pixel-icons";
 import { Search } from "../../../components/search";
 import {
   exerciseLevelColors,
+  exerciseLevelHealthBarColors,
   exerciseLevels,
 } from "../../../utils/exercise-utils";
 import { BatchProgressDialog } from "./_components/batch-progress-dialog";
@@ -22,8 +24,7 @@ import { ExerciseCard } from "./_components/exercise-card";
 function LevelSectionHeader({ level }: { level: ExerciseLevel }) {
   return (
     <div className="flex items-center gap-3 py-4">
-      <h2 className="text-xl font-semibold capitalize">{level}</h2>
-      <Badge className={exerciseLevelColors[level]}>{level}</Badge>
+      <Badge className={exerciseLevelHealthBarColors[level]}>{level}</Badge>
     </div>
   );
 }
@@ -77,7 +78,7 @@ function ExercisesList({ searchQuery }: ExercisesListProps) {
         return (
           <div key={level}>
             <LevelSectionHeader level={level} />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
               {exercises.map((exercise) => (
                 <ExerciseCard key={exercise._id} exercise={exercise} />
               ))}
@@ -99,12 +100,8 @@ export default function ExercisesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-foreground text-3xl font-bold">Exercises</h1>
-      </div>
-
       {/* Search and Batch Update */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div className="max-w-md flex-1">
           <Search
             initialValue={searchQuery}
@@ -113,7 +110,8 @@ export default function ExercisesPage() {
           />
         </div>
         <Button variant="outline" onClick={() => setIsBatchDialogOpen(true)}>
-          Log Progress
+          <PixelLog className="size-8" />
+          <span className="hidden sm:inline">Log Progress</span>
         </Button>
       </div>
 

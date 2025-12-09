@@ -1,11 +1,25 @@
-import {
-  Separator,
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@inochi/ui";
+"use client";
+
+import { Button, SidebarInset, SidebarProvider, useSidebar } from "@inochi/ui";
 
 import { AppSidebar } from "./_components/app-sidebar";
+import { PixelMenu } from "./_components/pixel-icons";
+
+function SidebarTriggerButton() {
+  const { toggleSidebar } = useSidebar();
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="retro -ml-1 size-7"
+      onClick={toggleSidebar}
+    >
+      <PixelMenu className="size-4" />
+      <span className="sr-only">Toggle Sidebar</span>
+    </Button>
+  );
+}
 
 export default function DashboardLayout({
   children,
@@ -18,11 +32,7 @@ export default function DashboardLayout({
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
+            <SidebarTriggerButton />
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>

@@ -45,5 +45,8 @@
       "csstype": "^3.2.3",
       "@types/react": "^19.2.7"
     }
+  },
+  "dependencies": {
+    "pixelarticons": "^1.8.1"
   }
 }

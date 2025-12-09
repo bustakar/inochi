@@ -51,6 +51,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      pixelarticons:
+        specifier: ^1.8.1
+        version: 1.8.1
     devDependencies:
       '@inochi/prettier-config':
         specifier: workspace:*
@@ -260,6 +264,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      pixelarticons:
+        specifier: ^1.8.1
+        version: 1.8.1
       posthog-js:
         specifier: ^1.298.0
         version: 1.298.0
@@ -6476,6 +6483,9 @@ packages:
   pirates@4.0.7:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
+
+  pixelarticons@1.8.1:
+    resolution: {integrity: sha512-4taoDCleft9RtzVHLA73VDnRBwJNqlwbW8ShO6S0G9b+bM5ArGe1MVFW9xpromuPvQgVUYCSjRxNAQuNtADqyA==}
 
   pkg-dir@4.2.0:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
@@ -15373,6 +15383,8 @@ snapshots:
   picomatch@4.0.3: {}
 
   pirates@4.0.7: {}
+
+  pixelarticons@1.8.1: {}
 
   pkg-dir@4.2.0:
     dependencies:
