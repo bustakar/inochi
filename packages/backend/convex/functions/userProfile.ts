@@ -43,6 +43,28 @@ function calculatePowerLevel(exercises: ExerciseWithProgress[]): number {
   return Math.round(exercises.reduce((sum, ex) => sum + ex.weightedPoints, 0));
 }
 
+function calculateLevel(xp: number): {
+  level: number;
+  currentXP: number;
+  xpForNextLevel: number;
+  xpProgress: number;
+} {
+  const calculatedLevel = Math.floor(Math.sqrt(xp / 100));
+  const level = Math.max(1, calculatedLevel);
+  const xpForCurrentLevel = level * level * 100;
+  const xpForNextLevel = (level + 1) * (level + 1) * 100;
+  const xpProgress =
+    xpForNextLevel > xpForCurrentLevel
+      ? ((xp - xpForCurrentLevel) / (xpForNextLevel - xpForCurrentLevel)) * 100
+      : 0;
+  return {
+    level,
+    currentXP: xp,
+    xpForNextLevel,
+    xpProgress: Math.max(0, Math.min(100, xpProgress)),
+  };
+}
+
 function calculateSpiderStats(exercises: ExerciseWithProgress[]): {
   push: number;
   pull: number;
@@ -208,6 +230,10 @@ export const getUserProfileStats = query({
   args: {},
   returns: v.object({
     powerLevel: v.number(),
+    level: v.number(),
+    currentXP: v.number(),
+    xpForNextLevel: v.number(),
+    xpProgress: v.number(),
     spiderStats: v.object({
       push: v.number(),
       pull: v.number(),
@@ -243,8 +269,13 @@ export const getUserProfileStats = query({
       .collect();
 
     if (userProgress.length === 0) {
+      const levelData = calculateLevel(0);
       return {
         powerLevel: 0,
+        level: levelData.level,
+        currentXP: levelData.currentXP,
+        xpForNextLevel: levelData.xpForNextLevel,
+        xpProgress: levelData.xpProgress,
         spiderStats: {
           push: 0,
           pull: 0,
@@ -315,8 +346,12 @@ export const getUserProfileStats = query({
       });
     }
 
-    // Calculate power level
+    // Calculate power level (XP) from all exercises with progress
+    // This is the total XP the user has earned
     const powerLevel = calculatePowerLevel(exercisesWithProgress);
+
+    // Calculate level from XP (powerLevel is the total XP earned)
+    const levelData = calculateLevel(powerLevel);
 
     // Calculate spider stats
     const spiderStats = calculateSpiderStats(exercisesWithProgress);
@@ -345,6 +380,10 @@ export const getUserProfileStats = query({
 
     return {
       powerLevel,
+      level: levelData.level,
+      currentXP: levelData.currentXP,
+      xpForNextLevel: levelData.xpForNextLevel,
+      xpProgress: levelData.xpProgress,
       spiderStats,
       archetype,
       trophyCase: masteredExercises,
