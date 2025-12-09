@@ -71,7 +71,7 @@ function getStatusValue(
   status: ProgressStatus | null | undefined,
 ): string | undefined {
   if (status === undefined) return undefined;
-  return status === null ? "none" : status;
+  return status ?? "none";
 }
 
 function parseStatusValue(value: string | undefined): ProgressStatus | null {

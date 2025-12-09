@@ -1,8 +1,8 @@
+import type { VariantProps } from "class-variance-authority";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
-
 import {
   Sheet as ShadcnSheet,
   SheetClose as ShadcnSheetClose,
@@ -56,7 +56,7 @@ function SheetOverlay({
       data-slot="sheet-overlay"
       className={cn(
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
-        className
+        className,
       )}
       {...props}
     />
@@ -95,33 +95,33 @@ function SheetContent({
           sheetVariants({
             font,
             className,
-          })
+          }),
         )}
         {...props}
       >
-        <div className="w-full h-full relative">
+        <div className="relative h-full w-full">
           {children}
           {/* 8 bit borders */}
           {side !== "top" && (
             <div
-              className="absolute top-0 left-0 w-full h-1.5 bg-foreground dark:bg-ring pointer-events-none"
+              className="bg-foreground dark:bg-ring pointer-events-none absolute top-0 left-0 h-1.5 w-full"
               aria-hidden="true"
             />
           )}
           {side !== "bottom" && (
             <div
-              className="absolute bottom-0 w-full h-1.5 bg-foreground dark:bg-ring pointer-events-none"
+              className="bg-foreground dark:bg-ring pointer-events-none absolute bottom-0 h-1.5 w-full"
               aria-hidden="true"
             />
           )}
           {side !== "left" && (
             <>
               <div
-                className="absolute top-1 -left-1 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+                className="bg-foreground dark:bg-ring pointer-events-none absolute top-1 -left-1 h-1/2 w-1.5"
                 aria-hidden="true"
               />
               <div
-                className="absolute bottom-1 -left-1 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+                className="bg-foreground dark:bg-ring pointer-events-none absolute bottom-1 -left-1 h-1/2 w-1.5"
                 aria-hidden="true"
               />
             </>
@@ -129,17 +129,17 @@ function SheetContent({
           {side !== "right" && (
             <>
               <div
-                className="absolute top-1 -right-1 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+                className="bg-foreground dark:bg-ring pointer-events-none absolute top-1 -right-1 h-1/2 w-1.5"
                 aria-hidden="true"
               />
               <div
-                className="absolute bottom-1 -right-1 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+                className="bg-foreground dark:bg-ring pointer-events-none absolute -right-1 bottom-1 h-1/2 w-1.5"
                 aria-hidden="true"
               />
             </>
           )}
         </div>
-        <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
           <svg
             width={50}
             height={50}
@@ -149,7 +149,7 @@ function SheetContent({
             stroke="currentColor"
             strokeWidth={0.25}
             color=""
-            className="w-6 h-6"
+            className="h-6 w-6"
             aria-label="x"
           >
             <rect

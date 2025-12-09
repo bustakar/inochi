@@ -1,12 +1,11 @@
 "use client";
 
-import type * as React from "react";
-
 import type * as TogglePrimitive from "@radix-ui/react-toggle";
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import type * as React from "react";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
-
 import { Toggle as ShadcnToggle } from "../../toggle";
 
 import "./styles/retro.css";
@@ -20,12 +19,12 @@ const toggleVariants = cva("", {
     variant: {
       default: "bg-transparent",
       outline:
-        "bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
+        "hover:bg-accent hover:text-accent-foreground bg-transparent shadow-sm",
     },
     size: {
-      default: "h-9 px-2 min-w-9",
-      sm: "h-8 px-1.5 min-w-8",
-      lg: "h-10 px-2.5 min-w-10",
+      default: "h-9 min-w-9 px-2",
+      sm: "h-8 min-w-8 px-1.5",
+      lg: "h-10 min-w-10 px-2.5",
     },
   },
   defaultVariants: {
@@ -46,10 +45,10 @@ function Toggle({ children, font, ...props }: BitToggleProps) {
     <ShadcnToggle
       {...props}
       className={cn(
-        "rounded-none active:translate-y-1 transition-transform relative border-none active:translate-x-1",
+        "relative rounded-none border-none transition-transform active:translate-x-1 active:translate-y-1",
         "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
         font !== "normal" && "retro",
-        className
+        className,
       )}
     >
       {children}
@@ -58,12 +57,12 @@ function Toggle({ children, font, ...props }: BitToggleProps) {
         {variant === "outline" && (
           <>
             <div
-              className="absolute inset-0 border-y-6 -my-1.5 border-foreground dark:border-ring pointer-events-none"
+              className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -my-1.5 border-y-6"
               aria-hidden="true"
             />
 
             <div
-              className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+              className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
               aria-hidden="true"
             />
           </>

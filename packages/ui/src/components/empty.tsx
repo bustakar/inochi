@@ -1,6 +1,7 @@
 "use client";
 
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
 
@@ -12,7 +13,7 @@ const emptyMediaVariants = cva(
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "relative bg-muted text-foreground flex size-12 shrink-0 items-center justify-center",
+        icon: "bg-muted text-foreground relative flex size-12 shrink-0 items-center justify-center",
       },
       font: {
         normal: "",
@@ -23,7 +24,7 @@ const emptyMediaVariants = cva(
       variant: "default",
       font: "retro",
     },
-  }
+  },
 );
 
 function Empty({
@@ -37,7 +38,7 @@ function Empty({
       className={cn(
         "flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border-dashed p-6 text-center text-balance md:p-12",
         font !== "normal" && "retro",
-        className
+        className,
       )}
       {...props}
     />
@@ -50,7 +51,7 @@ function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="empty-header"
       className={cn(
         "flex max-w-sm flex-col items-center gap-2 text-center",
-        className
+        className,
       )}
       {...props}
     />
@@ -72,12 +73,12 @@ function EmptyMedia({
       />
       {variant !== "default" && (
         <>
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-foreground dark:bg-ring pointer-events-none" />
-          <div className="absolute bottom-0 w-full h-1.5 bg-foreground dark:bg-ring pointer-events-none" />
-          <div className="absolute top-1.5 -left-1.5 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-          <div className="absolute bottom-1.5 -left-1.5 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-          <div className="absolute top-1.5 -right-1.5 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-          <div className="absolute bottom-1.5 -right-1.5 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
+          <div className="bg-foreground dark:bg-ring pointer-events-none absolute top-0 left-0 h-1.5 w-full" />
+          <div className="bg-foreground dark:bg-ring pointer-events-none absolute bottom-0 h-1.5 w-full" />
+          <div className="bg-foreground dark:bg-ring pointer-events-none absolute top-1.5 -left-1.5 h-1/2 w-1.5" />
+          <div className="bg-foreground dark:bg-ring pointer-events-none absolute bottom-1.5 -left-1.5 h-1/2 w-1.5" />
+          <div className="bg-foreground dark:bg-ring pointer-events-none absolute top-1.5 -right-1.5 h-1/2 w-1.5" />
+          <div className="bg-foreground dark:bg-ring pointer-events-none absolute -right-1.5 bottom-1.5 h-1/2 w-1.5" />
         </>
       )}
     </div>
@@ -100,7 +101,7 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
       data-slot="empty-description"
       className={cn(
         "text-muted-foreground [&>a:hover]:text-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4",
-        className
+        className,
       )}
       {...props}
     />
@@ -113,7 +114,7 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="empty-content"
       className={cn(
         "flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance",
-        className
+        className,
       )}
       {...props}
     />

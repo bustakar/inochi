@@ -1,8 +1,8 @@
 import type * as TabsPrimitive from "@radix-ui/react-tabs";
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
-
 import {
   Tabs as ShadcnTabs,
   TabsContent as ShadcnTabsContent,
@@ -53,15 +53,15 @@ function TabsList({
   return (
     <ShadcnTabsList
       {...props}
-      className={cn("relative bg-card rounded-none", className)}
+      className={cn("bg-card relative rounded-none", className)}
     >
       <div
-        className="absolute inset-0 border-y-6 -my-1.5 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -my-1.5 border-y-6"
         aria-hidden="true"
       />
 
       <div
-        className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
         aria-hidden="true"
       />
       {children}
@@ -77,8 +77,8 @@ function TabsTrigger({
   return (
     <ShadcnTabsTrigger
       className={cn(
-        "border-none data-[state=active]:bg-accent data-[state=active]:text-foreground text-muted-foreground rounded-none",
-        className
+        "data-[state=active]:bg-accent data-[state=active]:text-foreground text-muted-foreground rounded-none border-none",
+        className,
       )}
       {...props}
     >

@@ -309,7 +309,6 @@ export default function ProfileScreen() {
           <StatRow label="Pull" value={stats.spiderStats.pull} />
           <StatRow label="Core" value={stats.spiderStats.core} />
           <StatRow label="Legs" value={stats.spiderStats.legs} />
-          <StatRow label="Skill" value={stats.spiderStats.skill} />
         </Section>
 
         {/* Trophy Case Section */}

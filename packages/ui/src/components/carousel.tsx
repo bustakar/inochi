@@ -1,13 +1,10 @@
 "use client";
 
+import type { UseEmblaCarouselType } from "embla-carousel-react";
 import * as React from "react";
-
-import useEmblaCarousel, {
-  type UseEmblaCarouselType,
-} from "embla-carousel-react";
+import useEmblaCarousel from "embla-carousel-react";
 
 import { cn } from "../lib/utils";
-
 import { Button } from "./button";
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -15,12 +12,12 @@ type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
 type CarouselOptions = UseCarouselParameters[0];
 type CarouselPlugin = UseCarouselParameters[1];
 
-type CarouselProps = {
+interface CarouselProps {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
-};
+}
 
 type CarouselContextProps = {
   carouselRef: ReturnType<typeof useEmblaCarousel>[0];
@@ -57,14 +54,14 @@ const Carousel = React.forwardRef<
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [carouselRef, api] = useEmblaCarousel(
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
       },
-      plugins
+      plugins,
     );
     const [canScrollPrev, setCanScrollPrev] = React.useState(false);
     const [canScrollNext, setCanScrollNext] = React.useState(false);
@@ -98,7 +95,7 @@ const Carousel = React.forwardRef<
           scrollNext();
         }
       },
-      [scrollPrev, scrollNext]
+      [scrollPrev, scrollNext],
     );
 
     React.useEffect(() => {
@@ -110,7 +107,7 @@ const Carousel = React.forwardRef<
     }, [api, setApi]);
 
     React.useEffect(() => {
-      if (!api) {
+      if (api === null || api === undefined) {
         return;
       }
 
@@ -119,7 +116,7 @@ const Carousel = React.forwardRef<
       api.on("select", onSelect);
 
       return () => {
-        api?.off("select", onSelect);
+        api.off("select", onSelect);
       };
     }, [api, onSelect]);
 
@@ -130,7 +127,7 @@ const Carousel = React.forwardRef<
           api: api,
           opts,
           orientation:
-            orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+            orientation ?? (opts?.axis === "y" ? "vertical" : "horizontal"),
           scrollPrev,
           scrollNext,
           canScrollPrev,
@@ -149,7 +146,7 @@ const Carousel = React.forwardRef<
         </div>
       </CarouselContext.Provider>
     );
-  }
+  },
 );
 Carousel.displayName = "Carousel";
 
@@ -166,7 +163,7 @@ const CarouselContent = React.forwardRef<
         className={cn(
           "flex",
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
-          className
+          className,
         )}
         {...props}
       />
@@ -189,7 +186,7 @@ const CarouselItem = React.forwardRef<
       className={cn(
         "min-w-0 shrink-0 grow-0 basis-full",
         orientation === "horizontal" ? "pl-4" : "pt-4",
-        className
+        className,
       )}
       {...props}
     />
@@ -210,10 +207,10 @@ const CarouselPrevious = React.forwardRef<
       size={size}
       className={cn(
         orientation === "horizontal"
-          ? "top-1/2 -left-10 md:-left-14 -translate-y-1/2 active:-translate-y-1 w-8 h-9 md:w-9 md:h-10 "
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90 w-8 h-10 md:w-9 md:h-11",
-        "absolute rounded-none aspect-square grid place-items-center",
-        className
+          ? "top-1/2 -left-10 h-9 w-8 -translate-y-1/2 active:-translate-y-1 md:-left-14 md:h-10 md:w-9"
+          : "-top-12 left-1/2 h-10 w-8 -translate-x-1/2 rotate-90 md:h-11 md:w-9",
+        "absolute grid aspect-square place-items-center rounded-none",
+        className,
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
@@ -264,10 +261,10 @@ const CarouselNext = React.forwardRef<
       size={size}
       className={cn(
         orientation === "horizontal"
-          ? "top-1/2 -right-10 md:-right-14 -translate-y-1/2 active:-translate-y-1 aspect-square shrink-0 w-8 h-9 md:w-9 md:h-10 "
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90 w-8 h-10 md:w-9 md:h-11",
-        "absolute rounded-none aspect-square grid place-items-center",
-        className
+          ? "top-1/2 -right-10 aspect-square h-9 w-8 shrink-0 -translate-y-1/2 active:-translate-y-1 md:-right-14 md:h-10 md:w-9"
+          : "-bottom-12 left-1/2 h-10 w-8 -translate-x-1/2 rotate-90 md:h-11 md:w-9",
+        "absolute grid aspect-square place-items-center rounded-none",
+        className,
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}

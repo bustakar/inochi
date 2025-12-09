@@ -1,12 +1,13 @@
 import type * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
-
 import {
   ToggleGroup as ShadcnToggleGroup,
   ToggleGroupItem as ShadcnToggleGroupItem,
 } from "../toggle-group";
+
 import "./styles/retro.css";
 
 export const toggleGroupVariants = cva("", {
@@ -15,12 +16,12 @@ export const toggleGroupVariants = cva("", {
     variant: {
       default: "bg-transparent",
       outline:
-        "bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
+        "hover:bg-accent hover:text-accent-foreground bg-transparent shadow-sm",
     },
     size: {
-      default: "h-9 px-2 min-w-9",
-      sm: "h-4 px-1.5 min-w-4",
-      lg: "h-10 px-2.5 min-w-10",
+      default: "h-9 min-w-9 px-2",
+      sm: "h-4 min-w-4 px-1.5",
+      lg: "h-10 min-w-10 px-2.5",
     },
   },
   defaultVariants: { variant: "default", font: "retro", size: "default" },
@@ -56,7 +57,7 @@ function ToggleGroupItem({ ...props }: BitToggleGroupItemProps) {
       className={cn(
         "relative transition-transform active:translate-x-1 active:translate-y-1",
         className,
-        font !== "normal" && "retro"
+        font !== "normal" && "retro",
       )}
       {...props}
     >
@@ -66,11 +67,11 @@ function ToggleGroupItem({ ...props }: BitToggleGroupItemProps) {
         <>
           {" "}
           <div
-            className="absolute inset-0 -my-1.5 border-y-6 border-foreground dark:border-ring pointer-events-none"
+            className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -my-1.5 border-y-6"
             aria-hidden="true"
           />{" "}
           <div
-            className="absolute inset-0 -mx-1.5 border-x-6 border-foreground dark:border-ring pointer-events-none"
+            className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
             aria-hidden="true"
           />{" "}
         </>

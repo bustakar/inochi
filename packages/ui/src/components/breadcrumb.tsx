@@ -1,8 +1,7 @@
+import type { VariantProps } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { MoreHorizontal } from "lucide-react";
-
-import { cn } from "../lib/utils";
 
 import {
   Breadcrumb as ShadcnBreadcrumb,
@@ -12,6 +11,7 @@ import {
   BreadcrumbPage as ShadcnBreadcrumbPage,
   BreadcrumbSeparator as ShadcnBreadcrumbSeparator,
 } from "../breadcrumb";
+import { cn } from "../lib/utils";
 
 import "./styles/retro.css";
 
@@ -24,7 +24,7 @@ export const breadcrumbVariants = cva("", {
     variant: {
       default: "text-card-foreground",
       destructive:
-        "text-destructive [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
+        "text-destructive *:data-[slot=alert-description]:text-destructive/90 [&>svg]:text-current",
     },
   },
   defaultVariants: {
@@ -83,17 +83,17 @@ function Breadcrumb({ children, ...props }: BitBreadcrumbNavigationProps) {
   return (
     <div
       className={cn(
-        "mb-4 flex items-center space-x-1 text-sm leading-none text-muted-foreground",
-        className
+        "text-muted-foreground mb-4 flex items-center space-x-1 text-sm leading-none",
+        className,
       )}
     >
       <ShadcnBreadcrumb
         {...props}
         className={cn(
-          "relative rounded-none border-none bg-background",
+          "bg-background relative rounded-none border-none",
           breadcrumbVariants({ variant }),
           font !== "normal" && "retro",
-          className
+          className,
         )}
       >
         {children}

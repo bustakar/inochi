@@ -1,11 +1,10 @@
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
-
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
-
 import {
   Tooltip as ShadcnTooltip,
   TooltipContent as ShadcnTooltipContent,
@@ -49,14 +48,14 @@ function TooltipContent({
         {children}
         <div
           className={cn(
-            "absolute top-1.5 bottom-1.5 -left-1.5 w-1.5 bg-primary",
-            color
+            "bg-primary absolute top-1.5 bottom-1.5 -left-1.5 w-1.5",
+            color,
           )}
         />
         <div
           className={cn(
-            "absolute top-1.5 bottom-1.5 -right-1.5 w-1.5 bg-primary ",
-            color
+            "bg-primary absolute top-1.5 -right-1.5 bottom-1.5 w-1.5",
+            color,
           )}
         />
       </ShadcnTooltipContent>

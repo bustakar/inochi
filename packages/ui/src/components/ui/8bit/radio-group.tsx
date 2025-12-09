@@ -1,12 +1,10 @@
 "use client";
 
 import type * as React from "react";
-
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
-
 import { RadioGroup as ShadcnRadioGroup } from "../../radio-group";
 
 import "./styles/retro.css";
@@ -42,9 +40,9 @@ function RadioGroupItem({
       <RadioGroupPrimitive.Item
         ref={ref}
         className={cn(
-          "flex items-center justify-center rounded-none border-none py-3 peer border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 size-4 shrink-0 outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+          "peer border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 flex size-4 shrink-0 items-center justify-center rounded-none border-none py-3 outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
           "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary",
-          className
+          className,
         )}
         {...props}
       >
@@ -67,20 +65,20 @@ function RadioGroupItem({
         </RadioGroupPrimitive.Indicator>
       </RadioGroupPrimitive.Item>
 
-      <div className="absolute top-[0px] w-2.5 left-1.5 h-1 bg-foreground dark:bg-ring" />
-      <div className="absolute top-[0px] w-2.5 right-1.5 h-1 bg-foreground dark:bg-ring" />
+      <div className="bg-foreground dark:bg-ring absolute top-[0px] left-1.5 h-1 w-2.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-[0px] right-1.5 h-1 w-2.5" />
 
-      <div className="absolute bottom-[0px] w-2.5 left-1.5 h-1 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-[0px] w-2.5 right-1.5 h-1 bg-foreground dark:bg-ring" />
+      <div className="bg-foreground dark:bg-ring absolute bottom-[0px] left-1.5 h-1 w-2.5" />
+      <div className="bg-foreground dark:bg-ring absolute right-1.5 bottom-[0px] h-1 w-2.5" />
 
-      <div className="absolute top-[4px] -left-1 w-1 h-[15px] bg-foreground dark:bg-ring" />
-      <div className="absolute top-[4px] -right-1 w-1 h-[15px] bg-foreground dark:bg-ring" />
+      <div className="bg-foreground dark:bg-ring absolute top-[4px] -left-1 h-[15px] w-1" />
+      <div className="bg-foreground dark:bg-ring absolute top-[4px] -right-1 h-[15px] w-1" />
 
-      <div className="absolute top-[2px] -right-0.5 w-1 h-1 bg-foreground dark:bg-ring" />
-      <div className="absolute top-[2px] -left-0.5 w-1 h-1 bg-foreground dark:bg-ring" />
+      <div className="bg-foreground dark:bg-ring absolute top-[2px] -right-0.5 h-1 w-1" />
+      <div className="bg-foreground dark:bg-ring absolute top-[2px] -left-0.5 h-1 w-1" />
 
-      <div className="absolute bottom-[2px] -right-0.5 w-1 h-1 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-[2px] -left-0.5 w-1 h-1 bg-foreground dark:bg-ring" />
+      <div className="bg-foreground dark:bg-ring absolute -right-0.5 bottom-[2px] h-1 w-1" />
+      <div className="bg-foreground dark:bg-ring absolute bottom-[2px] -left-0.5 h-1 w-1" />
     </div>
   );
 }

@@ -1,8 +1,8 @@
-import { type VariantProps, cva } from "class-variance-authority";
-
-import { cn } from "../lib/utils";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { Badge as ShadcnBadge } from "../badge";
+import { cn } from "../lib/utils";
 
 export const badgeVariants = cva("", {
   variants: {
@@ -45,7 +45,7 @@ function Badge({
       c.startsWith("bg-") ||
       c.startsWith("border-") ||
       c.startsWith("text-") ||
-      c.startsWith("rounded-")
+      c.startsWith("rounded-"),
   );
 
   // Container should accept all non-visual utility classes (e.g., size, spacing, layout)
@@ -56,7 +56,7 @@ function Badge({
         c.startsWith("border-") ||
         c.startsWith("text-") ||
         c.startsWith("rounded-")
-      )
+      ),
   );
 
   return (
@@ -68,7 +68,7 @@ function Badge({
           "rounded-none",
           "w-full",
           font !== "normal" && "retro",
-          visualClasses
+          visualClasses,
         )}
         variant={variant}
       >
@@ -78,17 +78,17 @@ function Badge({
       {/* Left pixel bar */}
       <div
         className={cn(
-          "-left-1.5 absolute inset-y-[4px] w-1.5",
+          "absolute inset-y-[4px] -left-1.5 w-1.5",
           color,
-          visualClasses
+          visualClasses,
         )}
       />
       {/* Right pixel bar */}
       <div
         className={cn(
-          "-right-1.5 absolute inset-y-[4px] w-1.5",
+          "absolute inset-y-[4px] -right-1.5 w-1.5",
           color,
-          visualClasses
+          visualClasses,
         )}
       />
     </div>

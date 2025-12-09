@@ -1,13 +1,12 @@
+import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
-
 import { Indicator, Root, Viewport } from "@radix-ui/react-navigation-menu";
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
+import type { NavigationMenuIndicator as ShadcnNavigationMenuIndicator } from "../navigation-menu";
 import { cn } from "../lib/utils";
-
 import {
   NavigationMenuContent as ShadcnNavigationMenuContent,
-  type NavigationMenuIndicator as ShadcnNavigationMenuIndicator,
   NavigationMenuItem as ShadcnNavigationMenuItem,
   NavigationMenuLink as ShadcnNavigationMenuLink,
   NavigationMenuList as ShadcnNavigationMenuList,
@@ -51,7 +50,7 @@ function NavigationMenu({
       className={cn(
         "group/navigation-menu relative flex max-w-max flex-1 items-center justify-center",
         getFontClassName(font),
-        className
+        className,
       )}
       {...props}
     >
@@ -127,7 +126,7 @@ function NavigationMenuViewport({
   return (
     <div
       className={cn(
-        "absolute top-full left-0 isolate z-50 flex justify-center"
+        "absolute top-full left-0 isolate z-50 flex justify-center",
       )}
     >
       <Viewport
@@ -137,7 +136,7 @@ function NavigationMenuViewport({
           getFontClassName(font),
           "shadow-[6px_0px_0px_0px_var(--foreground),-6px_0px_0px_0px_var(--foreground),0px_-6px_0px_0px_var(--foreground),0px_6px_0px_0px_var(--foreground)]",
           "dark:shadow-[6px_0px_0px_0px_var(--ring),-6px_0px_0px_0px_var(--ring),0px_-6px_0px_0px_var(--ring),0px_6px_0px_0px_var(--ring)]",
-          className
+          className,
         )}
         {...props}
       />
@@ -170,7 +169,7 @@ function NavigationMenuIndicator({
       className={cn(
         "data-[state=visible]:animate-in data-[state=hidden]:fade-out data-[state=visible]:fade-in top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden",
         getFontClassName(font),
-        className
+        className,
       )}
       {...props}
     >

@@ -1,11 +1,9 @@
 "use client";
 
 import type * as React from "react";
-
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 
 import { cn } from "../../../lib/utils";
-
 import {
   Accordion as ShadcnAccordion,
   AccordionContent as ShadcnAccordionContent,
@@ -28,8 +26,8 @@ function AccordionItem({
   return (
     <ShadcnAccordionItem
       className={cn(
-        "border-dashed border-b-4 border-foreground dark:border-ring relative",
-        className
+        "border-foreground dark:border-ring relative border-b-4 border-dashed",
+        className,
       )}
       {...props}
     >
@@ -74,13 +72,13 @@ function AccordionContent({
     <div className="relative">
       <ShadcnAccordionContent
         className={cn(
-          "overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
+          "data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm",
           font !== "normal" && "retro",
-          className
+          className,
         )}
         {...props}
       >
-        <div className="pb-4 pt-0 relative z-10 p-1">{children}</div>
+        <div className="relative z-10 p-1 pt-0 pb-4">{children}</div>
       </ShadcnAccordionContent>
 
       <AccordionPrimitive.Content asChild forceMount />

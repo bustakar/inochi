@@ -1,8 +1,8 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "../../../lib/utils";
-
 import {
   Drawer as ShadcnDrawer,
   DrawerClose as ShadcnDrawerClose,
@@ -60,9 +60,9 @@ function DrawerTrigger({
       className={cn(
         // Only apply default trigger styling when NOT using asChild
         !asChild &&
-          "border-foreground dark:border-ring hover:bg-transparent active:bg-transparent focus:bg-transparent rounded-none border-4 focus:border-foreground hover:border-foreground dark:focus:border-ring bg-transparent data-[state=open]:bg-transparent data-[state=open]:border-foreground dark:data-[state=open]:border-ring",
+          "border-foreground dark:border-ring focus:border-foreground hover:border-foreground dark:focus:border-ring data-[state=open]:border-foreground dark:data-[state=open]:border-ring rounded-none border-4 bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent",
         className,
-        "retro"
+        "retro",
       )}
       asChild={asChild}
       {...props}
@@ -104,13 +104,13 @@ function DrawerContent({
           "border-foreground dark:border-ring rounded-none",
           "group/drawer-content bg-background fixed z-50 flex h-auto flex-col",
           side === "right" &&
-            "border-l-4 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l-4 sm:max-w-sm",
           side === "left" &&
-            "border-r-4 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r-4 sm:max-w-sm",
           side === "bottom" &&
-            "border-t-4 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto",
+            "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t-4",
           className,
-          "retro"
+          "retro",
         )}
         {...props}
       >

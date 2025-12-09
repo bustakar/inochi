@@ -26,7 +26,9 @@ export const Logo = ({
       <ServerIcon
         className={cn("h-5 w-5", uniColor ? "text-foreground" : "text-primary")}
       />
-      <span className="retro text-foreground text-lg font-semibold">inochi</span>
+      <span className="retro text-foreground text-lg font-semibold">
+        inochi
+      </span>
     </div>
   );
 };
@@ -50,7 +52,5 @@ export const LogoIcon = ({
 };
 
 export const LogoStroke = ({ className }: { className?: string }) => {
-  return (
-    <ServerIcon className={cn("size-7 w-7", className)} />
-  );
+  return <ServerIcon className={cn("size-7 w-7", className)} />;
 };

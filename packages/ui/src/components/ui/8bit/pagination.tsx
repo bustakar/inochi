@@ -1,8 +1,9 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { MoreHorizontal } from "lucide-react";
 
+import type { Button } from "../button";
 import { cn } from "../../../lib/utils";
-
 import {
   Pagination as ShadcnPagination,
   PaginationContent as ShadcnPaginationContent,
@@ -11,7 +12,6 @@ import {
   PaginationLink as ShadcnPaginationLink,
 } from "../../pagination";
 
-import type { Button } from "../button";
 import "./styles/retro.css";
 
 export const paginationVariants = cva("", {
@@ -23,7 +23,7 @@ export const paginationVariants = cva("", {
     variant: {
       default: "text-card-foreground",
       destructive:
-        "text-destructive [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
+        "text-destructive *:data-[slot=alert-description]:text-destructive/90 [&>svg]:text-current",
     },
   },
   defaultVariants: {
@@ -31,8 +31,11 @@ export const paginationVariants = cva("", {
   },
 });
 
-export type BitPaginationProps<T extends React.ElementType> =
-  React.ComponentPropsWithoutRef<T> & VariantProps<typeof paginationVariants>;
+export type BitPaginationProps<T extends React.ElementType> = Omit<
+  React.ComponentPropsWithoutRef<T>,
+  keyof VariantProps<typeof paginationVariants>
+> &
+  VariantProps<typeof paginationVariants>;
 
 function Pagination({ ...props }: BitPaginationProps<"nav">) {
   const { variant, className, font } = props;
@@ -42,7 +45,7 @@ function Pagination({ ...props }: BitPaginationProps<"nav">) {
       className={cn(
         paginationVariants({ variant }),
         font !== "normal" && "retro",
-        className
+        className,
       )}
     />
   );
@@ -165,13 +168,13 @@ function PaginationLink({ ...props }: PaginationLinkProps) {
       className={cn(
         font !== "normal" && "retro",
         className,
-        "relative group",
-        "bg-transparent hover:bg-transparent active:bg-transparent focus:bg-transparent",
-        "rounded-none border-dashed border-y-4 border-transparent",
+        "group relative",
+        "bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent",
+        "rounded-none border-y-4 border-dashed border-transparent",
         "dark:hover:border-ring dark:focus:border-ring",
         "hover:border-foreground focus:border-foreground",
         "active:border-transparent",
-        "data-[active=true]:border-none aria-[current=page]:border-none"
+        "aria-[current=page]:border-none data-[active=true]:border-none",
       )}
       {...props}
     >
@@ -179,31 +182,31 @@ function PaginationLink({ ...props }: PaginationLinkProps) {
 
       {isActive && (
         <div
-          className="absolute inset-0 w-full h-full pointer-events-none"
+          className="pointer-events-none absolute inset-0 h-full w-full"
           style={{ zIndex: 10 }}
         >
           <div
-            className="absolute top-0 left-0 w-full h-1.5 bg-foreground dark:bg-ring pointer-events-none"
+            className="bg-foreground dark:bg-ring pointer-events-none absolute top-0 left-0 h-1.5 w-full"
             aria-hidden="true"
           />
           <div
-            className="absolute left-0 bottom-0 w-full h-1.5 bg-foreground dark:bg-ring pointer-events-none"
+            className="bg-foreground dark:bg-ring pointer-events-none absolute bottom-0 left-0 h-1.5 w-full"
             aria-hidden="true"
           />
           <div
-            className="absolute top-1 -left-1 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+            className="bg-foreground dark:bg-ring pointer-events-none absolute top-1 -left-1 h-1/2 w-1.5"
             aria-hidden="true"
           />
           <div
-            className="absolute bottom-1 -left-1 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+            className="bg-foreground dark:bg-ring pointer-events-none absolute bottom-1 -left-1 h-1/2 w-1.5"
             aria-hidden="true"
           />
           <div
-            className="absolute top-1 -right-1 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+            className="bg-foreground dark:bg-ring pointer-events-none absolute top-1 -right-1 h-1/2 w-1.5"
             aria-hidden="true"
           />
           <div
-            className="absolute bottom-1 -right-1 w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+            className="bg-foreground dark:bg-ring pointer-events-none absolute -right-1 bottom-1 h-1/2 w-1.5"
             aria-hidden="true"
           />
         </div>
@@ -219,15 +222,15 @@ function PaginationPrevious({
   return (
     <PaginationLink
       className={cn(
-        "relative group",
-        "flex flex-row w-full text-sm",
-        "bg-transparent hover:bg-transparent active:bg-transparent focus:bg-transparent",
-        "rounded-none border-dashed border-y-4 border-transparent",
+        "group relative",
+        "flex w-full flex-row text-sm",
+        "bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent",
+        "rounded-none border-y-4 border-dashed border-transparent",
         "hover:border-foreground focus:border-foreground active:border-transparent",
         "dark:hover:border-ring dark:focus:border-ring",
-        "data-[active=true]:border-none aria-[current=page]:border-none",
+        "aria-[current=page]:border-none data-[active=true]:border-none",
         font !== "normal" && "retro",
-        className
+        className,
       )}
       {...props}
     >
@@ -245,16 +248,16 @@ function PaginationNext({
   return (
     <PaginationLink
       className={cn(
-        "relative group",
-        "flex flex-row w-full text-sm",
-        "bg-transparent hover:bg-transparent active:bg-transparent focus:bg-transparent",
-        "rounded-none border-dashed border-y-4 border-transparent",
+        "group relative",
+        "flex w-full flex-row text-sm",
+        "bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent",
+        "rounded-none border-y-4 border-dashed border-transparent",
         "hover:border-foreground focus:border-foreground active:border-transparent",
         "dark:hover:border-ring dark:focus:border-ring",
-        "data-[active=true]:border-none aria-[current=page]:border-none",
-        "flex flex-row text-sm w-full",
+        "aria-[current=page]:border-none data-[active=true]:border-none",
+        "flex w-full flex-row text-sm",
         font !== "normal" && "retro",
-        className
+        className,
       )}
       {...props}
     >

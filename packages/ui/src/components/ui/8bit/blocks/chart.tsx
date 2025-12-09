@@ -2,12 +2,8 @@
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "../chart";
+import type { ChartConfig } from "../chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../chart";
 
 export const description = "An area chart with axes";
 
@@ -44,7 +40,7 @@ export function ChartExample() {
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          tickFormatter={(value) => value.slice(0, 3)}
+          tickFormatter={(value: string) => value.slice(0, 3)}
         />
         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
         <YAxis

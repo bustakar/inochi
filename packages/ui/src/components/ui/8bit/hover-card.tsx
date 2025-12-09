@@ -1,8 +1,8 @@
 import type * as HoverCardPrimitive from "@radix-ui/react-hover-card";
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
-
 import {
   HoverCard as ShadcnHoverCard,
   HoverCardContent as ShadcnHoverCardContent,
@@ -60,18 +60,18 @@ function HoverCardContent({
         hoverCardVariants({
           font,
           className,
-        })
+        }),
       )}
       {...props}
     >
       {children}
 
       <div
-        className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
         aria-hidden="true"
       />
       <div
-        className="absolute inset-0 border-y-6 -my-1.5 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -my-1.5 border-y-6"
         aria-hidden="true"
       />
     </ShadcnHoverCardContent>

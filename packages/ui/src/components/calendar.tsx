@@ -1,11 +1,10 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import type { DayPicker } from "react-day-picker";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
-
-import { Calendar as ShadcnCalendar } from "./calendar";
-
 import { buttonVariants } from "./button";
+import { Calendar as ShadcnCalendar } from "./calendar";
 import {
   Select,
   SelectContent,
@@ -13,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
+
 import "./styles/retro.css";
 
 export const calendarVariants = cva("", {
@@ -34,8 +34,8 @@ function Calendar({ className, classNames, font, ...props }: CalendarProps) {
   return (
     <div
       className={cn(
-        "bg-popover relative border-y-6 border-foreground dark:border-ring w-max",
-        className
+        "bg-popover border-foreground dark:border-ring relative w-max border-y-6",
+        className,
       )}
     >
       <ShadcnCalendar
@@ -43,19 +43,19 @@ function Calendar({ className, classNames, font, ...props }: CalendarProps) {
           calendarVariants({
             className,
             font,
-          })
+          }),
         )}
         classNames={{
           nav_button: cn(
             buttonVariants({ variant: "outline" }),
-            "size-7 bg-transparent p-0 flex items-center justify-center hover:opacity-50 border-2 border-foreground dark:border-ring"
+            "border-foreground dark:border-ring flex size-7 items-center justify-center border-2 bg-transparent p-0 hover:opacity-50",
           ),
           day_button: cn(
             buttonVariants({ variant: "ghost" }),
-            "h-10 font-normal aria-selected:opacity-100"
+            "h-10 font-normal aria-selected:opacity-100",
           ),
           day: cn(
-            "relative w-full h-full p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md group/day select-none"
+            "group/day relative h-full w-full p-0 text-center select-none [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md",
           ),
           caption_label: "text-xs font-medium",
           ...classNames,
@@ -102,12 +102,12 @@ function Calendar({ className, classNames, font, ...props }: CalendarProps) {
             const currentYear = new Date().getFullYear();
             const years = Array.from(
               { length: currentYear - 1925 + 1 },
-              (_, i) => 1925 + i
+              (_, i) => 1925 + i,
             );
 
             return (
               <div className={cn("flex flex-col gap-3 text-xs", className)}>
-                <Select defaultValue={currentYear?.toString()}>
+                <Select defaultValue={currentYear.toString()}>
                   <SelectTrigger id="dropdown" className="bg-background w-full">
                     <SelectValue placeholder="Dropdown" />
                   </SelectTrigger>
@@ -209,7 +209,7 @@ function Calendar({ className, classNames, font, ...props }: CalendarProps) {
       />
 
       <div
-        className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
         aria-hidden="true"
       />
     </div>

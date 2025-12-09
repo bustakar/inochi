@@ -1,8 +1,8 @@
 import type * as PopoverPrimitive from "@radix-ui/react-popover";
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
-
 import {
   Popover as ShadcnPopover,
   PopoverAnchor as ShadcnPopoverAnchor,
@@ -43,16 +43,16 @@ function PopoverContent({
   return (
     <ShadcnPopoverContent
       className={cn(
-        "relative bg-card border-y-6 border-foreground dark:border-ring rounded-none mt-1",
+        "bg-card border-foreground dark:border-ring relative mt-1 rounded-none border-y-6",
         font !== "normal" && "retro",
-        className
+        className,
       )}
       {...props}
     >
       {children}
 
       <div
-        className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
         aria-hidden="true"
       />
     </ShadcnPopoverContent>

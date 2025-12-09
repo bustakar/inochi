@@ -74,7 +74,7 @@ export function ExerciseVariantsReadonly({
           <ButtonGroup>
             <Button
               variant="outline"
-              size="icon-sm"
+              size="icon"
               aria-label="Previous"
               onClick={handlePrevious}
             >
@@ -82,7 +82,7 @@ export function ExerciseVariantsReadonly({
             </Button>
             <Button
               variant="outline"
-              size="icon-sm"
+              size="icon"
               aria-label="Next"
               onClick={handleNext}
             >
@@ -152,7 +152,7 @@ export function ExerciseVariantsReadonly({
                 {currentVariant.tips.map((tip, index) => (
                   <div
                     key={index}
-                    className="bg-muted/30 flex flex-row items-start justify-between gap-2 border-foreground/20 border p-2"
+                    className="bg-muted/30 border-foreground/20 flex flex-row items-start justify-between gap-2 border p-2"
                   >
                     {tip.text && (
                       <p className="text-foreground retro text-sm">

@@ -8,19 +8,20 @@ import { cn } from "../lib/utils";
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
 
-export type ChartConfig = {
-  [k in string]: {
+export type ChartConfig = Record<
+  string,
+  {
     label?: React.ReactNode;
     icon?: React.ComponentType;
   } & (
     | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }
-  );
-};
+  )
+>;
 
-type ChartContextProps = {
+interface ChartContextProps {
   config: ChartConfig;
-};
+}
 
 const ChartContext = React.createContext<ChartContextProps | null>(null);
 
@@ -47,7 +48,7 @@ function ChartContainer({
   >["children"];
 }) {
   const uniqueId = React.useId();
-  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
+  const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`;
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -71,7 +72,7 @@ function ChartContainer({
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme || config.color,
+    ([, config]) => config.theme ?? config.color,
   );
 
   if (!colorConfig.length) {
@@ -88,7 +89,7 @@ ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
       itemConfig.color;
     return color ? `  --color-${key}: ${color};` : null;
   })
@@ -125,7 +126,7 @@ function ChartTooltipContent({
     indicator?: "line" | "dot" | "dashed";
     nameKey?: string;
     labelKey?: string;
-    payload?: Array<Record<string, unknown>>;
+    payload?: Record<string, unknown>[];
     label?: React.ReactNode;
   }) {
   const { config } = useChart();
@@ -136,11 +137,15 @@ function ChartTooltipContent({
     }
 
     const [item] = payload;
-    const key = `${labelKey || item?.dataKey || item?.name || "value"}`;
+    const keyValue = labelKey ?? item?.dataKey ?? item?.name ?? "value";
+    const key =
+      typeof keyValue === "string" || typeof keyValue === "number"
+        ? String(keyValue)
+        : "value";
     const itemConfig = getPayloadConfigFromPayload(config, item, key);
     const value =
       !labelKey && typeof label === "string"
-        ? config[label as keyof typeof config]?.label || label
+        ? (config[label]?.label ?? label)
         : itemConfig?.label;
 
     if (labelFormatter) {
@@ -186,16 +191,26 @@ function ChartTooltipContent({
       {!nestLabel ? tooltipLabel : null}
       <div className="grid gap-1.5">
         {payload?.map((item: Record<string, unknown>, index: number) => {
-          const key = `${nameKey || item.name || item.dataKey || "value"}`;
+          const keyValue = nameKey ?? item.name ?? item.dataKey ?? "value";
+          const key =
+            typeof keyValue === "string" || typeof keyValue === "number"
+              ? String(keyValue)
+              : "value";
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
           const indicatorColor =
-            color ||
-            (item.payload as Record<string, unknown>)?.fill ||
+            color ??
+            (item.payload as Record<string, unknown> | undefined)?.fill ??
             item.color;
+
+          const keyDataValue = item.dataKey ?? index;
+          const keyData =
+            typeof keyDataValue === "string" || typeof keyDataValue === "number"
+              ? String(keyDataValue)
+              : String(index);
 
           return (
             <div
-              key={String(item.dataKey ?? index)}
+              key={keyData}
               className={cn(
                 "[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5",
                 indicator === "dot" && "items-center",
@@ -244,7 +259,7 @@ function ChartTooltipContent({
                     <div className="grid gap-1.5">
                       {nestLabel ? tooltipLabel : null}
                       <span className="text-muted-foreground">
-                        {itemConfig?.label || (item.name as React.ReactNode)}
+                        {itemConfig?.label ?? (item.name as React.ReactNode)}
                       </span>
                       {item.value != null && (
                         <span className="text-foreground font-medium tabular-nums">
@@ -272,7 +287,7 @@ function ChartLegendContent({
   verticalAlign = "bottom",
   nameKey,
 }: React.ComponentProps<"div"> & {
-  payload?: Array<Record<string, unknown>>;
+  payload?: Record<string, unknown>[];
   verticalAlign?: "top" | "bottom";
   hideIcon?: boolean;
   nameKey?: string;
@@ -292,12 +307,22 @@ function ChartLegendContent({
       )}
     >
       {payload.map((item: Record<string, unknown>, index: number) => {
-        const key = `${nameKey || item.dataKey || "value"}`;
+        const keyValue = nameKey ?? item.dataKey ?? "value";
+        const key =
+          typeof keyValue === "string" || typeof keyValue === "number"
+            ? String(keyValue)
+            : "value";
         const itemConfig = getPayloadConfigFromPayload(config, item, key);
+
+        const keyItemValue = item.value ?? item.dataKey ?? index;
+        const keyItem =
+          typeof keyItemValue === "string" || typeof keyItemValue === "number"
+            ? String(keyItemValue)
+            : String(index);
 
         return (
           <div
-            key={String(item.value ?? item.dataKey ?? index)}
+            key={keyItem}
             className={cn(
               "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3",
             )}
@@ -354,9 +379,7 @@ function getPayloadConfigFromPayload(
     ] as string;
   }
 
-  return configLabelKey in config
-    ? config[configLabelKey]
-    : config[key as keyof typeof config];
+  return configLabelKey in config ? config[configLabelKey] : config[key];
 }
 
 export {

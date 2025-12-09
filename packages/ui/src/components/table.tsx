@@ -1,11 +1,10 @@
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
-
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
-
 import {
   Table as ShadcnTable,
   TableBody as ShadcnTableBody,
@@ -22,7 +21,7 @@ import "./styles/retro.css";
 export const tableVariants = cva("", {
   variants: {
     variant: {
-      default: "p-4 py-2.5 border-y-6 border-foreground dark:border-ring",
+      default: "border-foreground dark:border-ring border-y-6 p-4 py-2.5",
       borderless: "",
     },
     font: {
@@ -48,15 +47,15 @@ function Table({
   return (
     <div
       className={cn(
-        "relative flex justify-center w-fit",
-        tableVariants({ font, variant })
+        "relative flex w-fit justify-center",
+        tableVariants({ font, variant }),
       )}
     >
       <ShadcnTable className={className} {...props} />
 
       {variant !== "borderless" && (
         <div
-          className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+          className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
           aria-hidden="true"
         />
       )}
@@ -67,7 +66,7 @@ function Table({
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <ShadcnTableHeader
-      className={cn(className, "border-b-4 border-foreground dark:border-ring")}
+      className={cn(className, "border-foreground dark:border-ring border-b-4")}
       {...props}
     />
   );
@@ -86,7 +85,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <ShadcnTableRow
       className={cn(
         className,
-        "border-dashed border-b-4 border-foreground dark:border-ring"
+        "border-foreground dark:border-ring border-b-4 border-dashed",
       )}
       {...props}
     />

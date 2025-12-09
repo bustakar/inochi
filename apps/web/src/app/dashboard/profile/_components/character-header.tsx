@@ -27,7 +27,7 @@ export function CharacterHeader({
 }: CharacterHeaderProps) {
   const { user } = useUser();
   const characterName =
-    user?.fullName || user?.firstName || user?.username || "Adventurer";
+    user?.fullName ?? user?.firstName ?? user?.username ?? "Adventurer";
 
   return (
     <Card className="p-6">
@@ -35,7 +35,7 @@ export function CharacterHeader({
         {/* Level Badge */}
         <div className="flex items-center justify-center">
           <div className="retro border-foreground bg-muted flex h-20 w-20 items-center justify-center border-4 text-2xl font-bold">
-            {level ?? 1}
+            {level}
           </div>
         </div>
 
@@ -55,12 +55,12 @@ export function CharacterHeader({
                 Experience
               </span>
               <span className="retro text-muted-foreground text-xs">
-                {(currentXP ?? 0).toLocaleString()}/
-                {(xpForNextLevel ?? 100).toLocaleString()} XP
+                {currentXP.toLocaleString()}/{xpForNextLevel.toLocaleString()}{" "}
+                XP
               </span>
             </div>
             <HealthBar
-              value={xpProgress ?? 0}
+              value={xpProgress}
               sections={20}
               className="h-4"
               progressBg="bg-yellow-500"

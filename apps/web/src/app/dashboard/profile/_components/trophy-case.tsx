@@ -2,7 +2,6 @@
 
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { ProgressStatus } from "@packages/backend/convex/validators/validators";
-import * as React from "react";
 import Image from "next/image";
 import { Award } from "lucide-react";
 
@@ -59,17 +58,14 @@ export function TrophyCase({ trophies }: TrophyCaseProps) {
   return (
     <div className="space-y-4">
       {trophies.map((trophy) => {
-        const iconNumber = React.useMemo(
-          () => getIconNumber(trophy._id),
-          [trophy._id],
-        );
+        const iconNumber = getIconNumber(trophy._id);
         const status = trophy.status as ProgressStatus;
         const borderStyle =
-          statusBorderStyles[status] ?? statusBorderStyles.novice;
+          statusBorderStyles[status] || statusBorderStyles.novice;
         const levelColor =
           exerciseLevelHealthBarColors[
             trophy.level as keyof typeof exerciseLevelHealthBarColors
-          ] ?? exerciseLevelHealthBarColors.beginner;
+          ] || exerciseLevelHealthBarColors.beginner;
 
         return (
           <Card

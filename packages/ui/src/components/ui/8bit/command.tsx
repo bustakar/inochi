@@ -2,9 +2,8 @@
 
 import { Command as CommandPrimitive } from "cmdk";
 
+import type { Dialog } from "./dialog";
 import { cn } from "../../../lib/utils";
-
-import { Separator } from "./separator";
 import {
   Command as ShadcnCommand,
   CommandDialog as ShadcnCommandDialog,
@@ -16,12 +15,12 @@ import {
   CommandShortcut as ShadcnCommandShortcut,
 } from "../../command";
 import {
-  type Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "./dialog";
+import { Separator } from "./separator";
 
 import "./styles/retro.css";
 
@@ -36,23 +35,23 @@ function Command({
         className={cn(
           "bg-popover text-popover-foreground flex h-full !w-full flex-col overflow-hidden rounded-md",
           "retro",
-          className
+          className,
         )}
         {...props}
       />
 
-      <div className="absolute -top-1.5 w-1/2 left-1.5 h-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute -top-1.5 w-1/2 right-1.5 h-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute -bottom-1.5 w-1/2 left-1.5 h-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute -bottom-1.5 w-1/2 right-1.5 h-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute top-0 left-0 size-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute top-0 right-0 size-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-0 left-0 size-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-0 right-0 size-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute top-1.5 -left-1.5 h-1/2 w-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute top-1.5 -right-1.5 h-1/2 w-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-1.5 -left-1.5 h-1/2 w-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-1.5 -right-1.5 h-1/2 w-1.5 bg-foreground dark:bg-ring" />
+      <div className="bg-foreground dark:bg-ring absolute -top-1.5 left-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute -top-1.5 right-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute -bottom-1.5 left-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute right-1.5 -bottom-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute top-0 left-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-0 right-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute bottom-0 left-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute right-0 bottom-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-1.5 -left-1.5 h-1/2 w-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-1.5 -right-1.5 h-1/2 w-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute bottom-1.5 -left-1.5 h-1/2 w-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute -right-1.5 bottom-1.5 h-1/2 w-1.5" />
     </div>
   );
 }
@@ -124,7 +123,7 @@ function CommandInput({
         data-slot="command-input"
         className={cn(
           "placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
-          className
+          className,
         )}
         {...props}
       />
@@ -142,7 +141,7 @@ function CommandList({
       className={cn(
         "max-h-[320px] scroll-py-1 overflow-x-hidden overflow-y-auto",
         "retro",
-        className
+        className,
       )}
       {...props}
     />
@@ -171,7 +170,7 @@ function CommandGroup({
       className={cn(
         "text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium",
         "retro",
-        className
+        className,
       )}
       {...props}
     />
@@ -186,9 +185,9 @@ function CommandSeparator({
     <ShadcnCommandSeparator
       data-slot="command-separator"
       className={cn(
-        "data-[orientation=horizontal]:bg-[length:16px_8px] data-[orientation=horizontal]:bg-[linear-gradient(90deg,var(--foreground)_75%,transparent_75%)] dark:data-[orientation=horizontal]:bg-[linear-gradient(90deg,var(--ring)_75%,transparent_75%)] shrink-0 data-[orientation=horizontal]:h-0.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-0.5 data-[orientation=vertical]:bg-[length:2px_16px] data-[orientation=vertical]:bg-[linear-gradient(0deg,var(--foreground)_75%,transparent_75%)] dark:data-[orientation=vertical]:bg-[linear-gradient(0deg,var(--ring)_75%,transparent_75%)]",
+        "shrink-0 data-[orientation=horizontal]:h-0.5 data-[orientation=horizontal]:w-full data-[orientation=horizontal]:bg-[linear-gradient(90deg,var(--foreground)_75%,transparent_75%)] data-[orientation=horizontal]:bg-[length:16px_8px] data-[orientation=vertical]:h-full data-[orientation=vertical]:w-0.5 data-[orientation=vertical]:bg-[linear-gradient(0deg,var(--foreground)_75%,transparent_75%)] data-[orientation=vertical]:bg-[length:2px_16px] dark:data-[orientation=horizontal]:bg-[linear-gradient(90deg,var(--ring)_75%,transparent_75%)] dark:data-[orientation=vertical]:bg-[linear-gradient(0deg,var(--ring)_75%,transparent_75%)]",
         "retro",
-        className
+        className,
       )}
       {...props}
     >
@@ -205,8 +204,8 @@ function CommandItem({
     <ShadcnCommandItem
       data-slot="command-item"
       className={cn(
-        "rounded-none border-dashed border-y-3 border-ring/0 hover:border-foreground dark:hover:border-ring",
-        className
+        "border-ring/0 hover:border-foreground dark:hover:border-ring rounded-none border-y-3 border-dashed",
+        className,
       )}
       {...props}
     />
@@ -225,11 +224,11 @@ function CommandShortcut({
 export {
   Command,
   CommandDialog,
-  CommandInput,
-  CommandList,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
-  CommandShortcut,
+  CommandList,
   CommandSeparator,
+  CommandShortcut,
 };

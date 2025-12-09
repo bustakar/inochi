@@ -1,12 +1,12 @@
-import { type VariantProps, cva } from "class-variance-authority";
-
-import { cn } from "../lib/utils";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import {
   Alert as ShadcnAlert,
   AlertDescription as ShadcnAlertDescription,
   AlertTitle as ShadcnAlertTitle,
 } from "../alert";
+import { cn } from "../lib/utils";
 
 export const alertVariants = cva("", {
   variants: {
@@ -17,7 +17,7 @@ export const alertVariants = cva("", {
     variant: {
       default: "bg-card text-card-foreground",
       destructive:
-        "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
+        "text-destructive bg-card *:data-[slot=alert-description]:text-destructive/90 [&>svg]:text-current",
     },
   },
   defaultVariants: {
@@ -38,26 +38,26 @@ function Alert({ children, ...props }: BitAlertProps) {
         {...props}
         variant={variant}
         className={cn(
-          "relative rounded-none border-none bg-background",
+          "bg-background relative rounded-none border-none",
           font !== "normal" && "retro",
-          className
+          className,
         )}
       >
         {children}
       </ShadcnAlert>
 
-      <div className="absolute -top-1.5 w-1/2 left-1.5 h-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute -top-1.5 w-1/2 right-1.5 h-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute -bottom-1.5 w-1/2 left-1.5 h-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute -bottom-1.5 w-1/2 right-1.5 h-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute top-0 left-0 size-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute top-0 right-0 size-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-0 left-0 size-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-0 right-0 size-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute top-1.5 -left-1.5 h-1/2 w-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-1.5 -left-1.5 h-1/2 w-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute top-1.5 -right-1.5 h-1/2 w-1.5 bg-foreground dark:bg-ring" />
-      <div className="absolute bottom-1.5 -right-1.5 h-1/2 w-1.5 bg-foreground dark:bg-ring" />
+      <div className="bg-foreground dark:bg-ring absolute -top-1.5 left-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute -top-1.5 right-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute -bottom-1.5 left-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute right-1.5 -bottom-1.5 h-1.5 w-1/2" />
+      <div className="bg-foreground dark:bg-ring absolute top-0 left-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-0 right-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute bottom-0 left-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute right-0 bottom-0 size-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-1.5 -left-1.5 h-1/2 w-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute bottom-1.5 -left-1.5 h-1/2 w-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute top-1.5 -right-1.5 h-1/2 w-1.5" />
+      <div className="bg-foreground dark:bg-ring absolute -right-1.5 bottom-1.5 h-1/2 w-1.5" />
     </div>
   );
 }
@@ -82,7 +82,7 @@ function AlertDescription({
     <ShadcnAlertDescription
       className={cn(
         "text-muted-foreground grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
-        className
+        className,
       )}
       {...props}
     />

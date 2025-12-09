@@ -10,7 +10,6 @@ import { Badge, Button } from "@inochi/ui";
 import { PixelLog } from "../_components/pixel-icons";
 import { Search } from "../../../components/search";
 import {
-  exerciseLevelColors,
   exerciseLevelHealthBarColors,
   exerciseLevels,
 } from "../../../utils/exercise-utils";

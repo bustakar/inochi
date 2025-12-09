@@ -1,5 +1,6 @@
+import type { VariantProps } from "class-variance-authority";
 import * as ProgressPrimitive from "@radix-ui/react-progress";
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
 
@@ -38,8 +39,8 @@ function Progress({
   ...props
 }: BitProgressProps) {
   // Extract height from className if present
-  const heightMatch = className?.match(/h-(\d+|\[.*?\])/);
-  const heightClass = heightMatch ? heightMatch[0] : "h-2";
+  const heightMatch = /h-(\d+|\[.*?\])/.exec(className ?? "");
+  const heightClass = heightMatch?.[0] ?? "h-2";
 
   return (
     <div className={cn("relative w-full", className)}>
@@ -48,7 +49,7 @@ function Progress({
         className={cn(
           "bg-primary/20 relative w-full overflow-hidden",
           heightClass,
-          font !== "normal" && "retro"
+          font !== "normal" && "retro",
         )}
         {...props}
       >
@@ -57,24 +58,24 @@ function Progress({
           className={cn(
             "h-full transition-all",
             variant === "retro" ? "flex" : "w-full flex-1",
-            progressBg && variant !== "retro" ? progressBg : "bg-primary"
+            progressBg && variant !== "retro" ? progressBg : "bg-primary",
           )}
           style={
             variant === "retro"
               ? undefined
-              : { transform: `translateX(-${100 - (value || 0)}%)` }
+              : { transform: `translateX(-${100 - (value ?? 0)}%)` }
           }
         >
           {variant === "retro" && (
             <div className="flex w-full">
               {Array.from({ length: 20 }).map((_, i) => {
-                const filledSquares = Math.round(((value || 0) / 100) * 20);
+                const filledSquares = Math.round(((value ?? 0) / 100) * 20);
                 return (
                   <div
                     key={i}
                     className={cn(
-                      "size-full mx-[1px]",
-                      i < filledSquares ? progressBg : "bg-transparent"
+                      "mx-[1px] size-full",
+                      i < filledSquares ? progressBg : "bg-transparent",
                     )}
                   />
                 );
@@ -85,12 +86,12 @@ function Progress({
       </ProgressPrimitive.Root>
 
       <div
-        className="absolute inset-0 border-y-4 -my-1 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -my-1 border-y-4"
         aria-hidden="true"
       />
 
       <div
-        className="absolute inset-0 border-x-4 -mx-1 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1 border-x-4"
         aria-hidden="true"
       />
     </div>

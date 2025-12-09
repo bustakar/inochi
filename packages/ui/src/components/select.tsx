@@ -1,8 +1,8 @@
 import type * as SelectPrimitive from "@radix-ui/react-select";
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
-
 import {
   Select as ShadcnSelect,
   SelectContent as ShadcnSelectContent,
@@ -75,20 +75,20 @@ function SelectTrigger({ children, ...props }: BitSelectTriggerProps) {
   return (
     <div
       className={cn(
-        "relative border-y-6 border-foreground dark:border-ring",
+        "border-foreground dark:border-ring relative border-y-6",
         className,
-        font !== "normal" && "retro"
+        font !== "normal" && "retro",
       )}
     >
       <ShadcnSelectTrigger
         {...props}
-        className={cn("rounded-none ring-0 w-full border-0", className)}
+        className={cn("w-full rounded-none border-0 ring-0", className)}
       >
         {children}
       </ShadcnSelectTrigger>
 
       <div
-        className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
         aria-hidden="true"
       />
     </div>
@@ -113,7 +113,7 @@ function SelectContent({
       className={cn(
         font !== "normal" && "retro",
         className,
-        "relative rounded-none border-4 border-foreground dark:border-ring -ml-1 mt-1"
+        "border-foreground dark:border-ring relative mt-1 -ml-1 rounded-none border-4",
       )}
       {...props}
     >
@@ -138,7 +138,7 @@ function SelectItem({
     <ShadcnSelectItem
       className={cn(
         className,
-        "rounded-none border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring"
+        "border-ring/0 hover:border-foreground dark:hover:border-ring rounded-none border-y-3 border-dashed",
       )}
       {...props}
     >

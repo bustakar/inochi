@@ -5,14 +5,13 @@ import type {
   ExerciseLevel,
   ProgressStatus,
 } from "@packages/backend/convex/validators/validators";
-import {
-  ExerciseCard,
-  type ExerciseCardProps,
-} from "../../dashboard/exercises/_components/exercise-card";
+
+import type { ExerciseCardProps } from "../../dashboard/exercises/_components/exercise-card";
 import {
   exerciseLevels,
   progressStatuses,
 } from "../../../utils/exercise-utils";
+import { ExerciseCard } from "../../dashboard/exercises/_components/exercise-card";
 
 // ============================================================================
 // Mock Data Generator
@@ -44,9 +43,9 @@ function createMockExercise(
 
 export default function ComponentPreviewPage() {
   return (
-    <div className="container mx-auto py-8 space-y-12">
+    <div className="container mx-auto space-y-12 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Exercise Card Variations</h1>
+        <h1 className="mb-2 text-3xl font-bold">Exercise Card Variations</h1>
         <p className="text-muted-foreground">
           Preview all possible variations of the ExerciseCard component
         </p>
@@ -54,14 +53,14 @@ export default function ComponentPreviewPage() {
 
       {/* By Level - All with Progress */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">
+        <h2 className="mb-4 text-2xl font-semibold">
           By Level (with Apprentice progress)
         </h2>
         <p className="text-muted-foreground mb-6 text-sm">
           Shows how the card looks with different exercise levels, all with the
           same progress status
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {exerciseLevels.map((level) => (
             <ExerciseCard
               key={`level-${level}`}
@@ -75,13 +74,13 @@ export default function ComponentPreviewPage() {
 
       {/* By Progress Status */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">
+        <h2 className="mb-4 text-2xl font-semibold">
           By Progress Status (Intermediate level)
         </h2>
         <p className="text-muted-foreground mb-6 text-sm">
           Shows how the progress ribbon appears for different statuses
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {progressStatuses.map((status) => (
             <ExerciseCard
               key={`status-${status}`}
@@ -93,13 +92,13 @@ export default function ComponentPreviewPage() {
 
       {/* Without Progress (Inactive State) */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">
+        <h2 className="mb-4 text-2xl font-semibold">
           Without Progress (Inactive/Grayscale)
         </h2>
         <p className="text-muted-foreground mb-6 text-sm">
           Shows the inactive state when a user hasn't started the exercise yet
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {exerciseLevels.slice(0, 3).map((level) => (
             <ExerciseCard
               key={`no-progress-${level}`}
@@ -111,7 +110,7 @@ export default function ComponentPreviewPage() {
 
       {/* Long Description */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Long Description</h2>
+        <h2 className="mb-4 text-2xl font-semibold">Long Description</h2>
         <p className="text-muted-foreground mb-6 text-sm">
           Shows how the description truncates when it exceeds the maximum length
         </p>
@@ -127,11 +126,11 @@ export default function ComponentPreviewPage() {
 
       {/* Different Difficulties */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Different Difficulties</h2>
+        <h2 className="mb-4 text-2xl font-semibold">Different Difficulties</h2>
         <p className="text-muted-foreground mb-6 text-sm">
           Shows how the difficulty indicator appears for different values
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[1, 3, 7, 10].map((difficulty) => (
             <ExerciseCard
               key={`difficulty-${difficulty}`}
@@ -146,15 +145,16 @@ export default function ComponentPreviewPage() {
 
       {/* All Combinations Grid */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">All Combinations</h2>
+        <h2 className="mb-4 text-2xl font-semibold">All Combinations</h2>
         <p className="text-muted-foreground mb-6 text-sm">
-          A comprehensive grid showing all level and progress status combinations
+          A comprehensive grid showing all level and progress status
+          combinations
         </p>
         <div className="space-y-8">
           {exerciseLevels.map((level) => (
             <div key={`combo-${level}`}>
-              <h3 className="text-lg font-medium mb-4 capitalize">{level}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <h3 className="mb-4 text-lg font-medium capitalize">{level}</h3>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {progressStatuses.map((status) => (
                   <ExerciseCard
                     key={`combo-${level}-${status}`}
@@ -174,4 +174,3 @@ export default function ComponentPreviewPage() {
     </div>
   );
 }
-

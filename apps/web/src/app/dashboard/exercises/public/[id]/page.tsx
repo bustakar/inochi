@@ -10,12 +10,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { Globe } from "lucide-react";
 
 import { Badge, Button, Card, CardContent, HealthBar } from "@inochi/ui";
 
 import {
-  exerciseLevelColors,
   exerciseLevelHealthBarColors,
   getMuscleRoleLabel,
   muscleRoles,

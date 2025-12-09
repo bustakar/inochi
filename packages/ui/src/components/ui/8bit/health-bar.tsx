@@ -1,5 +1,5 @@
 import type { VariantProps } from "class-variance-authority";
-import * as React from "react";
+import type * as React from "react";
 import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
@@ -36,7 +36,6 @@ export interface HealthBarProps
 function HealthBar({
   className,
   font,
-  variant,
   value,
   sections = 20,
   progressBg = "bg-primary",

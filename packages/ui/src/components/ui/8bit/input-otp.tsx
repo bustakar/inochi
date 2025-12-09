@@ -1,7 +1,7 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../../../lib/utils";
-
 import {
   InputOTP as ShadcnInputOTP,
   InputOTPGroup as ShadcnInputOTPGroup,
@@ -76,19 +76,19 @@ export const InputOTPSlot = ({
   ...props
 }: SharedProps & { index?: number }) => {
   return (
-    <div className="relative size-12 border-y-6 border-foreground dark:border-ring">
+    <div className="border-foreground dark:border-ring relative size-12 border-y-6">
       <ShadcnInputOTPSlot
         index={index}
         {...props}
         className={cn(
-          "pl-1 size-full text-center text-xl tracking-widest z-0 ring-0 border-transparent ",
+          "z-0 size-full border-transparent pl-1 text-center text-xl tracking-widest ring-0",
           font !== "normal" && "retro",
-          className
+          className,
         )}
       />
 
       <div
-        className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
+        className="border-foreground dark:border-ring pointer-events-none absolute inset-0 -mx-1.5 border-x-6"
         aria-hidden="true"
       />
     </div>

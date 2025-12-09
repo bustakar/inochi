@@ -59,7 +59,7 @@ export function SpiderChart({ stats }: SpiderChartProps) {
             angle={90}
             domain={[0, viewportMax]}
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-            tickFormatter={(value) => value.toFixed(1)}
+            tickFormatter={(value: number) => value.toFixed(1)}
             allowDuplicatedCategory={false}
           />
           <Radar
