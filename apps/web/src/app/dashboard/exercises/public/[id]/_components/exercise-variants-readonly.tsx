@@ -30,10 +30,12 @@ export function ExerciseVariantsReadonly({
   if (variants.length === 0) {
     return (
       <div>
-        <h2 className="text-foreground mb-4 text-lg font-semibold">Variants</h2>
+        <h2 className="text-foreground retro mb-4 text-lg font-semibold">
+          Variants
+        </h2>
         <Card>
           <CardContent className="py-6">
-            <p className="text-muted-foreground text-center text-sm">
+            <p className="text-muted-foreground retro text-center text-sm">
               No variants available for this exercise.
             </p>
           </CardContent>
@@ -65,7 +67,9 @@ export function ExerciseVariantsReadonly({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-foreground text-lg font-semibold">Variants</h2>
+        <h2 className="text-foreground retro text-lg font-semibold">
+          Variants
+        </h2>
         {hasMultipleVariants && (
           <ButtonGroup>
             <Button
@@ -95,7 +99,7 @@ export function ExerciseVariantsReadonly({
               {currentVariant.overriddenTitle ?? "Default Variant"}
             </CardTitle>
             {hasMultipleVariants && (
-              <span className="text-muted-foreground text-sm">
+              <span className="text-muted-foreground retro text-sm">
                 {currentIndex + 1} / {variants.length}
               </span>
             )}
@@ -104,10 +108,10 @@ export function ExerciseVariantsReadonly({
         <CardContent className="space-y-4">
           {currentVariant.overriddenDescription && (
             <div>
-              <h3 className="text-foreground mb-2 text-sm font-medium">
+              <h3 className="text-foreground retro mb-2 text-sm font-medium">
                 Description
               </h3>
-              <p className="text-muted-foreground text-sm whitespace-pre-wrap">
+              <p className="text-muted-foreground retro text-sm whitespace-pre-wrap">
                 {currentVariant.overriddenDescription}
               </p>
             </div>
@@ -115,7 +119,7 @@ export function ExerciseVariantsReadonly({
 
           {currentVariant.overriddenDifficulty !== undefined && (
             <div>
-              <h3 className="text-foreground mb-2 text-sm font-medium">
+              <h3 className="text-foreground retro mb-2 text-sm font-medium">
                 Difficulty
               </h3>
               <Badge variant="secondary">
@@ -141,15 +145,19 @@ export function ExerciseVariantsReadonly({
 
           {currentVariant.tips.length > 0 && (
             <div>
-              <h3 className="text-foreground mb-3 text-sm font-medium">Tips</h3>
+              <h3 className="text-foreground retro mb-3 text-sm font-medium">
+                Tips
+              </h3>
               <div className="space-y-3">
                 {currentVariant.tips.map((tip, index) => (
                   <div
                     key={index}
-                    className="bg-muted/30 flex flex-row items-start justify-between gap-2 rounded-lg border p-2"
+                    className="bg-muted/30 flex flex-row items-start justify-between gap-2 border-foreground/20 border p-2"
                   >
                     {tip.text && (
-                      <p className="text-foreground text-sm">{tip.text}</p>
+                      <p className="text-foreground retro text-sm">
+                        {tip.text}
+                      </p>
                     )}
                     <div className="flex flex-row items-center gap-2">
                       {tip.videoUrl && (
@@ -157,7 +165,7 @@ export function ExerciseVariantsReadonly({
                           href={tip.videoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary inline-flex items-center gap-1 text-sm hover:underline"
+                          className="text-primary retro inline-flex items-center gap-1 text-sm hover:underline"
                         >
                           <LinkIcon className="h-4 w-4" />
                           Watch video
