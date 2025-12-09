@@ -83,6 +83,7 @@ export function TrophyCase({ trophies }: TrophyCaseProps) {
                   src={`/icons/exercises/Icon${iconNumber}.png`}
                   alt={trophy.title}
                   fill
+                  sizes="64px"
                   className="object-contain"
                 />
               </div>

@@ -70,13 +70,11 @@ function calculateSpiderStats(exercises: ExerciseWithProgress[]): {
   pull: number;
   core: number;
   legs: number;
-  skill: number;
 } {
   const pushExercises: number[] = [];
   const pullExercises: number[] = [];
   const coreExercises: number[] = [];
   const legsExercises: number[] = [];
-  const skillExercises: number[] = [];
 
   for (const ex of exercises) {
     const hasPush = ex.muscleGroups.some((mg) => PUSH_MUSCLES.includes(mg));
@@ -88,19 +86,16 @@ function calculateSpiderStats(exercises: ExerciseWithProgress[]): {
     if (hasPull) pullExercises.push(ex.weightedDifficulty);
     if (hasCore) coreExercises.push(ex.weightedDifficulty);
     if (hasLegs) legsExercises.push(ex.weightedDifficulty);
-    // All exercises contribute to skill
-    skillExercises.push(ex.weightedDifficulty);
   }
 
   const average = (arr: number[]) =>
     arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
   return {
-    push: Math.round(average(pushExercises)),
-    pull: Math.round(average(pullExercises)),
-    core: Math.round(average(coreExercises)),
-    legs: Math.round(average(legsExercises)),
-    skill: Math.round(average(skillExercises)),
+    push: average(pushExercises),
+    pull: average(pullExercises),
+    core: average(coreExercises),
+    legs: average(legsExercises),
   };
 }
 
@@ -175,16 +170,15 @@ function determineArchetype(stats: {
   pull: number;
   core: number;
   legs: number;
-  skill: number;
 }): { slug: string; title: string; description: string } {
-  const { push, pull, core, legs, skill } = stats;
+  const { push, pull, core, legs } = stats;
 
   // Find max stat
-  const maxStat = Math.max(push, pull, core, legs, skill);
+  const maxStat = Math.max(push, pull, core, legs);
   const threshold = maxStat * 0.8; // 80% of max to be considered "high"
 
   // Check for balanced stats (all within 20% of each other)
-  const statsArray = [push, pull, core, legs, skill];
+  const statsArray = [push, pull, core, legs];
   const minStat = Math.min(...statsArray);
   const isBalanced = maxStat - minStat < maxStat * 0.3;
 
@@ -193,8 +187,8 @@ function determineArchetype(stats: {
     return ARCHETYPE_DEFINITIONS["the-t-rex"]!;
   }
 
-  // High Push + High Skill
-  if (push >= threshold && skill >= threshold) {
+  // High Push + High Core (hand balancing requires both)
+  if (push >= threshold && core >= threshold) {
     return ARCHETYPE_DEFINITIONS["hand-balancer"]!;
   }
 
@@ -203,8 +197,8 @@ function determineArchetype(stats: {
     return ARCHETYPE_DEFINITIONS["bar-warrior"]!;
   }
 
-  // High Pull + High Skill
-  if (pull >= threshold && skill >= threshold) {
+  // High Pull + High Push (ring mastery requires both)
+  if (pull >= threshold && push >= threshold) {
     return ARCHETYPE_DEFINITIONS["ring-master"]!;
   }
 
@@ -223,7 +217,7 @@ function determineArchetype(stats: {
   if (pull === maxStat) return ARCHETYPE_DEFINITIONS["pull-specialist"]!;
   if (core === maxStat) return ARCHETYPE_DEFINITIONS["core-specialist"]!;
   if (legs === maxStat) return ARCHETYPE_DEFINITIONS["leg-specialist"]!;
-  return ARCHETYPE_DEFINITIONS["skill-specialist"]!;
+  return ARCHETYPE_DEFINITIONS["street-athlete"]!;
 }
 
 export const getUserProfileStats = query({
@@ -239,7 +233,6 @@ export const getUserProfileStats = query({
       pull: v.number(),
       core: v.number(),
       legs: v.number(),
-      skill: v.number(),
     }),
     archetype: v.object({
       slug: v.string(),
@@ -281,7 +274,6 @@ export const getUserProfileStats = query({
           pull: 0,
           core: 0,
           legs: 0,
-          skill: 0,
         },
         archetype: ARCHETYPE_DEFINITIONS["beginner"]!,
         trophyCase: [],
