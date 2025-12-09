@@ -5,7 +5,6 @@ import type { ProgressStatus } from "@packages/backend/convex/validators/validat
 import * as React from "react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation } from "convex/react";
-import { toast } from "sonner";
 
 import {
   cn,
@@ -14,6 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  toast,
 } from "@inochi/ui";
 
 import {
@@ -62,18 +62,16 @@ export function UserProgressSection({
     try {
       if (newStatus === null && currentStatus !== null) {
         await deleteProgress({ exerciseIds: [exerciseId] });
-        toast.success("Progress removed");
+        toast("Progress removed");
       } else if (newStatus !== null) {
         await updateProgress({
           exerciseId,
           status: newStatus,
         });
-        toast.success(
-          `Progress updated to ${getProgressStatusLabel(newStatus)}`,
-        );
+        toast(`Progress updated`);
       }
     } catch (error) {
-      toast.error("Failed to update progress. Please try again.");
+      toast("Failed to update progress. Please try again.");
       console.error("Error updating progress:", error);
     } finally {
       setIsUpdating(false);

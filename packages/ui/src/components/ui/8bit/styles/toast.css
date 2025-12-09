@@ -1,0 +1,84 @@
+/* 8bitcn styling for Sonner toasts */
+[data-sonner-toaster] [data-sonner-toast] {
+  border-radius: 0 !important;
+  border: none !important;
+  font-family:
+    "Press Start 2P",
+    system-ui,
+    -apple-system,
+    sans-serif !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0.5px !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* Apply thick pixelated borders */
+[data-sonner-toaster] [data-sonner-toast]::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: hsl(var(--foreground));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dark [data-sonner-toaster] [data-sonner-toast]::before {
+  background: hsl(var(--ring));
+}
+
+[data-sonner-toaster] [data-sonner-toast]::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: hsl(var(--foreground));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dark [data-sonner-toaster] [data-sonner-toast]::after {
+  background: hsl(var(--ring));
+}
+
+/* Side borders */
+[data-sonner-toaster] [data-sonner-toast] > div:first-child {
+  position: relative;
+}
+
+[data-sonner-toaster] [data-sonner-toast] > div:first-child::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  left: -6px;
+  width: 6px;
+  background: hsl(var(--foreground));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dark [data-sonner-toaster] [data-sonner-toast] > div:first-child::before {
+  background: hsl(var(--ring));
+}
+
+[data-sonner-toaster] [data-sonner-toast] > div:first-child::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  right: -6px;
+  width: 6px;
+  background: hsl(var(--foreground));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dark [data-sonner-toaster] [data-sonner-toast] > div:first-child::after {
+  background: hsl(var(--ring));
+}

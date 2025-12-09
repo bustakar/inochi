@@ -39,6 +39,7 @@ export * from "./components/sidebar";
 
 // 8bit components
 export { HealthBar } from "./components/ui/8bit/health-bar";
+export { toast } from "./components/ui/8bit/toast";
 
 // Hooks
 export * from "./hooks/use-mobile";

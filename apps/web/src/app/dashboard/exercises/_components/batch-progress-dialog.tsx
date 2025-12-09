@@ -9,7 +9,6 @@ import { useMemo, useState } from "react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { Search } from "lucide-react";
-import { toast } from "sonner";
 
 import {
   Badge,
@@ -28,6 +27,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  toast,
   ToggleGroup,
   ToggleGroupItem,
 } from "@inochi/ui";
@@ -417,12 +417,12 @@ export function BatchProgressDialog({
 
   const handleSubmit = async () => {
     if (selectedExercises.size === 0) {
-      toast.error("Please select at least one exercise");
+      toast("Select at least one exercise");
       return;
     }
 
     if (selectedStatus === undefined) {
-      toast.error("Please select a progress status");
+      toast("Select a progress status");
       return;
     }
 
@@ -440,13 +440,13 @@ export function BatchProgressDialog({
       ]);
 
       const totalCount = updateCount + deleteCount;
-      toast.success(
-        `Successfully updated progress for ${totalCount} exercise${totalCount !== 1 ? "s" : ""}`,
+      toast(
+        `Progress updated for ${totalCount} exercise${totalCount !== 1 ? "s" : ""}`,
       );
       setSelectedExercises(new Set());
       setSelectedStatus(undefined);
     } catch (error) {
-      toast.error("Failed to update progress. Please try again.");
+      toast("Failed to update progress");
       console.error("Error updating progress:", error);
     } finally {
       setIsUpdating(false);
