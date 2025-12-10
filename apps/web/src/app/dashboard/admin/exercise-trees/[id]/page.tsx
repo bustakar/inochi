@@ -28,7 +28,15 @@ import { useMutation, useQuery } from "convex/react";
 import "@xyflow/react/dist/style.css";
 
 import type { EditorNodeData } from "./_components/editor-node";
+import {
+  DEFAULT_EDGE_OPTIONS,
+  TREE_EDGE_STYLE,
+} from "../../../../../utils/react-flow-config";
 import { isClientAdminOrModerator } from "../../../../../utils/roles";
+import {
+  convertTreeToFlowEdges,
+  convertTreeToFlowNodes,
+} from "../../../../../utils/tree-flow-utils";
 import { EditorNode } from "./_components/editor-node";
 import { ExercisePickerSidebar } from "./_components/exercise-picker-sidebar";
 import { TreeToolbar } from "./_components/tree-toolbar";
@@ -60,45 +68,19 @@ const TreeEditorCanvas = React.forwardRef<
   // Load tree data into React Flow state
   useEffect(() => {
     // tree and exercises are guaranteed to be defined by parent component
+    const flowNodes = convertTreeToFlowNodes<EditorNodeData>(
+      tree.nodes,
+      tree.exercises.map((ex) => ({
+        _id: ex._id,
+        title: ex.title,
+        description: ex.description,
+        level: ex.level,
+        difficulty: ex.difficulty,
+      })),
+      "exercise",
+    );
 
-    // Create exercise map for quick lookup from tree.exercises
-    const exerciseMap = new Map(tree.exercises.map((ex) => [ex._id, ex]));
-
-    // Convert tree nodes to React Flow nodes
-    const flowNodes: Node[] = tree.nodes
-      .map((node) => {
-        const exercise = exerciseMap.get(node.exerciseId);
-        if (!exercise) return null;
-
-        return {
-          id: node.exerciseId,
-          type: "exercise",
-          position: { x: node.x, y: node.y },
-          data: {
-            _id: exercise._id,
-            title: exercise.title,
-            description: exercise.description,
-            level: exercise.level,
-            difficulty: exercise.difficulty,
-          } as EditorNodeData,
-        } as Node;
-      })
-      .filter((n): n is Node => n !== null);
-
-    // Convert tree connections to React Flow edges
-    const flowEdges: Edge[] = tree.connections.map((conn, index) => ({
-      id: `edge-${index}`,
-      source: conn.fromExercise,
-      target: conn.toExercise,
-      sourceHandle: conn.sourceHandle,
-      targetHandle: conn.targetHandle,
-      type: "smoothstep",
-      style: {
-        strokeWidth: 3,
-        strokeDasharray: "8 4",
-      },
-      data: { type: conn.type },
-    }));
+    const flowEdges = convertTreeToFlowEdges(tree.connections);
 
     setNodes(flowNodes);
     setEdges(flowEdges);
@@ -112,10 +94,7 @@ const TreeEditorCanvas = React.forwardRef<
           {
             ...connection,
             type: "smoothstep",
-            style: {
-              strokeWidth: 3,
-              strokeDasharray: "8 4",
-            },
+            style: TREE_EDGE_STYLE,
             data: { type: "required" },
           },
           eds,
@@ -233,13 +212,7 @@ const TreeEditorCanvas = React.forwardRef<
         fitView
         minZoom={0.2}
         maxZoom={4}
-        defaultEdgeOptions={{
-          type: "smoothstep",
-          style: {
-            strokeWidth: 3,
-            strokeDasharray: "8 4",
-          },
-        }}
+        defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
         proOptions={{ hideAttribution: true }}
       >
         <Background

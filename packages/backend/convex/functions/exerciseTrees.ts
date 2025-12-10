@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
-import { mutation, query } from "../_generated/server";
+import { mutation, query, QueryCtx } from "../_generated/server";
 import {
   exerciseLevelValidator,
   progressStatusValidator,
@@ -118,7 +118,7 @@ function collectExerciseIds(
 
 // Fetch exercises by IDs
 async function fetchExercises(
-  ctx: { db: any },
+  ctx: QueryCtx,
   exerciseIds: Set<Id<"exercises">>,
 ): Promise<
   Array<{
@@ -155,7 +155,7 @@ async function fetchExercises(
 
 // Get all unique muscle groups from exercises in a tree
 async function getMuscleGroupsForTree(
-  ctx: { db: any },
+  ctx: QueryCtx,
   exerciseIds: Set<Id<"exercises">>,
 ): Promise<string[]> {
   const muscleGroups = new Set<string>();
@@ -181,9 +181,36 @@ async function getMuscleGroupsForTree(
   return Array.from(muscleGroups).sort();
 }
 
+// Helper: Fetch user progress for exercises
+async function fetchUserProgress(
+  ctx: QueryCtx,
+  userId: string,
+  exerciseIds: Set<Id<"exercises">>,
+): Promise<
+  Map<Id<"exercises">, "novice" | "apprentice" | "journeyman" | "master">
+> {
+  const userProgressMap = new Map<
+    Id<"exercises">,
+    "novice" | "apprentice" | "journeyman" | "master"
+  >();
+
+  const allProgress = await ctx.db
+    .query("user_exercise_progress")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+
+  for (const p of allProgress) {
+    if (exerciseIds.has(p.exerciseId)) {
+      userProgressMap.set(p.exerciseId, p.status);
+    }
+  }
+
+  return userProgressMap;
+}
+
 // Helper: Enrich tree with exercise data
 async function enrichTree(
-  ctx: { db: any },
+  ctx: QueryCtx,
   tree: Doc<"exercise_trees">,
 ): Promise<{
   _id: Id<"exercise_trees">;
@@ -238,7 +265,7 @@ async function enrichTree(
 
 // Helper: Enrich tree with exercise data and user progress
 async function enrichTreeWithProgress(
-  ctx: { db: any },
+  ctx: QueryCtx,
   tree: Doc<"exercise_trees">,
   userId: string | null,
 ): Promise<{
@@ -272,50 +299,30 @@ async function enrichTreeWithProgress(
   }>;
   muscleGroups: string[];
 }> {
-  const nodes = tree.nodes || [];
-  const connections = tree.connections || [];
+  // Get base tree data (without progress)
+  const base = await enrichTree(ctx, tree);
 
-  const exerciseIds = collectExerciseIds(nodes, connections);
-
-  // Fetch user progress if authenticated
-  const userProgressMap = new Map<
-    Id<"exercises">,
-    "novice" | "apprentice" | "journeyman" | "master"
-  >();
-  if (userId) {
-    const allProgress = await ctx.db
-      .query("user_exercise_progress")
-      .withIndex("by_user", (q: any) => q.eq("userId", userId))
-      .collect();
-    for (const p of allProgress) {
-      if (exerciseIds.has(p.exerciseId)) {
-        userProgressMap.set(p.exerciseId, p.status);
-      }
-    }
+  // If no user, return with null progress for all exercises
+  if (!userId) {
+    return {
+      ...base,
+      exercises: base.exercises.map((e) => ({ ...e, userProgress: null })),
+    };
   }
 
-  const exercises = await fetchExercises(ctx, exerciseIds);
-  const muscleGroups = await getMuscleGroupsForTree(ctx, exerciseIds);
+  // Fetch user progress
+  const exerciseIds = collectExerciseIds(base.nodes, base.connections);
+  const userProgressMap = await fetchUserProgress(ctx, userId, exerciseIds);
 
   // Enrich exercises with user progress
-  const exercisesWithProgress = exercises.map((exercise) => ({
-    ...exercise,
-    userProgress: userProgressMap.has(exercise._id)
-      ? { status: userProgressMap.get(exercise._id)! }
-      : null,
-  }));
-
   return {
-    _id: tree._id,
-    _creationTime: tree._creationTime,
-    title: tree.title,
-    description: tree.description,
-    status: tree.status || "published",
-    createdBy: tree.createdBy || "",
-    exercises: exercisesWithProgress,
-    nodes,
-    connections,
-    muscleGroups,
+    ...base,
+    exercises: base.exercises.map((exercise) => ({
+      ...exercise,
+      userProgress: userProgressMap.has(exercise._id)
+        ? { status: userProgressMap.get(exercise._id)! }
+        : null,
+    })),
   };
 }
 

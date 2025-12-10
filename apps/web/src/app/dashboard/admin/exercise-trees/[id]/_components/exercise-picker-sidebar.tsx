@@ -48,28 +48,16 @@ export function ExercisePickerSidebar({
     searchQuery: debouncedSearchQuery.trim() || undefined,
   });
 
-  // Flatten exercises from all levels
+  // Map exercises to the format needed for the sidebar
   const publicExercises = useMemo(() => {
     if (!exercisesData) return [];
-    const allExercises: Array<{
-      _id: Id<"exercises">;
-      title: string;
-      description: string;
-      level: ExerciseLevel;
-      difficulty: number;
-    }> = [];
-    Object.values(exercisesData).forEach((levelExercises) => {
-      levelExercises.forEach((ex) => {
-        allExercises.push({
-          _id: ex._id,
-          title: ex.title,
-          description: ex.description,
-          level: ex.level,
-          difficulty: ex.difficulty,
-        });
-      });
-    });
-    return allExercises;
+    return exercisesData.map((ex) => ({
+      _id: ex._id,
+      title: ex.title,
+      description: ex.description,
+      level: ex.level,
+      difficulty: ex.difficulty,
+    }));
   }, [exercisesData]);
 
   const handleDragStart = (

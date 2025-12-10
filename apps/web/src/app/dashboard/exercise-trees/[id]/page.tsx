@@ -1,5 +1,6 @@
 "use client";
 
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { Edge, Node, NodeTypes } from "@xyflow/react";
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -20,6 +21,11 @@ import "@xyflow/react/dist/style.css";
 import { Button } from "@inochi/ui";
 
 import type { ViewerNodeData } from "./_components/viewer-node";
+import { DEFAULT_EDGE_OPTIONS } from "../../../../utils/react-flow-config";
+import {
+  convertTreeToFlowEdges,
+  convertTreeToFlowNodes,
+} from "../../../../utils/tree-flow-utils";
 import { ViewerNode } from "./_components/viewer-node";
 
 const nodeTypes: NodeTypes = {
@@ -42,45 +48,20 @@ function TreeViewerCanvas({
 
   // Initialize nodes and edges from tree data
   useEffect(() => {
-    // Create a map of exercise IDs to exercise data
-    const exerciseMap = new Map(tree.exercises.map((ex) => [ex._id, ex]));
+    const flowNodes = convertTreeToFlowNodes<ViewerNodeData>(
+      tree.nodes,
+      tree.exercises.map((ex) => ({
+        _id: ex._id,
+        title: ex.title,
+        description: ex.description,
+        level: ex.level,
+        difficulty: ex.difficulty,
+        userProgress: ex.userProgress,
+      })),
+      "exercise",
+    );
 
-    // Convert tree nodes to React Flow nodes
-    const flowNodes: Node[] = tree.nodes
-      .map((node): Node | null => {
-        const exercise = exerciseMap.get(node.exerciseId);
-        if (!exercise) return null;
-
-        return {
-          id: node.exerciseId,
-          type: "exercise",
-          position: { x: node.x, y: node.y },
-          data: {
-            _id: exercise._id,
-            title: exercise.title,
-            description: exercise.description,
-            level: exercise.level,
-            difficulty: exercise.difficulty,
-            userProgress: exercise.userProgress,
-          } as ViewerNodeData,
-        };
-      })
-      .filter((n): n is Node => n !== null);
-
-    // Convert tree connections to React Flow edges
-    const flowEdges: Edge[] = tree.connections.map((conn, index) => ({
-      id: `edge-${index}`,
-      source: conn.fromExercise,
-      target: conn.toExercise,
-      sourceHandle: conn.sourceHandle,
-      targetHandle: conn.targetHandle,
-      type: "smoothstep",
-      style: {
-        strokeWidth: 3,
-        strokeDasharray: "8 4",
-      },
-      data: { type: conn.type },
-    }));
+    const flowEdges = convertTreeToFlowEdges(tree.connections);
 
     setNodes(flowNodes);
     setEdges(flowEdges);
@@ -106,13 +87,7 @@ function TreeViewerCanvas({
       fitView
       minZoom={0.2}
       maxZoom={4}
-      defaultEdgeOptions={{
-        type: "smoothstep",
-        style: {
-          strokeWidth: 3,
-          strokeDasharray: "8 4",
-        },
-      }}
+      defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
       proOptions={{ hideAttribution: true }}
     >
       <Background
@@ -132,7 +107,7 @@ export default function ExerciseTreeDetailPage() {
   const treeId = params.id as string;
 
   const tree = useQuery(api.functions.exerciseTrees.getByIdWithProgress, {
-    id: treeId as any,
+    id: treeId as Id<"exercise_trees">,
   });
 
   if (tree === undefined) {

@@ -37,18 +37,25 @@ const exerciseResponseValidator = v.object({
   ),
 });
 
+// Level order for sorting
+const LEVEL_ORDER: ExerciseLevel[] = [
+  "beginner",
+  "intermediate",
+  "advanced",
+  "expert",
+  "elite",
+  "legendary",
+];
+
+const getLevelOrder = (level: ExerciseLevel): number => {
+  return LEVEL_ORDER.indexOf(level);
+};
+
 export const getAllExercises = query({
   args: {
     searchQuery: v.optional(v.string()),
   },
-  returns: v.object({
-    beginner: v.array(exerciseResponseValidator),
-    intermediate: v.array(exerciseResponseValidator),
-    advanced: v.array(exerciseResponseValidator),
-    expert: v.array(exerciseResponseValidator),
-    elite: v.array(exerciseResponseValidator),
-    legendary: v.array(exerciseResponseValidator),
-  }),
+  returns: v.array(exerciseResponseValidator),
   handler: async (ctx, args) => {
     // Fetch all public exercises
     let publicExercises = await ctx.db.query("exercises").collect();
@@ -159,29 +166,17 @@ export const getAllExercises = query({
       };
     });
 
-    const grouped: Record<ExerciseLevel, typeof enrichedPublic> = {
-      beginner: [],
-      intermediate: [],
-      advanced: [],
-      expert: [],
-      elite: [],
-      legendary: [],
-    };
+    // Sort by level (using level order), then by title
+    enrichedPublic.sort((a, b) => {
+      const levelOrderA = getLevelOrder(a.level);
+      const levelOrderB = getLevelOrder(b.level);
+      if (levelOrderA !== levelOrderB) {
+        return levelOrderA - levelOrderB;
+      }
+      return a.title.localeCompare(b.title);
+    });
 
-    for (const exercise of enrichedPublic) {
-      grouped[exercise.level].push(exercise);
-    }
-
-    for (const level of Object.keys(grouped) as ExerciseLevel[]) {
-      grouped[level].sort((a, b) => {
-        if (a.difficulty !== b.difficulty) {
-          return a.difficulty - b.difficulty;
-        }
-        return a.title.localeCompare(b.title);
-      });
-    }
-
-    return grouped;
+    return enrichedPublic;
   },
 });
 
