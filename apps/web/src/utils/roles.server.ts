@@ -1,20 +1,19 @@
 import { auth } from "@clerk/nextjs/server";
 
-import type { Roles } from "../types/globals";
+import type { Role } from "../types/globals";
 
 // Server-side role checking functions
-export const checkRole = async (role: Roles): Promise<boolean> => {
+export const checkRole = async (role: Role): Promise<boolean> => {
   const { sessionClaims } = await auth();
   if (!sessionClaims) return false;
-  const metadata = sessionClaims.metadata;
-  return (metadata.role ?? null) === role;
+  const userRole = sessionClaims.role;
+  return userRole === role;
 };
 
-export const getUserRole = async (): Promise<Roles> => {
+export const getUserRole = async (): Promise<Role> => {
   const { sessionClaims } = await auth();
   if (!sessionClaims) return "user";
-  const metadata = sessionClaims.metadata;
-  return metadata.role ?? "user";
+  return (sessionClaims.role as Role | undefined) ?? "user";
 };
 
 export const isAdminOrModerator = async (): Promise<boolean> => {
