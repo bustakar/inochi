@@ -158,6 +158,11 @@ async function getMuscleGroupsForTree(
   ctx: QueryCtx,
   exerciseIds: Set<Id<"exercises">>,
 ): Promise<string[]> {
+  // Return empty array if no exercises
+  if (exerciseIds.size === 0) {
+    return [];
+  }
+
   const muscleGroups = new Set<string>();
 
   // Fetch all muscle relations for exercises in the tree
@@ -240,8 +245,9 @@ async function enrichTree(
   }>;
   muscleGroups: string[];
 }> {
-  const nodes = tree.nodes || [];
-  const connections = tree.connections || [];
+  // Handle null/undefined nodes and connections with Array.isArray check
+  const nodes = Array.isArray(tree.nodes) ? tree.nodes : [];
+  const connections = Array.isArray(tree.connections) ? tree.connections : [];
 
   const exerciseIds = collectExerciseIds(nodes, connections);
   const [exercises, muscleGroups] = await Promise.all([
@@ -252,7 +258,7 @@ async function enrichTree(
   return {
     _id: tree._id,
     _creationTime: tree._creationTime,
-    title: tree.title,
+    title: tree.title || "",
     description: tree.description,
     status: tree.status || "published", // Default to published for backward compatibility
     createdBy: tree.createdBy || "",
@@ -261,6 +267,58 @@ async function enrichTree(
     connections,
     muscleGroups,
   };
+}
+
+// Helper: Enrich tree with error handling (returns minimal valid structure on failure)
+async function enrichTreeSafe(
+  ctx: QueryCtx,
+  tree: Doc<"exercise_trees">,
+): Promise<{
+  _id: Id<"exercise_trees">;
+  _creationTime: number;
+  title: string;
+  description?: string;
+  status: "draft" | "published";
+  createdBy: string;
+  exercises: Array<{
+    _id: Id<"exercises">;
+    title: string;
+    description: string;
+    level: Doc<"exercises">["level"];
+    difficulty: number;
+  }>;
+  nodes: Array<{
+    exerciseId: Id<"exercises">;
+    x: number;
+    y: number;
+  }>;
+  connections: Array<{
+    fromExercise: Id<"exercises">;
+    toExercise: Id<"exercises">;
+    type: "required" | "optional";
+    sourceHandle: "top" | "bottom" | "left" | "right";
+    targetHandle: "top" | "bottom" | "left" | "right";
+  }>;
+  muscleGroups: string[];
+}> {
+  try {
+    return await enrichTree(ctx, tree);
+  } catch (error) {
+    // Log error but return a minimal valid tree structure
+    console.error(`Error enriching tree ${tree._id}:`, error);
+    return {
+      _id: tree._id,
+      _creationTime: tree._creationTime,
+      title: tree.title || "Untitled Tree",
+      description: tree.description,
+      status: (tree.status || "published") as "draft" | "published",
+      createdBy: tree.createdBy || "",
+      exercises: [],
+      nodes: Array.isArray(tree.nodes) ? tree.nodes : [],
+      connections: Array.isArray(tree.connections) ? tree.connections : [],
+      muscleGroups: [],
+    };
+  }
 }
 
 // Helper: Enrich tree with exercise data and user progress
@@ -336,7 +394,7 @@ export const list = query({
       .withIndex("by_status", (q) => q.eq("status", "published"))
       .collect();
 
-    return Promise.all(publishedTrees.map((tree) => enrichTree(ctx, tree)));
+    return Promise.all(publishedTrees.map((tree) => enrichTreeSafe(ctx, tree)));
   },
 });
 
@@ -352,7 +410,32 @@ export const listAll = query({
     }
 
     const allTrees = await ctx.db.query("exercise_trees").collect();
-    return Promise.all(allTrees.map((tree) => enrichTree(ctx, tree)));
+    return Promise.all(allTrees.map((tree) => enrichTreeSafe(ctx, tree)));
+  },
+});
+
+// List trees for current user (handles role-based filtering internally)
+export const listForUser = query({
+  args: {},
+  returns: v.object({
+    trees: v.array(exerciseTreeReturnValidator),
+    isAdmin: v.boolean(),
+  }),
+  handler: async (ctx) => {
+    const isAdmin = await isAdminOrModerator(ctx);
+
+    const trees = isAdmin
+      ? await ctx.db.query("exercise_trees").collect()
+      : await ctx.db
+          .query("exercise_trees")
+          .withIndex("by_status", (q) => q.eq("status", "published"))
+          .collect();
+
+    const enrichedTrees = await Promise.all(
+      trees.map((tree) => enrichTreeSafe(ctx, tree)),
+    );
+
+    return { trees: enrichedTrees, isAdmin };
   },
 });
 

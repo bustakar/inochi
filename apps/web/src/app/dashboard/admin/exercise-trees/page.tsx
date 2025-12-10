@@ -25,7 +25,12 @@ import { isClientAdminOrModerator } from "../../../../utils/roles";
 export default function ExerciseTreesPage() {
   const router = useRouter();
   const { sessionClaims, isLoaded } = useAuth();
-  const trees = useQuery(api.functions.exerciseTrees.listAll, {});
+
+  // Skip query until auth is loaded to prevent race conditions
+  const trees = useQuery(
+    api.functions.exerciseTrees.listAll,
+    isLoaded ? {} : "skip",
+  );
   const deleteTree = useMutation(api.functions.exerciseTrees.delete_);
   const publishTree = useMutation(api.functions.exerciseTrees.publish);
   const unpublishTree = useMutation(api.functions.exerciseTrees.unpublish);
@@ -50,10 +55,25 @@ export default function ExerciseTreesPage() {
     );
   }
 
+  // Handle loading state
   if (trees === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading trees...</p>
+      </div>
+    );
+  }
+
+  // Handle error state (trees is null or not an array)
+  if (!trees || !Array.isArray(trees)) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8">
+        <p className="text-muted-foreground mb-2">
+          Failed to load exercise trees.
+        </p>
+        <p className="text-muted-foreground text-sm">
+          Please try refreshing the page.
+        </p>
       </div>
     );
   }
