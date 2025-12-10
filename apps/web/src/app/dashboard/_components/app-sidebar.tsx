@@ -14,7 +14,7 @@ import "../../styles/retro.css";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-import { PixelGrid, PixelUser } from "./pixel-icons";
+import { PixelGrid, PixelTree, PixelUser } from "./pixel-icons";
 
 const platformData = {
   navMain: [
@@ -22,6 +22,11 @@ const platformData = {
       title: "Inventory",
       url: "/dashboard/exercises",
       icon: PixelGrid,
+    },
+    {
+      title: "Raids",
+      url: "/dashboard/exercise-trees",
+      icon: PixelTree,
     },
     {
       title: "Character",

@@ -34,7 +34,6 @@ import {
 
 import {
   exerciseLevelColors,
-  exerciseLevels,
   getProgressStatusColor,
   getProgressStatusLabel,
   progressStatuses,
@@ -49,22 +48,14 @@ interface Exercise {
   userProgress: { status: ProgressStatus } | null;
 }
 
-type ExercisesByLevel = Record<ExerciseLevel, Exercise[]>;
-
 function buildExercisesMap(
-  exercises: ExercisesByLevel,
+  exercises: Exercise[],
 ): Map<Id<"exercises">, Exercise> {
   const map = new Map<Id<"exercises">, Exercise>();
-  for (const level of exerciseLevels) {
-    for (const exercise of exercises[level]) {
-      map.set(exercise._id, exercise);
-    }
+  for (const exercise of exercises) {
+    map.set(exercise._id, exercise);
   }
   return map;
-}
-
-function flattenExercises(exercises: ExercisesByLevel): Exercise[] {
-  return exerciseLevels.flatMap((level) => exercises[level]);
 }
 
 function getStatusValue(
@@ -186,7 +177,7 @@ function ExerciseRow({
 }
 
 interface ExerciseListProps {
-  exercises: ExercisesByLevel | undefined;
+  exercises: Exercise[] | undefined;
   filteredExercises: Exercise[];
   searchQuery: string;
   selectedExercises: Set<Id<"exercises">>;
@@ -392,11 +383,10 @@ export function BatchProgressDialog({
   const filteredExercises = useMemo(() => {
     if (!exercises) return [];
 
-    const all = flattenExercises(exercises);
-    if (!searchQuery.trim()) return all;
+    if (!searchQuery.trim()) return exercises;
 
     const query = searchQuery.toLowerCase().trim();
-    return all.filter(
+    return exercises.filter(
       (exercise) =>
         exercise.title.toLowerCase().includes(query) ||
         exercise.description.toLowerCase().includes(query),

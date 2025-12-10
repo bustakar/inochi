@@ -71,3 +71,20 @@ export function PixelLog({ className, ...props }: PixelIconProps) {
     </svg>
   );
 }
+
+export function PixelTree({ className, ...props }: PixelIconProps) {
+  return (
+    <svg
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      className={className}
+      {...props}
+    >
+      <path
+        d="M12 2v4h-2v2h2v2h-2v2h2v2h-2v2h2v2h-2v2h4v-2h-2v-2h2v-2h-2v-2h2v-2h-2v-2h2V6h-2V2h-2zM6 8h2v2H6V8zm10 0h2v2h-2V8zM6 14h2v2H6v-2zm10 0h2v2h-2v-2z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}

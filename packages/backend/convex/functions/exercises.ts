@@ -37,7 +37,156 @@ const exerciseResponseValidator = v.object({
   ),
 });
 
+// Level order for sorting
+const LEVEL_ORDER: ExerciseLevel[] = [
+  "beginner",
+  "intermediate",
+  "advanced",
+  "expert",
+  "elite",
+  "legendary",
+];
+
+const getLevelOrder = (level: ExerciseLevel): number => {
+  return LEVEL_ORDER.indexOf(level);
+};
+
+// Helper type for muscle data
+type MuscleData = {
+  _id: Id<"muscles">;
+  name: string;
+  muscleGroup?: string;
+  role?: "primary" | "secondary" | "stabilizer";
+};
+
+// Helper to get muscles for an exercise from pre-fetched data
+function getMusclesForExercise(
+  exerciseId: Id<"exercises">,
+  muscleRelations: Array<Doc<"exercises_muscles">>,
+  musclesDataMapBySlug: Map<string, Doc<"muscles">>,
+): MuscleData[] {
+  const relations = muscleRelations.filter(
+    (rel) => rel.exercise === exerciseId,
+  );
+  const result: MuscleData[] = [];
+
+  for (const rel of relations) {
+    const muscle = musclesDataMapBySlug.get(rel.muscle);
+    if (muscle) {
+      result.push({
+        _id: muscle._id,
+        name: muscle.name,
+        muscleGroup: muscle.muscleGroup,
+        role: rel.role,
+      });
+    }
+  }
+
+  return result;
+}
+
+// Helper to extract primary muscle groups from muscle data
+function getPrimaryMuscleGroups(musclesData: MuscleData[]): string[] {
+  const groups: string[] = [];
+  for (const m of musclesData) {
+    if (m.role === "primary" && m.muscleGroup) {
+      groups.push(m.muscleGroup);
+    }
+  }
+  return [...new Set(groups)];
+}
+
+const getEnrichedPublicExercises = async (
+  ctx: QueryCtx,
+  args: { searchQuery?: string | undefined },
+) => {
+  // Fetch all public exercises
+  let publicExercises = await ctx.db.query("exercises").collect();
+
+  // Filter by search query if provided
+  if (args.searchQuery && args.searchQuery.trim().length > 0) {
+    const searchLower = args.searchQuery.toLowerCase().trim();
+    publicExercises = publicExercises.filter((exercise) => {
+      const titleMatch = exercise.title.toLowerCase().includes(searchLower);
+      const descriptionMatch = exercise.description
+        .toLowerCase()
+        .includes(searchLower);
+      return titleMatch || descriptionMatch;
+    });
+  }
+
+  // Pre-fetch all muscles for enrichment
+  const muscles = await ctx.db.query("muscles").collect();
+  const musclesDataMapBySlug = new Map<string, Doc<"muscles">>();
+  muscles.forEach((m) => musclesDataMapBySlug.set(m.slug, m));
+
+  // Fetch muscle relations for all exercises
+  const muscleRelations = await ctx.db.query("exercises_muscles").collect();
+
+  // Fetch user progress if authenticated
+  const userId = await getUserId(ctx);
+  const userProgressMap = new Map<
+    Id<"exercises">,
+    "novice" | "apprentice" | "journeyman" | "master"
+  >();
+  if (userId) {
+    const allProgress = await ctx.db
+      .query("user_exercise_progress")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    for (const p of allProgress) {
+      userProgressMap.set(p.exerciseId, p.status);
+    }
+  }
+
+  // Enrich exercises
+  const enrichedPublic = publicExercises.map((exercise) => {
+    const musclesData = getMusclesForExercise(
+      exercise._id,
+      muscleRelations,
+      musclesDataMapBySlug,
+    );
+    const primaryMuscleGroups = getPrimaryMuscleGroups(musclesData);
+    const progressStatus = userProgressMap.get(exercise._id);
+    return {
+      _id: exercise._id,
+      _creationTime: exercise._creationTime,
+      title: exercise.title,
+      description: exercise.description,
+      level: exercise.level,
+      difficulty: exercise.difficulty,
+      musclesData,
+      primaryMuscleGroups,
+      userProgress: progressStatus ? { status: progressStatus } : null,
+    };
+  });
+
+  // Sort by level (using level order), then by title
+  enrichedPublic.sort((a, b) => {
+    const levelOrderA = getLevelOrder(a.level);
+    const levelOrderB = getLevelOrder(b.level);
+    if (levelOrderA !== levelOrderB) {
+      return levelOrderA - levelOrderB;
+    }
+    return a.title.localeCompare(b.title);
+  });
+
+  return enrichedPublic;
+};
+
 export const getAllExercises = query({
+  args: {
+    searchQuery: v.optional(v.string()),
+  },
+  returns: v.array(exerciseResponseValidator),
+  handler: async (ctx, args) => {
+    const enrichedPublic = await getEnrichedPublicExercises(ctx, args);
+
+    return enrichedPublic;
+  },
+});
+
+export const getAllExercisesByLevel = query({
   args: {
     searchQuery: v.optional(v.string()),
   },
@@ -51,115 +200,25 @@ export const getAllExercises = query({
   }),
   handler: async (ctx, args) => {
     // Fetch all public exercises
-    let publicExercises = await ctx.db.query("exercises").collect();
+    let enrichedPublic = await getEnrichedPublicExercises(ctx, args);
 
-    // Filter by search query if provided
-    if (args.searchQuery && args.searchQuery.trim().length > 0) {
-      const searchLower = args.searchQuery.toLowerCase().trim();
-      publicExercises = publicExercises.filter((exercise) => {
-        const titleMatch = exercise.title.toLowerCase().includes(searchLower);
-        const descriptionMatch = exercise.description
-          .toLowerCase()
-          .includes(searchLower);
-        return titleMatch || descriptionMatch;
-      });
-    }
-
-    // Pre-fetch all muscles for enrichment
-    const muscles = await ctx.db.query("muscles").collect();
-    const musclesDataMapBySlug = new Map<string, Doc<"muscles">>();
-    muscles.forEach((m) => musclesDataMapBySlug.set(m.slug, m));
-
-    // Fetch muscle relations for all exercises
-    const muscleRelations = await ctx.db.query("exercises_muscles").collect();
-
-    // Fetch user progress if authenticated
-    const userId = await getUserId(ctx);
-    const userProgressMap = new Map<
-      Id<"exercises">,
-      "novice" | "apprentice" | "journeyman" | "master"
-    >();
-    if (userId) {
-      const allProgress = await ctx.db
-        .query("user_exercise_progress")
-        .withIndex("by_user", (q) => q.eq("userId", userId))
-        .collect();
-      for (const p of allProgress) {
-        userProgressMap.set(p.exerciseId, p.status);
-      }
-    }
-
-    // Helper to get muscles for an exercise
-    const getMusclesForExercise = (
-      exerciseId: Id<"exercises">,
-    ): Array<{
-      _id: Id<"muscles">;
-      name: string;
-      muscleGroup?: string;
-      role?: "primary" | "secondary" | "stabilizer";
-    }> => {
-      const relations = muscleRelations.filter(
-        (rel) => rel.exercise === exerciseId,
-      );
-      const result: Array<{
-        _id: Id<"muscles">;
-        name: string;
-        muscleGroup?: string;
-        role?: "primary" | "secondary" | "stabilizer";
-      }> = [];
-
-      for (const rel of relations) {
-        const muscle = musclesDataMapBySlug.get(rel.muscle);
-        if (muscle) {
-          result.push({
-            _id: muscle._id,
-            name: muscle.name,
-            muscleGroup: muscle.muscleGroup,
-            role: rel.role,
-          });
-        }
-      }
-
-      return result;
-    };
-
-    // Helper to extract primary muscle groups
-    const getPrimaryMuscleGroups = (
-      musclesData: Array<{
-        _id: Id<"muscles">;
-        name: string;
-        muscleGroup?: string;
-        role?: "primary" | "secondary" | "stabilizer";
-      }>,
-    ): string[] => {
-      const groups: string[] = [];
-      for (const m of musclesData) {
-        if (m.role === "primary" && m.muscleGroup) {
-          groups.push(m.muscleGroup);
-        }
-      }
-      return [...new Set(groups)];
-    };
-
-    // Enrich exercises
-    const enrichedPublic = publicExercises.map((exercise) => {
-      const musclesData = getMusclesForExercise(exercise._id);
-      const primaryMuscleGroups = getPrimaryMuscleGroups(musclesData);
-      const progressStatus = userProgressMap.get(exercise._id);
-      return {
-        _id: exercise._id,
-        _creationTime: exercise._creationTime,
-        title: exercise.title,
-        description: exercise.description,
-        level: exercise.level,
-        difficulty: exercise.difficulty,
-        musclesData,
-        primaryMuscleGroups,
-        userProgress: progressStatus ? { status: progressStatus } : null,
-      };
-    });
-
-    const grouped: Record<ExerciseLevel, typeof enrichedPublic> = {
+    // Group by level
+    const grouped: Record<
+      ExerciseLevel,
+      Array<{
+        _id: Id<"exercises">;
+        _creationTime: number;
+        title: string;
+        description: string;
+        level: ExerciseLevel;
+        difficulty: number;
+        musclesData: MuscleData[];
+        primaryMuscleGroups: string[];
+        userProgress: {
+          status: "novice" | "apprentice" | "journeyman" | "master";
+        } | null;
+      }>
+    > = {
       beginner: [],
       intermediate: [],
       advanced: [],
@@ -172,7 +231,8 @@ export const getAllExercises = query({
       grouped[exercise.level].push(exercise);
     }
 
-    for (const level of Object.keys(grouped) as ExerciseLevel[]) {
+    // Sort each level by difficulty, then by title
+    for (const level of LEVEL_ORDER) {
       grouped[level].sort((a, b) => {
         if (a.difficulty !== b.difficulty) {
           return a.difficulty - b.difficulty;
@@ -199,14 +259,7 @@ export async function getExerciseTitle(
 async function getPublicExerciseMuscles(
   ctx: QueryCtx,
   exerciseId: Id<"exercises">,
-): Promise<
-  Array<{
-    _id: Id<"muscles">;
-    name: string;
-    muscleGroup?: string;
-    role?: "primary" | "secondary" | "stabilizer";
-  }>
-> {
+): Promise<MuscleData[]> {
   const muscleRelations = await ctx.db
     .query("exercises_muscles")
     .withIndex("by_exercise", (q) => q.eq("exercise", exerciseId))
@@ -217,26 +270,7 @@ async function getPublicExerciseMuscles(
   const musclesBySlug = new Map<string, Doc<"muscles">>();
   allMuscles.forEach((m) => musclesBySlug.set(m.slug, m));
 
-  const result: Array<{
-    _id: Id<"muscles">;
-    name: string;
-    muscleGroup?: string;
-    role?: "primary" | "secondary" | "stabilizer";
-  }> = [];
-
-  for (const rel of muscleRelations) {
-    const muscle = musclesBySlug.get(rel.muscle);
-    if (muscle) {
-      result.push({
-        _id: muscle._id,
-        name: muscle.name,
-        muscleGroup: muscle.muscleGroup,
-        role: rel.role,
-      });
-    }
-  }
-
-  return result;
+  return getMusclesForExercise(exerciseId, muscleRelations, musclesBySlug);
 }
 
 // Helper: Fetch user's progress for a public exercise
