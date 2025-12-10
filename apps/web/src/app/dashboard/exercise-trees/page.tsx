@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Edit, Eye, EyeOff, MoreVertical, Plus, Trash2 } from "lucide-react";
+import { Edit, Eye, EyeOff, MoreVertical, Trash2 } from "lucide-react";
 
 import {
   Badge,
@@ -20,12 +20,20 @@ import {
   DropdownMenuTrigger,
 } from "@inochi/ui";
 
-import { isClientAdminOrModerator } from "../../../../utils/roles";
+import { isClientAdminOrModerator } from "../../../utils/roles";
 
 export default function ExerciseTreesPage() {
   const router = useRouter();
   const { sessionClaims, isLoaded } = useAuth();
-  const trees = useQuery(api.functions.exerciseTrees.listAll, {});
+  const isAdminOrMod = isClientAdminOrModerator(sessionClaims);
+  
+  // Admins see all trees, users see only published
+  const trees = useQuery(
+    isAdminOrMod
+      ? api.functions.exerciseTrees.listAll
+      : api.functions.exerciseTrees.list,
+    {},
+  );
   const deleteTree = useMutation(api.functions.exerciseTrees.delete_);
   const publishTree = useMutation(api.functions.exerciseTrees.publish);
   const unpublishTree = useMutation(api.functions.exerciseTrees.unpublish);
@@ -38,18 +46,6 @@ export default function ExerciseTreesPage() {
     );
   }
 
-  const isAdminOrMod = isClientAdminOrModerator(sessionClaims);
-
-  if (!isAdminOrMod) {
-    return (
-      <div className="flex flex-col items-center justify-center space-y-4 p-8">
-        <p className="text-muted-foreground">
-          You don&apos;t have permission to access this page.
-        </p>
-      </div>
-    );
-  }
-
   if (trees === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -57,10 +53,6 @@ export default function ExerciseTreesPage() {
       </div>
     );
   }
-
-  const handleCreateNew = () => {
-    router.push("/dashboard/admin/exercise-trees/new");
-  };
 
   const handleEdit = (id: Id<"exercise_trees">) => {
     router.push(`/dashboard/admin/exercise-trees/${id}`);
@@ -83,29 +75,25 @@ export default function ExerciseTreesPage() {
     }
   };
 
+  if (trees.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">No exercise trees available.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
-      {trees.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground mb-4">
-              No exercise trees yet. Create your first one!
-            </p>
-            <Button onClick={handleCreateNew}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create New Tree
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {trees.map((tree) => (
-            <Card key={tree._id} className="flex flex-col">
-              <CardHeader>
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="line-clamp-1 flex-1">
-                    {tree.title}
-                  </CardTitle>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {trees.map((tree) => (
+          <Card key={tree._id} className="flex flex-col">
+            <CardHeader>
+              <div className="flex items-start justify-between gap-2">
+                <CardTitle className="line-clamp-1 flex-1">
+                  {tree.title}
+                </CardTitle>
+                {isAdminOrMod && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -119,9 +107,7 @@ export default function ExerciseTreesPage() {
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() =>
-                          handleTogglePublish(tree._id, tree.status)
-                        }
+                        onClick={() => handleTogglePublish(tree._id, tree.status)}
                       >
                         {tree.status === "published" ? (
                           <>
@@ -144,9 +130,11 @@ export default function ExerciseTreesPage() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1 space-y-4">
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 space-y-4">
+              {isAdminOrMod && (
                 <div>
                   <Badge
                     variant={
@@ -156,24 +144,25 @@ export default function ExerciseTreesPage() {
                     {tree.status}
                   </Badge>
                 </div>
-                {tree.muscleGroups && tree.muscleGroups.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {tree.muscleGroups.map((group) => (
-                      <Badge key={group} variant="outline">
-                        {group}
-                      </Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">
-                    No muscle groups
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+              )}
+              {tree.muscleGroups && tree.muscleGroups.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {tree.muscleGroups.map((group) => (
+                    <Badge key={group} variant="outline">
+                      {group}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  No muscle groups
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
+

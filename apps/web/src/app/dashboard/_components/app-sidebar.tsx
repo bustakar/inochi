@@ -25,7 +25,7 @@ const platformData = {
     },
     {
       title: "Raids",
-      url: "/dashboard/admin/exercise-trees",
+      url: "/dashboard/exercise-trees",
       icon: PixelTree,
     },
     {

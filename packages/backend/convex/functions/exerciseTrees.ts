@@ -57,6 +57,7 @@ const exerciseTreeReturnValidator = v.object({
   exercises: v.array(exerciseInTreeValidator),
   nodes: v.array(treeNodeValidator),
   connections: v.array(treeConnectionValidator),
+  muscleGroups: v.array(v.string()),
 });
 
 // ============================================================================
@@ -124,6 +125,34 @@ async function fetchExercises(
   return exercises;
 }
 
+// Get all unique muscle groups from exercises in a tree
+async function getMuscleGroupsForTree(
+  ctx: { db: any },
+  exerciseIds: Set<Id<"exercises">>,
+): Promise<string[]> {
+  const muscleGroups = new Set<string>();
+
+  // Fetch all muscle relations for exercises in the tree
+  const muscleRelations = await ctx.db.query("exercises_muscles").collect();
+
+  // Pre-fetch all muscles to map slugs to muscle data
+  const allMuscles = await ctx.db.query("muscles").collect();
+  const musclesBySlug = new Map<string, Doc<"muscles">>();
+  allMuscles.forEach((m: Doc<"muscles">) => musclesBySlug.set(m.slug, m));
+
+  // Collect muscle groups from primary muscles only
+  for (const rel of muscleRelations) {
+    if (exerciseIds.has(rel.exercise) && rel.role === "primary") {
+      const muscle = musclesBySlug.get(rel.muscle);
+      if (muscle?.muscleGroup) {
+        muscleGroups.add(muscle.muscleGroup);
+      }
+    }
+  }
+
+  return Array.from(muscleGroups).sort();
+}
+
 // Helper: Enrich tree with exercise data
 async function enrichTree(
   ctx: { db: any },
@@ -154,12 +183,16 @@ async function enrichTree(
     sourceHandle: "top" | "bottom" | "left" | "right";
     targetHandle: "top" | "bottom" | "left" | "right";
   }>;
+  muscleGroups: string[];
 }> {
   const nodes = tree.nodes || [];
   const connections = tree.connections || [];
 
   const exerciseIds = collectExerciseIds(nodes, connections);
-  const exercises = await fetchExercises(ctx, exerciseIds);
+  const [exercises, muscleGroups] = await Promise.all([
+    fetchExercises(ctx, exerciseIds),
+    getMuscleGroupsForTree(ctx, exerciseIds),
+  ]);
 
   return {
     _id: tree._id,
@@ -171,6 +204,7 @@ async function enrichTree(
     exercises,
     nodes,
     connections,
+    muscleGroups,
   };
 }
 
