@@ -29,7 +29,7 @@ export default function ExercisesScreen() {
   const params = useLocalSearchParams<{ q?: string }>();
   const searchQuery = params.q?.trim() ?? undefined;
 
-  const exercises = useQuery(api.functions.exercises.getAllExercises, {
+  const exercises = useQuery(api.functions.exercises.getAllExercisesByLevel, {
     searchQuery: searchQuery,
   });
 

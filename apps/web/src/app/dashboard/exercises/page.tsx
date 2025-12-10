@@ -37,26 +37,20 @@ interface ExercisesListProps {
 }
 
 function ExercisesList({ searchQuery }: ExercisesListProps) {
-  const allExercises = useQuery(api.functions.exercises.getAllExercises, {
-    searchQuery: searchQuery.trim() || undefined,
-  });
+  const exercisesByLevel = useQuery(
+    api.functions.exercises.getAllExercisesByLevel,
+    {
+      searchQuery: searchQuery.trim() || undefined,
+    },
+  );
 
-  if (allExercises === undefined) {
+  if (exercisesByLevel === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading exercises...</p>
       </div>
     );
   }
-
-  // Group exercises by level
-  const exercisesByLevel = exerciseLevels.reduce(
-    (acc, level) => {
-      acc[level] = allExercises.filter((ex) => ex.level === level);
-      return acc;
-    },
-    {} as Record<ExerciseLevel, typeof allExercises>,
-  );
 
   // Check if all levels are empty
   const hasAnyExercises = exerciseLevels.some(
