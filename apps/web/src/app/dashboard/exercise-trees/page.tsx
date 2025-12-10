@@ -14,6 +14,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  cn,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -26,7 +27,7 @@ export default function ExerciseTreesPage() {
   const router = useRouter();
   const { sessionClaims, isLoaded } = useAuth();
   const isAdminOrMod = isClientAdminOrModerator(sessionClaims);
-  
+
   // Admins see all trees, users see only published
   const trees = useQuery(
     isAdminOrMod
@@ -83,11 +84,34 @@ export default function ExerciseTreesPage() {
     );
   }
 
+  const handleCardClick = (
+    e: React.MouseEvent,
+    treeId: Id<"exercise_trees">,
+  ) => {
+    // Don't navigate if clicking on dropdown menu or its trigger
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('[role="menu"]') ||
+      target.closest('[role="menuitem"]') ||
+      target.closest('button[aria-haspopup="true"]')
+    ) {
+      return;
+    }
+    router.push(`/dashboard/exercise-trees/${treeId}`);
+  };
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {trees.map((tree) => (
-          <Card key={tree._id} className="flex flex-col">
+          <Card
+            key={tree._id}
+            className={cn(
+              "flex flex-col",
+              "cursor-pointer transition-transform active:translate-y-1",
+            )}
+            onClick={(e) => handleCardClick(e, tree._id)}
+          >
             <CardHeader>
               <div className="flex items-start justify-between gap-2">
                 <CardTitle className="line-clamp-1 flex-1">
@@ -96,7 +120,12 @@ export default function ExerciseTreesPage() {
                 {isAdminOrMod && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <MoreVertical className="h-4 w-4" />
                         <span className="sr-only">More options</span>
                       </Button>
@@ -107,7 +136,9 @@ export default function ExerciseTreesPage() {
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleTogglePublish(tree._id, tree.status)}
+                        onClick={() =>
+                          handleTogglePublish(tree._id, tree.status)
+                        }
                       >
                         {tree.status === "published" ? (
                           <>
@@ -165,4 +196,3 @@ export default function ExerciseTreesPage() {
     </div>
   );
 }
-

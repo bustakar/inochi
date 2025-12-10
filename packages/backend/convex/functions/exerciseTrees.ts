@@ -1,7 +1,10 @@
 import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
-import { exerciseLevelValidator } from "../validators/validators";
+import {
+  exerciseLevelValidator,
+  progressStatusValidator,
+} from "../validators/validators";
 import { getUserId, isAdminOrModerator } from "./auth";
 
 // ============================================================================
@@ -33,6 +36,18 @@ const exerciseInTreeValidator = v.object({
   difficulty: v.number(),
 });
 
+const exerciseInTreeWithProgressValidator = v.object({
+  _id: v.id("exercises"),
+  title: v.string(),
+  description: v.string(),
+  level: exerciseLevelValidator,
+  difficulty: v.number(),
+  userProgress: v.union(
+    v.object({ status: progressStatusValidator }),
+    v.null(),
+  ),
+});
+
 const treeNodeValidator = v.object({
   exerciseId: v.id("exercises"),
   x: v.number(),
@@ -55,6 +70,19 @@ const exerciseTreeReturnValidator = v.object({
   status: exerciseTreeStatusValidator,
   createdBy: v.string(),
   exercises: v.array(exerciseInTreeValidator),
+  nodes: v.array(treeNodeValidator),
+  connections: v.array(treeConnectionValidator),
+  muscleGroups: v.array(v.string()),
+});
+
+const exerciseTreeWithProgressReturnValidator = v.object({
+  _id: v.id("exercise_trees"),
+  _creationTime: v.number(),
+  title: v.string(),
+  description: v.optional(v.string()),
+  status: exerciseTreeStatusValidator,
+  createdBy: v.string(),
+  exercises: v.array(exerciseInTreeWithProgressValidator),
   nodes: v.array(treeNodeValidator),
   connections: v.array(treeConnectionValidator),
   muscleGroups: v.array(v.string()),
@@ -208,6 +236,89 @@ async function enrichTree(
   };
 }
 
+// Helper: Enrich tree with exercise data and user progress
+async function enrichTreeWithProgress(
+  ctx: { db: any },
+  tree: Doc<"exercise_trees">,
+  userId: string | null,
+): Promise<{
+  _id: Id<"exercise_trees">;
+  _creationTime: number;
+  title: string;
+  description?: string;
+  status: "draft" | "published";
+  createdBy: string;
+  exercises: Array<{
+    _id: Id<"exercises">;
+    title: string;
+    description: string;
+    level: Doc<"exercises">["level"];
+    difficulty: number;
+    userProgress: {
+      status: "novice" | "apprentice" | "journeyman" | "master";
+    } | null;
+  }>;
+  nodes: Array<{
+    exerciseId: Id<"exercises">;
+    x: number;
+    y: number;
+  }>;
+  connections: Array<{
+    fromExercise: Id<"exercises">;
+    toExercise: Id<"exercises">;
+    type: "required" | "optional";
+    sourceHandle: "top" | "bottom" | "left" | "right";
+    targetHandle: "top" | "bottom" | "left" | "right";
+  }>;
+  muscleGroups: string[];
+}> {
+  const nodes = tree.nodes || [];
+  const connections = tree.connections || [];
+
+  const exerciseIds = collectExerciseIds(nodes, connections);
+
+  // Fetch user progress if authenticated
+  const userProgressMap = new Map<
+    Id<"exercises">,
+    "novice" | "apprentice" | "journeyman" | "master"
+  >();
+  if (userId) {
+    const allProgress = await ctx.db
+      .query("user_exercise_progress")
+      .withIndex("by_user", (q: any) => q.eq("userId", userId))
+      .collect();
+    for (const p of allProgress) {
+      if (exerciseIds.has(p.exerciseId)) {
+        userProgressMap.set(p.exerciseId, p.status);
+      }
+    }
+  }
+
+  const exercises = await fetchExercises(ctx, exerciseIds);
+  const muscleGroups = await getMuscleGroupsForTree(ctx, exerciseIds);
+
+  // Enrich exercises with user progress
+  const exercisesWithProgress = exercises.map((exercise) => ({
+    ...exercise,
+    userProgress: userProgressMap.has(exercise._id)
+      ? { status: userProgressMap.get(exercise._id)! }
+      : null,
+  }));
+
+  return {
+    _id: tree._id,
+    _creationTime: tree._creationTime,
+    title: tree.title,
+    description: tree.description,
+    status: tree.status || "published",
+    createdBy: tree.createdBy || "",
+    exercises: exercisesWithProgress,
+    nodes,
+    connections,
+    muscleGroups,
+  };
+}
+
 // List only published trees (for regular users)
 export const list = query({
   args: {},
@@ -258,6 +369,30 @@ export const getById = query({
     }
 
     return enrichTree(ctx, tree);
+  },
+});
+
+// Get single tree by ID with user progress (for user-facing detail page)
+export const getByIdWithProgress = query({
+  args: {
+    id: v.id("exercise_trees"),
+  },
+  returns: v.union(exerciseTreeWithProgressReturnValidator, v.null()),
+  handler: async (ctx, args) => {
+    const tree = await ctx.db.get(args.id);
+    if (!tree) {
+      return null;
+    }
+
+    // If draft, only admins/moderators can access
+    if (tree.status === "draft") {
+      if (!(await isAdminOrModerator(ctx))) {
+        return null;
+      }
+    }
+
+    const userId = await getUserId(ctx);
+    return enrichTreeWithProgress(ctx, tree, userId ?? null);
   },
 });
 
