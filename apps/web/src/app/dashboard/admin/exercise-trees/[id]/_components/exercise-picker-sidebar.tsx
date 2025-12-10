@@ -7,7 +7,17 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Search } from "lucide-react";
 
-import { Badge, Input, ScrollArea } from "@inochi/ui";
+import {
+  BitCard,
+  BitCardContent,
+  BitCardHeader,
+  BitCardTitle,
+  HealthBar,
+  Input,
+  ScrollArea,
+} from "@inochi/ui";
+
+import { exerciseLevelHealthBarColors } from "../../../../../../utils/exercise-utils";
 
 interface ExercisePickerSidebarProps {
   onExerciseSelect: (exercise: {
@@ -85,16 +95,16 @@ export function ExercisePickerSidebar({
   }
 
   return (
-    <div className="bg-muted/50 flex h-full w-64 flex-col border-r">
+    <div className="bg-muted/50 flex h-full w-96 flex-col border-r">
       <div className="shrink-0 border-b p-4">
-        <h3 className="mb-3 font-semibold">Exercises</h3>
+        <h3 className="retro mb-3 font-semibold">Exercises</h3>
         <div className="relative">
           <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder="Search exercises..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
+            className="retro pl-8"
           />
         </div>
       </div>
@@ -110,26 +120,38 @@ export function ExercisePickerSidebar({
           ) : (
             <div className="space-y-2">
               {publicExercises.map((exercise) => (
-                <div
+                <BitCard
                   key={exercise._id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, exercise)}
-                  className="bg-background hover:bg-accent cursor-grab rounded-lg border p-3 transition-colors active:cursor-grabbing"
+                  className="cursor-grab transition-transform active:translate-y-1 active:cursor-grabbing"
                 >
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <h4 className="text-sm leading-tight font-medium">
+                  <BitCardHeader className="pb-1">
+                    <BitCardTitle className="retro line-clamp-1 text-sm font-semibold">
                       {exercise.title}
-                    </h4>
-                    <Badge variant="outline" className="shrink-0 text-xs">
-                      {exercise.level}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-xs">
-                      Diff: {exercise.difficulty}/10
-                    </span>
-                  </div>
-                </div>
+                    </BitCardTitle>
+                  </BitCardHeader>
+                  <BitCardContent className="pt-0">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="flex w-full justify-between gap-2">
+                        <span className="text-muted-foreground retro text-xs font-medium">
+                          Difficulty:
+                        </span>
+                        <span className="text-muted-foreground retro text-xs">
+                          {exercise.difficulty}/12
+                        </span>
+                      </div>
+                      <HealthBar
+                        value={(exercise.difficulty / 12) * 100}
+                        sections={12}
+                        className="h-3"
+                        progressBg={
+                          exerciseLevelHealthBarColors[exercise.level]
+                        }
+                      />
+                    </div>
+                  </BitCardContent>
+                </BitCard>
               ))}
             </div>
           )}

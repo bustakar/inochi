@@ -93,6 +93,10 @@ const TreeEditorCanvas = React.forwardRef<
       sourceHandle: conn.sourceHandle,
       targetHandle: conn.targetHandle,
       type: "smoothstep",
+      style: {
+        strokeWidth: 3,
+        strokeDasharray: "8 4",
+      },
       data: { type: conn.type },
     }));
 
@@ -108,6 +112,10 @@ const TreeEditorCanvas = React.forwardRef<
           {
             ...connection,
             type: "smoothstep",
+            style: {
+              strokeWidth: 3,
+              strokeDasharray: "8 4",
+            },
             data: { type: "required" },
           },
           eds,
@@ -225,7 +233,13 @@ const TreeEditorCanvas = React.forwardRef<
         fitView
         minZoom={0.2}
         maxZoom={4}
-        defaultEdgeOptions={{ type: "smoothstep" }}
+        defaultEdgeOptions={{
+          type: "smoothstep",
+          style: {
+            strokeWidth: 3,
+            strokeDasharray: "8 4",
+          },
+        }}
         proOptions={{ hideAttribution: true }}
       >
         <Background
