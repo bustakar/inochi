@@ -21,20 +21,12 @@ import {
   DropdownMenuTrigger,
 } from "@inochi/ui";
 
-import { isClientAdminOrModerator } from "../../../utils/roles";
-
 export default function ExerciseTreesPage() {
   const router = useRouter();
-  const { sessionClaims, isLoaded } = useAuth();
-  const isAdminOrMod = isClientAdminOrModerator(sessionClaims);
+  const { isLoaded } = useAuth();
 
-  // Admins see all trees, users see only published
-  const trees = useQuery(
-    isAdminOrMod
-      ? api.functions.exerciseTrees.listAll
-      : api.functions.exerciseTrees.list,
-    {},
-  );
+  // Single query that handles role-based filtering on the server
+  const result = useQuery(api.functions.exerciseTrees.listForUser, {});
   const deleteTree = useMutation(api.functions.exerciseTrees.delete_);
   const publishTree = useMutation(api.functions.exerciseTrees.publish);
   const unpublishTree = useMutation(api.functions.exerciseTrees.unpublish);
@@ -47,13 +39,34 @@ export default function ExerciseTreesPage() {
     );
   }
 
-  if (trees === undefined) {
+  // Handle loading state
+  if (result === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading trees...</p>
       </div>
     );
   }
+
+  // Handle error state (result is null or has error)
+  if (!result || !result.trees) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8">
+        <p className="text-muted-foreground mb-2">
+          Failed to load exercise trees.
+        </p>
+        <p className="text-muted-foreground text-sm">
+          Please try refreshing the page.
+        </p>
+      </div>
+    );
+  }
+
+  const { trees, isAdmin: isAdminOrMod } = result;
+
+  const handleCreateNew = () => {
+    router.push("/dashboard/admin/exercise-trees/new");
+  };
 
   const handleEdit = (id: Id<"exercise_trees">) => {
     router.push(`/dashboard/admin/exercise-trees/${id}`);
@@ -78,15 +91,25 @@ export default function ExerciseTreesPage() {
 
   if (trees.length === 0) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">No exercise trees available.</p>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
+          {isAdminOrMod && (
+            <div className="flex justify-end">
+              <Button onClick={handleCreateNew}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create New Raid
+              </Button>
+            </div>
+          )}
+          <div className="flex items-center justify-center p-8">
+            <p className="text-muted-foreground">
+              No exercise trees available.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
-
-  const handleCreateNew = () => {
-    router.push("/dashboard/admin/exercise-trees/new");
-  };
 
   const handleCardClick = (
     e: React.MouseEvent,
