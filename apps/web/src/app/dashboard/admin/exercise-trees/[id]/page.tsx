@@ -61,8 +61,8 @@ const TreeEditorCanvas = React.forwardRef<
   useEffect(() => {
     // tree and exercises are guaranteed to be defined by parent component
 
-    // Create exercise map for quick lookup
-    const exerciseMap = new Map(exercises.map((ex) => [ex._id, ex]));
+    // Create exercise map for quick lookup from tree.exercises
+    const exerciseMap = new Map(tree.exercises.map((ex) => [ex._id, ex]));
 
     // Convert tree nodes to React Flow nodes
     const flowNodes: Node[] = tree.nodes
@@ -78,7 +78,6 @@ const TreeEditorCanvas = React.forwardRef<
             _id: exercise._id,
             title: exercise.title,
             description: exercise.description,
-            category: exercise.category,
             level: exercise.level,
             difficulty: exercise.difficulty,
           } as EditorNodeData,
@@ -99,7 +98,7 @@ const TreeEditorCanvas = React.forwardRef<
 
     setNodes(flowNodes);
     setEdges(flowEdges);
-  }, [tree, exercises, setNodes, setEdges]);
+  }, [tree, setNodes, setEdges]);
 
   // Handle new connections
   const onConnect = useCallback(

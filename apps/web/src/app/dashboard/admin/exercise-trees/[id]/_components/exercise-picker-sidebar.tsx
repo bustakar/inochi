@@ -1,6 +1,7 @@
 "use client";
 
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
+import type { ExerciseLevel } from "@packages/backend/convex/validators/validators";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
@@ -13,8 +14,7 @@ interface ExercisePickerSidebarProps {
     _id: Id<"exercises">;
     title: string;
     description: string;
-    category: "calisthenics" | "gym" | "stretch" | "mobility";
-    level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+    level: ExerciseLevel;
     difficulty: number;
   }) => void;
 }
@@ -34,18 +34,33 @@ export function ExercisePickerSidebar({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const exercises = useQuery(api.functions.exercises.getAllExercises, {
+  const exercisesData = useQuery(api.functions.exercises.getAllExercises, {
     searchQuery: debouncedSearchQuery.trim() || undefined,
   });
 
-  // Filter to only public exercises
+  // Flatten exercises from all levels
   const publicExercises = useMemo(() => {
-    if (!exercises) return [];
-    return exercises.filter(
-      (ex): ex is typeof ex & { _id: Id<"exercises">; isPrivate: false } =>
-        !ex.isPrivate,
-    );
-  }, [exercises]);
+    if (!exercisesData) return [];
+    const allExercises: Array<{
+      _id: Id<"exercises">;
+      title: string;
+      description: string;
+      level: ExerciseLevel;
+      difficulty: number;
+    }> = [];
+    Object.values(exercisesData).forEach((levelExercises) => {
+      levelExercises.forEach((ex) => {
+        allExercises.push({
+          _id: ex._id,
+          title: ex.title,
+          description: ex.description,
+          level: ex.level,
+          difficulty: ex.difficulty,
+        });
+      });
+    });
+    return allExercises;
+  }, [exercisesData]);
 
   const handleDragStart = (
     e: React.DragEvent,
@@ -53,8 +68,7 @@ export function ExercisePickerSidebar({
       _id: Id<"exercises">;
       title: string;
       description: string;
-      category: "calisthenics" | "gym" | "stretch" | "mobility";
-      level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+      level: ExerciseLevel;
       difficulty: number;
     },
   ) => {
@@ -62,7 +76,7 @@ export function ExercisePickerSidebar({
     e.dataTransfer.effectAllowed = "copy";
   };
 
-  if (exercises === undefined) {
+  if (exercisesData === undefined) {
     return (
       <div className="bg-muted/50 flex h-full w-64 flex-col border-r p-4">
         <p className="text-muted-foreground text-sm">Loading exercises...</p>
@@ -111,9 +125,6 @@ export function ExercisePickerSidebar({
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {exercise.category}
-                    </Badge>
                     <span className="text-muted-foreground text-xs">
                       Diff: {exercise.difficulty}/10
                     </span>

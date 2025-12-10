@@ -1,10 +1,7 @@
 import { v } from "convex/values";
 import { Doc, Id } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
-import {
-  exerciseCategoryValidator,
-  exerciseLevelValidator,
-} from "../validators/validators";
+import { exerciseLevelValidator } from "../validators/validators";
 import { getUserId, isAdminOrModerator } from "./auth";
 
 // ============================================================================
@@ -32,7 +29,6 @@ const exerciseInTreeValidator = v.object({
   _id: v.id("exercises"),
   title: v.string(),
   description: v.string(),
-  category: exerciseCategoryValidator,
   level: exerciseLevelValidator,
   difficulty: v.number(),
 });
@@ -100,7 +96,6 @@ async function fetchExercises(
     _id: Id<"exercises">;
     title: string;
     description: string;
-    category: Doc<"exercises">["category"];
     level: Doc<"exercises">["level"];
     difficulty: number;
   }>
@@ -109,7 +104,6 @@ async function fetchExercises(
     _id: Id<"exercises">;
     title: string;
     description: string;
-    category: Doc<"exercises">["category"];
     level: Doc<"exercises">["level"];
     difficulty: number;
   }> = [];
@@ -121,7 +115,6 @@ async function fetchExercises(
         _id: exercise._id,
         title: exercise.title,
         description: exercise.description,
-        category: exercise.category,
         level: exercise.level,
         difficulty: exercise.difficulty,
       });
@@ -146,7 +139,6 @@ async function enrichTree(
     _id: Id<"exercises">;
     title: string;
     description: string;
-    category: Doc<"exercises">["category"];
     level: Doc<"exercises">["level"];
     difficulty: number;
   }>;

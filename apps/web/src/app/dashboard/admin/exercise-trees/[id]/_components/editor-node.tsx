@@ -1,6 +1,7 @@
 "use client";
 
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
+import type { ExerciseLevel } from "@packages/backend/convex/validators/validators";
 import type { NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
 import { Dumbbell } from "lucide-react";
@@ -11,8 +12,7 @@ export interface EditorNodeData extends Record<string, unknown> {
   _id: Id<"exercises">;
   title: string;
   description: string;
-  category: "calisthenics" | "gym" | "stretch" | "mobility";
-  level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+  level: ExerciseLevel;
   difficulty: number;
 }
 
