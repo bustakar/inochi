@@ -156,7 +156,7 @@ export default function ExerciseTreesPage() {
                     {tree.status}
                   </Badge>
                 </div>
-                {tree.muscleGroups && tree.muscleGroups.length > 0 ? (
+                {tree.muscleGroups.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {tree.muscleGroups.map((group) => (
                       <Badge key={group} variant="outline">

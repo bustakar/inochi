@@ -4,7 +4,6 @@ import type {
   ExerciseLevel,
   ProgressStatus,
 } from "@packages/backend/convex/validators/validators";
-import type { ComponentProps } from "react";
 
 import {
   BitCard,

@@ -49,31 +49,27 @@ function getMockStatus(difficulty: number): ExerciseStatus {
 // --- Detail Sheet Component ---
 function ExerciseDetailSheet({
   exerciseId,
-  isPrivate,
+  isPrivate: _isPrivate,
   isOpen,
   onClose,
 }: {
-  exerciseId: Id<"exercises"> | Id<"private_exercises"> | null;
+  exerciseId: Id<"exercises"> | null;
   isPrivate: boolean;
   isOpen: boolean;
   onClose: () => void;
 }) {
   const publicData = useQuery(
     api.functions.exercises.getPublicExerciseById,
-    !isPrivate && exerciseId
-      ? { exerciseId: exerciseId as Id<"exercises"> }
-      : "skip",
+    exerciseId ? { exerciseId } : "skip",
   );
 
-  const privateData = useQuery(
-    api.functions.exercises.getPrivateExerciseById,
-    isPrivate && exerciseId
-      ? { exerciseId: exerciseId as Id<"private_exercises"> }
-      : "skip",
-  );
-
-  const data = isPrivate ? privateData : publicData;
-  const isLoading = data === undefined && exerciseId !== null;
+  const data = publicData as
+    | (typeof publicData & {
+        prerequisites?: { _id: Id<"exercises">; title: string }[];
+        progressions?: { _id: Id<"exercises">; title: string }[];
+      })
+    | null;
+  const isLoading = publicData === undefined;
 
   if (!exerciseId) return null;
 
@@ -93,7 +89,6 @@ function ExerciseDetailSheet({
             ) : (
               <div className="mt-2 flex flex-wrap gap-2">
                 <Badge variant="outline">{data?.level}</Badge>
-                <Badge variant="secondary">{data?.category}</Badge>
                 <Badge variant="outline">
                   Difficulty: {data?.difficulty}/10
                 </Badge>
@@ -129,20 +124,26 @@ function ExerciseDetailSheet({
                     <Dumbbell className="h-4 w-4" /> Targeted Muscles
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {data.muscles.map((m) => (
-                      <Badge
-                        key={m._id}
-                        variant="secondary"
-                        className="capitalize"
-                      >
-                        {m.name}{" "}
-                        {m.role && (
-                          <span className="ml-1 text-[10px] opacity-50">
-                            ({m.role})
-                          </span>
-                        )}
-                      </Badge>
-                    ))}
+                    {data.muscles.map(
+                      (m: {
+                        _id: Id<"muscles">;
+                        name: string;
+                        role?: string;
+                      }) => (
+                        <Badge
+                          key={m._id}
+                          variant="secondary"
+                          className="capitalize"
+                        >
+                          {m.name}{" "}
+                          {m.role && (
+                            <span className="ml-1 text-[10px] opacity-50">
+                              ({m.role})
+                            </span>
+                          )}
+                        </Badge>
+                      ),
+                    )}
                   </div>
                 </div>
               )}
@@ -150,35 +151,39 @@ function ExerciseDetailSheet({
               <Separator />
 
               {/* Progressions */}
-              {(data.prerequisites.length > 0 ||
-                data.progressions.length > 0) && (
+              {((data.prerequisites?.length ?? 0) > 0 ||
+                (data.progressions?.length ?? 0) > 0) && (
                 <div>
                   <h4 className="mb-2 flex items-center gap-2 font-semibold">
                     <Trophy className="h-4 w-4" /> Progression Path
                   </h4>
                   <div className="space-y-4 text-sm">
-                    {data.prerequisites.length > 0 && (
+                    {(data.prerequisites?.length ?? 0) > 0 && (
                       <div>
                         <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
                           Prerequisites
                         </span>
                         <ul className="text-muted-foreground mt-1 list-inside list-disc space-y-1">
-                          {data.prerequisites.map((p) => (
-                            <li key={p._id}>{p.title}</li>
-                          ))}
+                          {(data.prerequisites ?? []).map(
+                            (p: { _id: Id<"exercises">; title: string }) => (
+                              <li key={p._id}>{p.title}</li>
+                            ),
+                          )}
                         </ul>
                       </div>
                     )}
 
-                    {data.progressions.length > 0 && (
+                    {(data.progressions?.length ?? 0) > 0 && (
                       <div>
                         <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
                           Unlocks
                         </span>
                         <ul className="text-primary mt-1 list-inside list-disc space-y-1 font-medium">
-                          {data.progressions.map((p) => (
-                            <li key={p._id}>{p.title}</li>
-                          ))}
+                          {(data.progressions ?? []).map(
+                            (p: { _id: Id<"exercises">; title: string }) => (
+                              <li key={p._id}>{p.title}</li>
+                            ),
+                          )}
                         </ul>
                       </div>
                     )}
@@ -216,8 +221,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
 
   // State for detail sheet
   const [selectedNode, setSelectedNode] = useState<{
-    id: Id<"exercises"> | Id<"private_exercises">;
-    isPrivate: boolean;
+    id: Id<"exercises">;
   } | null>(null);
 
   // Transform trees into flat exercise list with prerequisites
@@ -233,8 +237,13 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
         _id: Id<"exercises">;
         title: string;
         description: string;
-        category: "calisthenics" | "gym" | "stretch" | "mobility";
-        level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+        level:
+          | "beginner"
+          | "intermediate"
+          | "advanced"
+          | "expert"
+          | "elite"
+          | "legendary";
         difficulty: number;
         prerequisites: Id<"exercises">[];
         isPrivate: false;
@@ -252,7 +261,6 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
             _id: exercise._id,
             title: exercise.title,
             description: exercise.description,
-            category: exercise.category,
             level: exercise.level,
             difficulty: exercise.difficulty,
             prerequisites: [],
@@ -311,8 +319,13 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
         _id: Id<"exercises">;
         title: string;
         description: string;
-        category: "calisthenics" | "gym" | "stretch" | "mobility";
-        level: "beginner" | "intermediate" | "advanced" | "expert" | "elite";
+        level:
+          | "beginner"
+          | "intermediate"
+          | "advanced"
+          | "expert"
+          | "elite"
+          | "legendary";
         difficulty: number;
         prerequisites: Id<"exercises">[];
         status: ExerciseStatus;
@@ -472,12 +485,10 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     if (node.type === "exercise") {
       const data = node.data as {
-        _id: Id<"exercises"> | Id<"private_exercises">;
-        isPrivate: boolean;
+        _id: Id<"exercises">;
       };
       setSelectedNode({
         id: data._id,
-        isPrivate: data.isPrivate,
       });
     }
   }, []);
@@ -550,7 +561,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
       {/* Detail Sheet */}
       <ExerciseDetailSheet
         exerciseId={selectedNode?.id ?? null}
-        isPrivate={selectedNode?.isPrivate ?? false}
+        isPrivate={false}
         isOpen={selectedNode !== null}
         onClose={() => setSelectedNode(null)}
       />

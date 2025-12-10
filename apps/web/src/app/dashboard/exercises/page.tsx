@@ -107,30 +107,32 @@ export default function ExercisesPage() {
   const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      {/* Search and Batch Update */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="max-w-md flex-1">
-          <Search
-            initialValue={searchQuery}
-            onSearchUpdate={setSearchQuery}
-            placeholder="Search exercises by title or description..."
-          />
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
+        {/* Search and Batch Update */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="max-w-md flex-1">
+            <Search
+              initialValue={searchQuery}
+              onSearchUpdate={setSearchQuery}
+              placeholder="Search exercises by title or description..."
+            />
+          </div>
+          <Button variant="outline" onClick={() => setIsBatchDialogOpen(true)}>
+            <PixelLog className="size-8" />
+            <span className="hidden sm:inline">Log Progress</span>
+          </Button>
         </div>
-        <Button variant="outline" onClick={() => setIsBatchDialogOpen(true)}>
-          <PixelLog className="size-8" />
-          <span className="hidden sm:inline">Log Progress</span>
-        </Button>
+
+        {/* Exercises List */}
+        <ExercisesList searchQuery={searchQuery} />
+
+        {/* Batch Progress Dialog */}
+        <BatchProgressDialog
+          open={isBatchDialogOpen}
+          onOpenChange={setIsBatchDialogOpen}
+        />
       </div>
-
-      {/* Exercises List */}
-      <ExercisesList searchQuery={searchQuery} />
-
-      {/* Batch Progress Dialog */}
-      <BatchProgressDialog
-        open={isBatchDialogOpen}
-        onOpenChange={setIsBatchDialogOpen}
-      />
     </div>
   );
 }

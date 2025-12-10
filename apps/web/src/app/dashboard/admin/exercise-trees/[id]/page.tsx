@@ -59,7 +59,7 @@ const TreeEditorCanvas = React.forwardRef<
     >;
     treeId: Id<"exercise_trees">;
   }
->(({ tree, exercises, treeId }, ref) => {
+>(({ tree, exercises: _exercises, treeId }, ref) => {
   const updateTree = useMutation(api.functions.exerciseTrees.update);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);

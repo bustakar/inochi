@@ -10,7 +10,7 @@ import { cn } from "@inochi/ui";
 export type ExerciseStatus = "locked" | "unlocked" | "mastered";
 
 export interface ExerciseOrbData extends Record<string, unknown> {
-  _id: Id<"exercises"> | Id<"private_exercises">;
+  _id: Id<"exercises">;
   title: string;
   description: string;
   category: "calisthenics" | "gym" | "stretch" | "mobility";

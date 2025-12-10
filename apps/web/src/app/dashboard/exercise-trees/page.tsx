@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Edit, Eye, EyeOff, MoreVertical, Trash2 } from "lucide-react";
+import { Edit, Eye, EyeOff, MoreVertical, Plus, Trash2 } from "lucide-react";
 
 import {
   Badge,
@@ -84,6 +84,10 @@ export default function ExerciseTreesPage() {
     );
   }
 
+  const handleCreateNew = () => {
+    router.push("/dashboard/admin/exercise-trees/new");
+  };
+
   const handleCardClick = (
     e: React.MouseEvent,
     treeId: Id<"exercise_trees">,
@@ -101,97 +105,109 @@ export default function ExerciseTreesPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {trees.map((tree) => (
-          <Card
-            key={tree._id}
-            className={cn(
-              "flex flex-col",
-              "cursor-pointer transition-transform active:translate-y-1",
-            )}
-            onClick={(e) => handleCardClick(e, tree._id)}
-          >
-            <CardHeader>
-              <div className="flex items-start justify-between gap-2">
-                <CardTitle className="line-clamp-1 flex-1">
-                  {tree.title}
-                </CardTitle>
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
+        {/* Create New Button for Admins */}
+        {isAdminOrMod && (
+          <div className="flex justify-end">
+            <Button onClick={handleCreateNew}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create New Raid
+            </Button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {trees.map((tree) => (
+            <Card
+              key={tree._id}
+              className={cn(
+                "flex flex-col",
+                "cursor-pointer transition-transform active:translate-y-1",
+              )}
+              onClick={(e) => handleCardClick(e, tree._id)}
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between gap-2">
+                  <CardTitle className="line-clamp-1 flex-1">
+                    {tree.title}
+                  </CardTitle>
+                  {isAdminOrMod && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                          <span className="sr-only">More options</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(tree._id)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleTogglePublish(tree._id, tree.status)
+                          }
+                        >
+                          {tree.status === "published" ? (
+                            <>
+                              <EyeOff className="mr-2 h-4 w-4" />
+                              Unpublish
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Publish
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(tree._id)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 space-y-4">
                 {isAdminOrMod && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                        <span className="sr-only">More options</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(tree._id)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleTogglePublish(tree._id, tree.status)
-                        }
-                      >
-                        {tree.status === "published" ? (
-                          <>
-                            <EyeOff className="mr-2 h-4 w-4" />
-                            Unpublish
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="mr-2 h-4 w-4" />
-                            Publish
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleDelete(tree._id)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1 space-y-4">
-              {isAdminOrMod && (
-                <div>
-                  <Badge
-                    variant={
-                      tree.status === "published" ? "default" : "secondary"
-                    }
-                  >
-                    {tree.status}
-                  </Badge>
-                </div>
-              )}
-              {tree.muscleGroups && tree.muscleGroups.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {tree.muscleGroups.map((group) => (
-                    <Badge key={group} variant="outline">
-                      {group}
+                  <div>
+                    <Badge
+                      variant={
+                        tree.status === "published" ? "default" : "secondary"
+                      }
+                    >
+                      {tree.status}
                     </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  No muscle groups
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                  </div>
+                )}
+                {tree.muscleGroups.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {tree.muscleGroups.map((group) => (
+                      <Badge key={group} variant="outline">
+                        {group}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    No muscle groups
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );

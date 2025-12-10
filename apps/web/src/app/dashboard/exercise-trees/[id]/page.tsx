@@ -67,9 +67,13 @@ function TreeViewerCanvas({
     setEdges(flowEdges);
 
     // Fit view after a short delay to ensure nodes are rendered
-    setTimeout(() => {
-      fitView({ padding: 0.2 });
+    const timeoutId = setTimeout(() => {
+      void fitView({ padding: 0.2 });
     }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [tree, setNodes, setEdges, fitView]);
 
   return (

@@ -34,7 +34,6 @@ import {
 
 import {
   exerciseLevelColors,
-  exerciseLevels,
   getProgressStatusColor,
   getProgressStatusLabel,
   progressStatuses,

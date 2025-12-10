@@ -46,11 +46,7 @@ export interface ExerciseDataWithProgress extends ExerciseData {
  */
 export function convertTreeToFlowNodes<
   T extends ExerciseData | ExerciseDataWithProgress,
->(
-  treeNodes: TreeNode[],
-  exercises: T[],
-  nodeType: string = "exercise",
-): Node[] {
+>(treeNodes: TreeNode[], exercises: T[], nodeType = "exercise"): Node[] {
   const exerciseMap = new Map(exercises.map((ex) => [ex._id, ex]));
 
   return treeNodes
