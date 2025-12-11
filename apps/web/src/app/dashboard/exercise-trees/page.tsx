@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/clerk-react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Edit, Eye, EyeOff, MoreVertical, Plus, Trash2 } from "lucide-react";
+import {
+  Edit,
+  Eye,
+  EyeOff,
+  Folder,
+  MoreVertical,
+  Plus,
+  Trash2,
+} from "lucide-react";
 
 import {
   Badge,
@@ -53,22 +61,14 @@ function EmptyState({ isAdmin, onCreateClick }: EmptyStateProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
       <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
-        {isAdmin && (
-          <div className="flex justify-end">
-            <Button onClick={onCreateClick}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create New Raid
-            </Button>
-          </div>
-        )}
         <Empty className="border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <Plus className="h-6 w-6" />
+              <Folder className="h-6 w-6" />
             </EmptyMedia>
             <EmptyTitle>No exercise trees available</EmptyTitle>
             <EmptyDescription>
-              Get started by creating your first exercise tree.
+              Hopefully someone will add some trees soon.
             </EmptyDescription>
           </EmptyHeader>
           {isAdmin && (
