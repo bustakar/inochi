@@ -232,12 +232,12 @@ function TreeCardMenu({
 // ============================================================================
 
 interface TreesListProps {
-  trees: Array<{
+  trees: {
     _id: Id<"exercise_trees">;
     title: string;
     status: "draft" | "published";
     muscleGroups: string[];
-  }>;
+  }[];
   isAdmin: boolean;
   onCardClick: (e: React.MouseEvent, treeId: Id<"exercise_trees">) => void;
   onEdit: (id: Id<"exercise_trees">) => void;

@@ -30,9 +30,9 @@ import "@xyflow/react/dist/style.css";
 
 import { api } from "@packages/backend/convex/_generated/api";
 
-import type { ExerciseStatus } from "../../exercises/_components/exercise-orb";
+import type { ExerciseStatus } from "./exercise-orb";
 import { layoutElements } from "~/utils/tree-layout";
-import { ExerciseOrb } from "../../exercises/_components/exercise-orb";
+import { ExerciseOrb } from "./exercise-orb";
 
 // Register node types
 const nodeTypes = {
