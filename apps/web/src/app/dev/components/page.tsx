@@ -6,12 +6,12 @@ import type {
   ProgressStatus,
 } from "@packages/backend/convex/validators/validators";
 
-import type { ExerciseCardProps } from "../../dashboard/exercises/_components/exercise-card";
+import type { ExerciseCardProps } from "../../dashboard/exercise-trees/_components/exercise-card";
 import {
   exerciseLevels,
   progressStatuses,
 } from "../../../utils/exercise-utils";
-import { ExerciseCard } from "../../dashboard/exercises/_components/exercise-card";
+import { ExerciseCard } from "../../dashboard/exercise-trees/_components/exercise-card";
 
 // ============================================================================
 // Mock Data Generator
