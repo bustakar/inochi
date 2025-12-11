@@ -92,7 +92,6 @@ const exerciseTreeWithProgressReturnValidator = v.object({
 // Helper Functions
 // ============================================================================
 
-// Collect exercise IDs from tree nodes and connections
 function collectExerciseIds(
   nodes: Array<{ exerciseId: Id<"exercises"> }>,
   connections: Array<{
@@ -102,12 +101,10 @@ function collectExerciseIds(
 ): Set<Id<"exercises">> {
   const exerciseIds = new Set<Id<"exercises">>();
 
-  // Collect exercise IDs from nodes
   for (const node of nodes) {
     exerciseIds.add(node.exerciseId);
   }
 
-  // Also collect from connections (for backward compatibility)
   for (const connection of connections) {
     exerciseIds.add(connection.fromExercise);
     exerciseIds.add(connection.toExercise);
@@ -116,7 +113,6 @@ function collectExerciseIds(
   return exerciseIds;
 }
 
-// Fetch exercises by IDs
 async function fetchExercises(
   ctx: QueryCtx,
   exerciseIds: Set<Id<"exercises">>,
@@ -129,6 +125,10 @@ async function fetchExercises(
     difficulty: number;
   }>
 > {
+  if (exerciseIds.size === 0) {
+    return [];
+  }
+
   const exercises: Array<{
     _id: Id<"exercises">;
     title: string;
@@ -153,27 +153,21 @@ async function fetchExercises(
   return exercises;
 }
 
-// Get all unique muscle groups from exercises in a tree
 async function getMuscleGroupsForTree(
   ctx: QueryCtx,
   exerciseIds: Set<Id<"exercises">>,
 ): Promise<string[]> {
-  // Return empty array if no exercises
   if (exerciseIds.size === 0) {
     return [];
   }
 
   const muscleGroups = new Set<string>();
-
-  // Fetch all muscle relations for exercises in the tree
   const muscleRelations = await ctx.db.query("exercises_muscles").collect();
 
-  // Pre-fetch all muscles to map slugs to muscle data
   const allMuscles = await ctx.db.query("muscles").collect();
   const musclesBySlug = new Map<string, Doc<"muscles">>();
   allMuscles.forEach((m: Doc<"muscles">) => musclesBySlug.set(m.slug, m));
 
-  // Collect muscle groups from primary muscles only
   for (const rel of muscleRelations) {
     if (exerciseIds.has(rel.exercise) && rel.role === "primary") {
       const muscle = musclesBySlug.get(rel.muscle);
@@ -186,7 +180,6 @@ async function getMuscleGroupsForTree(
   return Array.from(muscleGroups).sort();
 }
 
-// Helper: Fetch user progress for exercises
 async function fetchUserProgress(
   ctx: QueryCtx,
   userId: string,
@@ -213,7 +206,6 @@ async function fetchUserProgress(
   return userProgressMap;
 }
 
-// Helper: Enrich tree with exercise data
 async function enrichTree(
   ctx: QueryCtx,
   tree: Doc<"exercise_trees">,
@@ -245,7 +237,6 @@ async function enrichTree(
   }>;
   muscleGroups: string[];
 }> {
-  // Handle null/undefined nodes and connections with Array.isArray check
   const nodes = Array.isArray(tree.nodes) ? tree.nodes : [];
   const connections = Array.isArray(tree.connections) ? tree.connections : [];
 
@@ -260,7 +251,7 @@ async function enrichTree(
     _creationTime: tree._creationTime,
     title: tree.title || "",
     description: tree.description,
-    status: tree.status || "published", // Default to published for backward compatibility
+    status: tree.status || "draft", // Default to published for backward compatibility
     createdBy: tree.createdBy || "",
     exercises,
     nodes,
@@ -269,59 +260,6 @@ async function enrichTree(
   };
 }
 
-// Helper: Enrich tree with error handling (returns minimal valid structure on failure)
-async function enrichTreeSafe(
-  ctx: QueryCtx,
-  tree: Doc<"exercise_trees">,
-): Promise<{
-  _id: Id<"exercise_trees">;
-  _creationTime: number;
-  title: string;
-  description?: string;
-  status: "draft" | "published";
-  createdBy: string;
-  exercises: Array<{
-    _id: Id<"exercises">;
-    title: string;
-    description: string;
-    level: Doc<"exercises">["level"];
-    difficulty: number;
-  }>;
-  nodes: Array<{
-    exerciseId: Id<"exercises">;
-    x: number;
-    y: number;
-  }>;
-  connections: Array<{
-    fromExercise: Id<"exercises">;
-    toExercise: Id<"exercises">;
-    type: "required" | "optional";
-    sourceHandle: "top" | "bottom" | "left" | "right";
-    targetHandle: "top" | "bottom" | "left" | "right";
-  }>;
-  muscleGroups: string[];
-}> {
-  try {
-    return await enrichTree(ctx, tree);
-  } catch (error) {
-    // Log error but return a minimal valid tree structure
-    console.error(`Error enriching tree ${tree._id}:`, error);
-    return {
-      _id: tree._id,
-      _creationTime: tree._creationTime,
-      title: tree.title || "Untitled Tree",
-      description: tree.description,
-      status: (tree.status || "published") as "draft" | "published",
-      createdBy: tree.createdBy || "",
-      exercises: [],
-      nodes: Array.isArray(tree.nodes) ? tree.nodes : [],
-      connections: Array.isArray(tree.connections) ? tree.connections : [],
-      muscleGroups: [],
-    };
-  }
-}
-
-// Helper: Enrich tree with exercise data and user progress
 async function enrichTreeWithProgress(
   ctx: QueryCtx,
   tree: Doc<"exercise_trees">,
@@ -357,10 +295,8 @@ async function enrichTreeWithProgress(
   }>;
   muscleGroups: string[];
 }> {
-  // Get base tree data (without progress)
   const base = await enrichTree(ctx, tree);
 
-  // If no user, return with null progress for all exercises
   if (!userId) {
     return {
       ...base,
@@ -368,11 +304,9 @@ async function enrichTreeWithProgress(
     };
   }
 
-  // Fetch user progress
   const exerciseIds = collectExerciseIds(base.nodes, base.connections);
   const userProgressMap = await fetchUserProgress(ctx, userId, exerciseIds);
 
-  // Enrich exercises with user progress
   return {
     ...base,
     exercises: base.exercises.map((exercise) => ({
@@ -384,38 +318,7 @@ async function enrichTreeWithProgress(
   };
 }
 
-// List only published trees (for regular users)
 export const list = query({
-  args: {},
-  returns: v.array(exerciseTreeReturnValidator),
-  handler: async (ctx) => {
-    const publishedTrees = await ctx.db
-      .query("exercise_trees")
-      .withIndex("by_status", (q) => q.eq("status", "published"))
-      .collect();
-
-    return Promise.all(publishedTrees.map((tree) => enrichTreeSafe(ctx, tree)));
-  },
-});
-
-// List all trees (admin/moderator only)
-export const listAll = query({
-  args: {},
-  returns: v.array(exerciseTreeReturnValidator),
-  handler: async (ctx) => {
-    if (!(await isAdminOrModerator(ctx))) {
-      throw new Error(
-        "Unauthorized: Only admins and moderators can list all trees",
-      );
-    }
-
-    const allTrees = await ctx.db.query("exercise_trees").collect();
-    return Promise.all(allTrees.map((tree) => enrichTreeSafe(ctx, tree)));
-  },
-});
-
-// List trees for current user (handles role-based filtering internally)
-export const listForUser = query({
   args: {},
   returns: v.object({
     trees: v.array(exerciseTreeReturnValidator),
@@ -432,14 +335,13 @@ export const listForUser = query({
           .collect();
 
     const enrichedTrees = await Promise.all(
-      trees.map((tree) => enrichTreeSafe(ctx, tree)),
+      trees.map((tree) => enrichTree(ctx, tree)),
     );
 
     return { trees: enrichedTrees, isAdmin };
   },
 });
 
-// Get single tree by ID
 export const getById = query({
   args: {
     id: v.id("exercise_trees"),
@@ -451,7 +353,6 @@ export const getById = query({
       return null;
     }
 
-    // If draft, only admins/moderators can access
     if (tree.status === "draft") {
       if (!(await isAdminOrModerator(ctx))) {
         return null;
@@ -462,7 +363,6 @@ export const getById = query({
   },
 });
 
-// Get single tree by ID with user progress (for user-facing detail page)
 export const getByIdWithProgress = query({
   args: {
     id: v.id("exercise_trees"),
@@ -474,7 +374,6 @@ export const getByIdWithProgress = query({
       return null;
     }
 
-    // If draft, only admins/moderators can access
     if (tree.status === "draft") {
       if (!(await isAdminOrModerator(ctx))) {
         return null;
@@ -486,7 +385,6 @@ export const getByIdWithProgress = query({
   },
 });
 
-// Create new tree (admin/moderator only)
 export const create = mutation({
   args: {
     title: v.string(),
@@ -521,7 +419,6 @@ export const create = mutation({
   },
 });
 
-// Update tree (admin/moderator only)
 export const update = mutation({
   args: {
     id: v.id("exercise_trees"),
@@ -565,7 +462,6 @@ export const update = mutation({
   },
 });
 
-// Publish tree (admin/moderator only)
 export const publish = mutation({
   args: {
     id: v.id("exercise_trees"),
@@ -592,7 +488,6 @@ export const publish = mutation({
   },
 });
 
-// Unpublish tree (admin/moderator only)
 export const unpublish = mutation({
   args: {
     id: v.id("exercise_trees"),
@@ -619,7 +514,6 @@ export const unpublish = mutation({
   },
 });
 
-// Delete tree (admin/moderator only)
 export const delete_ = mutation({
   args: {
     id: v.id("exercise_trees"),

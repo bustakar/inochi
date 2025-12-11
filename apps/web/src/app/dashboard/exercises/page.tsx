@@ -13,8 +13,8 @@ import {
   exerciseLevelHealthBarColors,
   exerciseLevels,
 } from "../../../utils/exercise-utils";
+import { ExerciseCard } from "../exercise-trees/_components/exercise-card";
 import { BatchProgressDialog } from "./_components/batch-progress-dialog";
-import { ExerciseCard } from "./_components/exercise-card";
 
 // ============================================================================
 // Level Section Header Component

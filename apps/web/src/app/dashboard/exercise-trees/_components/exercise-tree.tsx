@@ -30,9 +30,9 @@ import "@xyflow/react/dist/style.css";
 
 import { api } from "@packages/backend/convex/_generated/api";
 
-import type { ExerciseStatus } from "./exercise-orb";
+import type { ExerciseStatus } from "../../exercises/_components/exercise-orb";
 import { layoutElements } from "~/utils/tree-layout";
-import { ExerciseOrb } from "./exercise-orb";
+import { ExerciseOrb } from "../../exercises/_components/exercise-orb";
 
 // Register node types
 const nodeTypes = {
@@ -226,7 +226,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
 
   // Transform trees into flat exercise list with prerequisites
   const exercises = useMemo(() => {
-    if (!exerciseTrees || exerciseTrees.length === 0) {
+    if (!exerciseTrees || exerciseTrees.trees.length === 0) {
       return [];
     }
 
@@ -254,7 +254,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
     const prerequisitesMap = new Map<Id<"exercises">, Id<"exercises">[]>();
 
     // First pass: collect all exercises and build prerequisites map
-    for (const tree of exerciseTrees) {
+    for (const tree of exerciseTrees.trees) {
       for (const exercise of tree.exercises) {
         if (!exerciseMap.has(exercise._id)) {
           exerciseMap.set(exercise._id, {
@@ -303,7 +303,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
 
   // Layout calculation
   const { nodes, edges } = useMemo(() => {
-    if (!exerciseTrees || exerciseTrees.length === 0) {
+    if (!exerciseTrees || exerciseTrees.trees.length === 0) {
       return { nodes: [], edges: [] };
     }
 
@@ -313,7 +313,7 @@ export function ExerciseTree({ searchQuery }: ExerciseTreeProps) {
     const TREE_GAP = 400; // Gap between trees
 
     // Process each tree independently
-    for (const tree of exerciseTrees) {
+    for (const tree of exerciseTrees.trees) {
       // 1. Prepare data for this tree
       interface ExerciseWithStatus extends Record<string, unknown> {
         _id: Id<"exercises">;
