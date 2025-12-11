@@ -164,7 +164,7 @@ export function TreeToolbar({
 
   const handleDelete = async () => {
     await deleteTree({ id: treeId });
-    router.push("/dashboard/admin/exercise-trees");
+    router.push("/dashboard/exercise-trees");
   };
 
   return (
@@ -172,7 +172,7 @@ export function TreeToolbar({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => router.push("/dashboard/admin/exercise-trees")}
+        onClick={() => router.push("/dashboard/exercise-trees")}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
