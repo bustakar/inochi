@@ -37,12 +37,9 @@ interface ExercisesListProps {
 }
 
 function ExercisesList({ searchQuery }: ExercisesListProps) {
-  const exercisesByLevel = useQuery(
-    api.functions.exercises.getAllExercisesByLevel,
-    {
-      searchQuery: searchQuery.trim() || undefined,
-    },
-  );
+  const exercisesByLevel = useQuery(api.functions.exercises.listByLevel, {
+    searchQuery: searchQuery.trim() || undefined,
+  });
 
   if (exercisesByLevel === undefined) {
     return (

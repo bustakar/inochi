@@ -44,7 +44,7 @@ export function ExercisePickerSidebar({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const exercisesData = useQuery(api.functions.exercises.getAllExercises, {
+  const exercisesData = useQuery(api.functions.exercises.list, {
     searchQuery: debouncedSearchQuery.trim() || undefined,
   });
 
