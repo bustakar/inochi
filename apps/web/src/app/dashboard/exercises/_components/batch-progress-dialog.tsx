@@ -351,7 +351,7 @@ export function BatchProgressDialog({
   open,
   onOpenChange,
 }: BatchProgressDialogProps) {
-  const exercises = useQuery(api.functions.exercises.getAllExercises, {
+  const exercises = useQuery(api.functions.exercises.list, {
     searchQuery: undefined,
   });
 

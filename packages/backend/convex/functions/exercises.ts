@@ -100,10 +100,8 @@ const getEnrichedPublicExercises = async (
   ctx: QueryCtx,
   args: { searchQuery?: string | undefined },
 ) => {
-  // Fetch all public exercises
   let publicExercises = await ctx.db.query("exercises").collect();
 
-  // Filter by search query if provided
   if (args.searchQuery && args.searchQuery.trim().length > 0) {
     const searchLower = args.searchQuery.toLowerCase().trim();
     publicExercises = publicExercises.filter((exercise) => {
@@ -115,15 +113,12 @@ const getEnrichedPublicExercises = async (
     });
   }
 
-  // Pre-fetch all muscles for enrichment
   const muscles = await ctx.db.query("muscles").collect();
   const musclesDataMapBySlug = new Map<string, Doc<"muscles">>();
   muscles.forEach((m) => musclesDataMapBySlug.set(m.slug, m));
 
-  // Fetch muscle relations for all exercises
   const muscleRelations = await ctx.db.query("exercises_muscles").collect();
 
-  // Fetch user progress if authenticated
   const userId = await getUserId(ctx);
   const userProgressMap = new Map<
     Id<"exercises">,
@@ -139,7 +134,6 @@ const getEnrichedPublicExercises = async (
     }
   }
 
-  // Enrich exercises
   const enrichedPublic = publicExercises.map((exercise) => {
     const musclesData = getMusclesForExercise(
       exercise._id,
@@ -161,12 +155,9 @@ const getEnrichedPublicExercises = async (
     };
   });
 
-  // Sort by level (using level order), then by title
   enrichedPublic.sort((a, b) => {
-    const levelOrderA = getLevelOrder(a.level);
-    const levelOrderB = getLevelOrder(b.level);
-    if (levelOrderA !== levelOrderB) {
-      return levelOrderA - levelOrderB;
+    if (a.difficulty !== b.difficulty) {
+      return a.difficulty - b.difficulty;
     }
     return a.title.localeCompare(b.title);
   });
@@ -174,7 +165,7 @@ const getEnrichedPublicExercises = async (
   return enrichedPublic;
 };
 
-export const getAllExercises = query({
+export const list = query({
   args: {
     searchQuery: v.optional(v.string()),
   },
@@ -186,7 +177,7 @@ export const getAllExercises = query({
   },
 });
 
-export const getAllExercisesByLevel = query({
+export const listByLevel = query({
   args: {
     searchQuery: v.optional(v.string()),
   },
@@ -199,10 +190,8 @@ export const getAllExercisesByLevel = query({
     legendary: v.array(exerciseResponseValidator),
   }),
   handler: async (ctx, args) => {
-    // Fetch all public exercises
     let enrichedPublic = await getEnrichedPublicExercises(ctx, args);
 
-    // Group by level
     const grouped: Record<
       ExerciseLevel,
       Array<{
@@ -231,16 +220,6 @@ export const getAllExercisesByLevel = query({
       grouped[exercise.level].push(exercise);
     }
 
-    // Sort each level by difficulty, then by title
-    for (const level of LEVEL_ORDER) {
-      grouped[level].sort((a, b) => {
-        if (a.difficulty !== b.difficulty) {
-          return a.difficulty - b.difficulty;
-        }
-        return a.title.localeCompare(b.title);
-      });
-    }
-
     return grouped;
   },
 });
@@ -265,7 +244,6 @@ async function getPublicExerciseMuscles(
     .withIndex("by_exercise", (q) => q.eq("exercise", exerciseId))
     .collect();
 
-  // Pre-fetch all muscles to map slugs to muscle data
   const allMuscles = await ctx.db.query("muscles").collect();
   const musclesBySlug = new Map<string, Doc<"muscles">>();
   allMuscles.forEach((m) => musclesBySlug.set(m.slug, m));

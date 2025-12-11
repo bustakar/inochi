@@ -53,9 +53,7 @@ const TreeEditorCanvas = React.forwardRef<
       ReturnType<typeof useQuery<typeof api.functions.exerciseTrees.getById>>
     >;
     exercises: NonNullable<
-      ReturnType<
-        typeof useQuery<typeof api.functions.exercises.getAllExercises>
-      >
+      ReturnType<typeof useQuery<typeof api.functions.exercises.list>>
     >;
     treeId: Id<"exercise_trees">;
   }
@@ -238,7 +236,7 @@ export default function ExerciseTreeEditorPage() {
 
   // All hooks must be called before any conditional returns
   const tree = useQuery(api.functions.exerciseTrees.getById, { id: treeId });
-  const exercises = useQuery(api.functions.exercises.getAllExercises, {});
+  const exercises = useQuery(api.functions.exercises.list, {});
   const [isSaving, setIsSaving] = useState(false);
   const canvasRef = useRef<{ save: () => Promise<void> }>(null);
 
